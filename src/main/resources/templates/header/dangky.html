@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký - StayViet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --navy: #1a2744;
+            --gold: #c9a84c;
+            --gold-light: #f0d080;
+            --cream: #faf8f4;
+            --white: #ffffff;
+            --gray: #8a8fa8;
+            --border: #e8e4dc;
+            --blue: #2563eb;
+            --blue-dark: #1d4ed8;
+            --shadow: 0 8px 40px rgba(26,39,68,0.13);
+            --radius: 16px;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--cream);
+        }
+
+        /* ===== WRAPPER (dùng khi embed vào trang khác) ===== */
+        #register-section {
+            max-width: 560px;
+            margin: 48px auto 60px;
+            padding: 0 20px;
+            animation: slideUp 0.35s cubic-bezier(.22,.68,0,1.2);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .reg-card {
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 16px 60px rgba(26,39,68,0.12);
+            overflow: hidden;
+        }
+
+        /* Banner */
+        .reg-banner {
+            background: linear-gradient(135deg, var(--navy) 0%, #2d4a8a 100%);
+            padding: 32px 36px 28px;
+            position: relative;
+            overflow: hidden;
+        }
+        .reg-banner::before {
+            content: '🏨';
+            position: absolute; right: 28px; top: 50%; transform: translateY(-50%);
+            font-size: 64px; opacity: 0.15;
+        }
+        .reg-banner h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px; font-weight: 700;
+            color: var(--white); margin-bottom: 4px;
+        }
+        .reg-banner p { font-size: 13px; color: rgba(255,255,255,0.6); }
+
+        /* Body */
+        .reg-body { padding: 32px 36px; }
+
+        .reg-row { display: flex; gap: 16px; }
+        .reg-row .reg-field { flex: 1; }
+
+        .reg-field { margin-bottom: 20px; }
+
+        .reg-label {
+            display: block;
+            font-size: 11px; font-weight: 700;
+            letter-spacing: 0.7px; text-transform: uppercase;
+            color: var(--gray); margin-bottom: 7px;
+        }
+        .reg-input-wrap {
+            position: relative; display: flex; align-items: center;
+        }
+        .reg-input-icon {
+            position: absolute; left: 13px;
+            font-size: 15px; pointer-events: none;
+        }
+        .reg-input {
+            width: 100%;
+            padding: 11px 14px 11px 38px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px; color: var(--navy);
+            background: #fafafa;
+            transition: all 0.2s; outline: none;
+        }
+        .reg-input:focus {
+            border-color: var(--blue);
+            background: var(--white);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+        }
+        .reg-input.error { border-color: #ef4444; }
+        .reg-input.success { border-color: #22c55e; }
+        .reg-error-msg {
+            font-size: 11px; color: #ef4444;
+            margin-top: 4px; display: none;
+        }
+        .reg-error-msg.show { display: block; }
+
+        /* Email + OTP */
+        .reg-email-wrap {
+            display: flex; gap: 8px; align-items: flex-start;
+        }
+        .reg-email-wrap .reg-input-wrap { flex: 1; }
+        .btn-send-otp {
+            flex-shrink: 0;
+            padding: 11px 14px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: var(--navy); font-family: 'DM Sans', sans-serif;
+            font-size: 12px; font-weight: 700;
+            border: none; border-radius: 10px;
+            cursor: pointer; transition: all 0.2s;
+            white-space: nowrap; line-height: 1.3;
+        }
+        .btn-send-otp:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(201,168,76,0.4); }
+        .btn-send-otp:disabled {
+            background: #e5e7eb; color: #9ca3af;
+            cursor: default; transform: none; box-shadow: none;
+        }
+        .otp-countdown { font-size: 11px; color: var(--gray); margin-top: 4px; text-align: center; }
+
+        /* Password strength */
+        .pw-strength { display: flex; gap: 4px; margin-top: 6px; }
+        .pw-bar {
+            flex: 1; height: 3px; border-radius: 2px;
+            background: var(--border); transition: background 0.3s;
+        }
+        .pw-bar.weak   { background: #ef4444; }
+        .pw-bar.medium { background: #f59e0b; }
+        .pw-bar.strong { background: #22c55e; }
+        .pw-hint { font-size: 11px; color: var(--gray); margin-top: 4px; }
+
+        .reg-divider {
+            border: none; border-top: 1px solid var(--border);
+            margin: 8px 0 24px;
+        }
+
+        .btn-submit-reg {
+            width: 100%; padding: 14px;
+            background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+            color: white; font-family: 'DM Sans', sans-serif;
+            font-size: 15px; font-weight: 700;
+            border: none; border-radius: 12px;
+            cursor: pointer; transition: all 0.2s;
+            letter-spacing: 0.3px;
+        }
+        .btn-submit-reg:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.35); }
+
+        .reg-footer-note {
+            text-align: center; font-size: 12px;
+            color: var(--gray); margin-top: 16px;
+        }
+        .reg-footer-note a { color: var(--blue); text-decoration: none; font-weight: 600; }
+
+        /* Success */
+        .reg-success {
+            display: none; text-align: center; padding: 48px 36px;
+        }
+        .reg-success.show { display: block; animation: slideUp 0.3s ease; }
+        .reg-success-icon { font-size: 56px; margin-bottom: 16px; }
+        .reg-success h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px; color: var(--navy); margin-bottom: 8px;
+        }
+        .reg-success p { font-size: 14px; color: var(--gray); }
+    </style>
+</head>
+<body>
+
+<div id="register-section">
+    <div class="reg-card">
+
+        <!-- Banner -->
+        <div class="reg-banner">
+            <h2>Tạo tài khoản mới</h2>
+            <p>Đăng ký để nhận ưu đãi độc quyền và đặt phòng dễ dàng hơn</p>
+        </div>
+
+        <!-- Form body -->
+        <div class="reg-body" id="reg-form-body">
+
+            <div class="reg-row">
+                <div class="reg-field">
+                    <label class="reg-label">Họ và tên</label>
+                    <div class="reg-input-wrap">
+                        <span class="reg-input-icon">👤</span>
+                        <input class="reg-input" id="reg-name" type="text" placeholder="Nguyễn Văn A" oninput="validateField('name')">
+                    </div>
+                    <div class="reg-error-msg" id="err-name">Vui lòng nhập họ và tên</div>
+                </div>
+
+                <div class="reg-field">
+                    <label class="reg-label">Số CCCD / CMND</label>
+                    <div class="reg-input-wrap">
+                        <span class="reg-input-icon">🪪</span>
+                        <input class="reg-input" id="reg-cccd" type="text" placeholder="012345678901" maxlength="12" oninput="validateField('cccd')">
+                    </div>
+                    <div class="reg-error-msg" id="err-cccd">CCCD phải có 9 hoặc 12 số</div>
+                </div>
+            </div>
+
+            <div class="reg-field">
+                <label class="reg-label">Địa chỉ Email</label>
+                <div class="reg-email-wrap">
+                    <div class="reg-input-wrap">
+                        <span class="reg-input-icon">✉️</span>
+                        <input class="reg-input" id="reg-email" type="email" placeholder="example@email.com" oninput="validateField('email')">
+                    </div>
+                    <div>
+                        <button class="btn-send-otp" id="btn-otp" onclick="sendOTP()">Gửi mã<br>xác nhận</button>
+                        <div class="otp-countdown" id="otp-countdown"></div>
+                    </div>
+                </div>
+                <div class="reg-error-msg" id="err-email">Email không hợp lệ</div>
+            </div>
+
+            <div class="reg-row">
+                <div class="reg-field">
+                    <label class="reg-label">Số điện thoại</label>
+                    <div class="reg-input-wrap">
+                        <span class="reg-input-icon">📱</span>
+                        <input class="reg-input" id="reg-phone" type="tel" placeholder="0912 345 678" maxlength="11" oninput="validateField('phone')">
+                    </div>
+                    <div class="reg-error-msg" id="err-phone">Số điện thoại không hợp lệ</div>
+                </div>
+
+                <div class="reg-field">
+                    <label class="reg-label">Tên đăng nhập</label>
+                    <div class="reg-input-wrap">
+                        <span class="reg-input-icon">🔖</span>
+                        <input class="reg-input" id="reg-username" type="text" placeholder="nguyenvana123" oninput="validateField('username')">
+                    </div>
+                    <div class="reg-error-msg" id="err-username">Tối thiểu 5 ký tự, không dấu</div>
+                </div>
+            </div>
+
+            <div class="reg-field">
+                <label class="reg-label">Mật khẩu</label>
+                <div class="reg-input-wrap">
+                    <span class="reg-input-icon">🔒</span>
+                    <input class="reg-input" id="reg-pw" type="password" placeholder="Tối thiểu 8 ký tự"
+                           oninput="checkPwStrength(this.value); validateField('pw')">
+                </div>
+                <div class="pw-strength" id="pw-strength">
+                    <div class="pw-bar" id="bar1"></div>
+                    <div class="pw-bar" id="bar2"></div>
+                    <div class="pw-bar" id="bar3"></div>
+                    <div class="pw-bar" id="bar4"></div>
+                </div>
+                <div class="pw-hint" id="pw-hint">Nhập mật khẩu để xem độ mạnh</div>
+                <div class="reg-error-msg" id="err-pw">Mật khẩu tối thiểu 8 ký tự</div>
+            </div>
+
+            <hr class="reg-divider">
+
+            <button class="btn-submit-reg" onclick="submitRegister()">🚀 &nbsp;Tạo tài khoản</button>
+
+            <p class="reg-footer-note">
+                Đã có tài khoản?
+                <a href="#" onclick="if(window.hideRegister) window.hideRegister(); return false;">Đăng nhập ngay</a>
+            </p>
+        </div>
+
+        <!-- Success state -->
+        <div class="reg-success" id="reg-success">
+            <div class="reg-success-icon">🎉</div>
+            <h3>Đăng ký thành công!</h3>
+            <p>Chào mừng bạn đến với StayViet.<br>Vui lòng kiểm tra email để xác nhận tài khoản.</p>
+            <button class="btn-submit-reg"
+                    style="margin-top:24px;max-width:200px;display:inline-block;"
+                    onclick="if(window.hideRegister) window.hideRegister();">
+                Về trang chủ
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function validateField(field) {
+        const rules = {
+            name:     { el: 'reg-name',     check: v => v.trim().length >= 2,                             err: 'err-name' },
+            cccd:     { el: 'reg-cccd',     check: v => /^[0-9]{9}$|^[0-9]{12}$/.test(v.trim()),         err: 'err-cccd' },
+            email:    { el: 'reg-email',    check: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),             err: 'err-email' },
+            phone:    { el: 'reg-phone',    check: v => /^(0[3-9][0-9]{8,9})$/.test(v.replace(/\s/g,'')),err: 'err-phone' },
+            username: { el: 'reg-username', check: v => /^[a-zA-Z0-9_]{5,}$/.test(v),                    err: 'err-username' },
+            pw:       { el: 'reg-pw',       check: v => v.length >= 8,                                    err: 'err-pw' },
+        };
+        const r = rules[field]; if (!r) return true;
+        const input = document.getElementById(r.el);
+        const err   = document.getElementById(r.err);
+        const val   = input.value;
+        const ok    = r.check(val);
+        input.classList.toggle('error',  !ok && val.length > 0);
+        input.classList.toggle('success', ok);
+        err.classList.toggle('show',     !ok && val.length > 0);
+        return ok || val.length === 0;
+    }
+
+    function checkPwStrength(val) {
+        const bars = ['bar1','bar2','bar3','bar4'].map(id => document.getElementById(id));
+        const hint = document.getElementById('pw-hint');
+        bars.forEach(b => b.className = 'pw-bar');
+        if (!val) { hint.textContent = 'Nhập mật khẩu để xem độ mạnh'; return; }
+        let score = 0;
+        if (val.length >= 8)          score++;
+        if (/[A-Z]/.test(val))        score++;
+        if (/[0-9]/.test(val))        score++;
+        if (/[^A-Za-z0-9]/.test(val)) score++;
+        const cls   = score <= 1 ? 'weak' : score === 2 ? 'medium' : 'strong';
+        const label = ['','🔴 Yếu','🟡 Trung bình','🟢 Mạnh','💪 Rất mạnh'][score] || '🔴 Yếu';
+        for (let i = 0; i < score; i++) bars[i].classList.add(cls);
+        hint.textContent = label;
+    }
+
+    let otpTimer = null;
+    function sendOTP() {
+        const emailInput = document.getElementById('reg-email');
+        const email = emailInput.value.trim();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            emailInput.classList.add('error');
+            document.getElementById('err-email').classList.add('show');
+            return;
+        }
+        const btn = document.getElementById('btn-otp');
+        const countdown = document.getElementById('otp-countdown');
+        btn.disabled = true;
+        let secs = 60;
+        countdown.textContent = `Gửi lại sau ${secs}s`;
+        if (otpTimer) clearInterval(otpTimer);
+        otpTimer = setInterval(() => {
+            secs--;
+            if (secs <= 0) {
+                clearInterval(otpTimer);
+                btn.disabled = false;
+                countdown.textContent = '';
+            } else {
+                countdown.textContent = `Gửi lại sau ${secs}s`;
+            }
+        }, 1000);
+        emailInput.classList.remove('error');
+        emailInput.classList.add('success');
+        document.getElementById('err-email').classList.remove('show');
+        alert(`✅ Mã xác nhận đã được gửi tới:\n${email}\n\n(Demo — không gửi thật)`);
+    }
+
+    function submitRegister() {
+        const fields = ['name','cccd','email','phone','username','pw'];
+        const inputIds = { name:'reg-name', cccd:'reg-cccd', email:'reg-email', phone:'reg-phone', username:'reg-username', pw:'reg-pw' };
+        let allOk = true;
+        fields.forEach(f => {
+            const input = document.getElementById(inputIds[f]);
+            if (!input.value.trim()) {
+                input.classList.add('error');
+                document.getElementById('err-' + f).classList.add('show');
+                allOk = false;
+            } else {
+                validateField(f);
+                if (input.classList.contains('error')) allOk = false;
+            }
+        });
+        if (!allOk) { alert('⚠️ Vui lòng điền đầy đủ và đúng thông tin!'); return; }
+        document.getElementById('reg-form-body').style.display = 'none';
+        document.getElementById('reg-success').classList.add('show');
+    }
+</script>
+</body>
+</html>

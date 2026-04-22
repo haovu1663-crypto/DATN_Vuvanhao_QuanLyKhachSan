@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StayViet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --navy: #1a2744;
+            --gold: #c9a84c;
+            --gold-light: #f0d080;
+            --cream: #faf8f4;
+            --white: #ffffff;
+            --gray: #8a8fa8;
+            --border: #e8e4dc;
+            --blue: #2563eb;
+            --blue-dark: #1d4ed8;
+            --shadow: 0 8px 40px rgba(26,39,68,0.13);
+            --radius: 16px;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--cream);
+            min-height: 100vh;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            background: var(--navy);
+            padding: 0 5%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(26,39,68,0.3);
+        }
+
+        .logo {
+            display: flex; align-items: center; gap: 10px;
+            text-decoration: none; flex-shrink: 0;
+        }
+        .logo-icon {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+        }
+        .logo-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px; color: var(--white); letter-spacing: 0.5px;
+        }
+        .logo-text span { color: var(--gold); }
+
+        .header-auth { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+        .btn-login {
+            font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+            color: rgba(255,255,255,0.8); background: none;
+            border: 1px solid rgba(255,255,255,0.25);
+            padding: 7px 18px; border-radius: 20px; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-login:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .btn-register {
+            font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+            color: var(--navy);
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-register:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(201,168,76,0.4); }
+
+        /* ===== SEARCH BAR ===== */
+        .search-bar-wrapper {
+            background: var(--white); border-bottom: 1px solid var(--border);
+            padding: 18px 5%; display: flex; justify-content: center;
+        }
+        .search-bar {
+            display: flex; align-items: stretch; background: var(--white);
+            border: 1.5px solid var(--border); border-radius: var(--radius);
+            overflow: visible; box-shadow: var(--shadow);
+            max-width: 860px; width: 100%; position: relative;
+        }
+        .search-field {
+            flex: 1; display: flex; flex-direction: column;
+            padding: 12px 18px; border-right: 1px solid var(--border);
+            cursor: pointer; position: relative; min-width: 0;
+        }
+        .search-field:last-of-type { border-right: none; }
+        .search-field:hover { background: #f7f5f0; border-radius: 0; }
+        .search-field:first-child:hover { border-radius: var(--radius) 0 0 var(--radius); }
+
+        .field-label {
+            font-size: 10px; font-weight: 600; letter-spacing: 0.8px;
+            text-transform: uppercase; color: var(--gray); margin-bottom: 3px;
+        }
+        .field-value {
+            font-size: 14px; font-weight: 600; color: var(--navy);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .field-value.placeholder { color: #bbb; font-weight: 400; }
+
+        .search-btn {
+            background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+            border: none; color: white; width: 56px;
+            border-radius: 0 calc(var(--radius) - 2px) calc(var(--radius) - 2px) 0;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; flex-shrink: 0;
+        }
+        .search-btn:hover { background: linear-gradient(135deg, var(--blue-dark), #1e3a8a); }
+        .search-btn svg { width: 20px; height: 20px; }
+
+        /* ===== DROPDOWN ĐIỂM ĐẾN ===== */
+        .dropdown-dest {
+            position: absolute; top: calc(100% + 8px); left: 0;
+            width: 280px; background: var(--white);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            box-shadow: var(--shadow); z-index: 200; overflow: hidden; display: none;
+        }
+        .dropdown-dest.open { display: block; animation: fadeDown 0.15s ease; }
+
+        .dest-search { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+        .dest-search input {
+            width: 100%; border: none; outline: none;
+            font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--navy);
+        }
+        .dest-section-title {
+            font-size: 10px; font-weight: 700; letter-spacing: 0.8px;
+            text-transform: uppercase; color: var(--gray); padding: 10px 14px 4px;
+        }
+        .dest-item {
+            display: flex; align-items: center; gap: 10px; padding: 9px 14px;
+            cursor: pointer; transition: background 0.15s;
+            font-size: 14px; color: var(--navy); font-weight: 500;
+        }
+        .dest-item:hover { background: #f0f4ff; }
+        .dest-item .dest-icon { font-size: 16px; }
+        .dest-item .dest-sub { font-size: 11px; color: var(--gray); font-weight: 400; }
+
+        /* ===== DATE PICKER POPUP ===== */
+        .datepicker-popup {
+            position: absolute; top: calc(100% + 8px); left: 50%;
+            transform: translateX(-50%); background: var(--white);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            box-shadow: var(--shadow); z-index: 200; padding: 20px; width: 620px; display: none;
+        }
+        .datepicker-popup.open { display: block; animation: fadeDown 0.15s ease; }
+
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .cal-nav-btn {
+            background: none; border: 1px solid var(--border);
+            width: 32px; height: 32px; border-radius: 50%;
+            cursor: pointer; font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s; color: var(--navy);
+        }
+        .cal-nav-btn:hover { background: var(--navy); color: white; border-color: var(--navy); }
+
+        .cal-months { display: flex; gap: 24px; }
+        .cal-month { flex: 1; }
+        .cal-month-title {
+            text-align: center; font-family: 'Playfair Display', serif;
+            font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 12px;
+        }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+        .cal-dow {
+            text-align: center; font-size: 10px; font-weight: 700;
+            color: var(--gray); letter-spacing: 0.5px; padding: 4px 0;
+        }
+        .cal-day {
+            text-align: center; font-size: 13px; font-weight: 500;
+            padding: 7px 2px; border-radius: 8px; cursor: pointer;
+            color: var(--navy); transition: all 0.15s; position: relative;
+        }
+        .cal-day:hover:not(.disabled):not(.empty) { background: #e8efff; }
+        .cal-day.disabled { color: #ccc; cursor: default; }
+        .cal-day.empty { cursor: default; }
+        .cal-day.selected-start, .cal-day.selected-end {
+            background: var(--blue) !important; color: white !important;
+            font-weight: 700; border-radius: 8px;
+        }
+        .cal-day.in-range { background: #dbeafe; color: var(--blue); border-radius: 0; }
+        .cal-day.range-start { border-radius: 8px 0 0 8px; }
+        .cal-day.range-end   { border-radius: 0 8px 8px 0; }
+        .cal-day.today::after {
+            content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
+            width: 4px; height: 4px; border-radius: 50%; background: var(--gold);
+        }
+        .cal-shortcuts { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+        .cal-shortcut {
+            font-size: 12px; font-weight: 500; padding: 6px 14px; border-radius: 20px;
+            border: 1px solid var(--border); background: var(--white);
+            cursor: pointer; transition: all 0.15s; color: var(--navy);
+        }
+        .cal-shortcut:hover { border-color: var(--blue); color: var(--blue); background: #eff6ff; }
+
+        /* ===== GUESTS POPUP ===== */
+        .guests-popup {
+            position: absolute; top: calc(100% + 8px); right: 0;
+            width: 300px; background: var(--white);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            box-shadow: var(--shadow); z-index: 200; padding: 20px; display: none;
+        }
+        .guests-popup.open { display: block; animation: fadeDown 0.15s ease; }
+
+        .guest-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 0; border-bottom: 1px solid var(--border);
+        }
+        .guest-row:last-of-type { border-bottom: none; }
+        .guest-info { flex: 1; }
+        .guest-label { font-size: 14px; font-weight: 600; color: var(--navy); }
+        .guest-sub { font-size: 11px; color: var(--gray); margin-top: 1px; }
+        .counter { display: flex; align-items: center; gap: 12px; }
+        .counter-btn {
+            width: 32px; height: 32px; border-radius: 50%;
+            border: 1.5px solid var(--border); background: white; cursor: pointer;
+            font-size: 18px; font-weight: 300;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--navy); transition: all 0.15s; line-height: 1;
+        }
+        .counter-btn:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
+        .counter-btn:disabled { opacity: 0.3; cursor: default; }
+        .counter-val { font-size: 16px; font-weight: 700; color: var(--navy); min-width: 24px; text-align: center; }
+
+        .pet-row { display: flex; align-items: flex-start; justify-content: space-between; padding: 14px 0; }
+        .toggle-switch {
+            position: relative; width: 40px; height: 22px;
+            background: #ddd; border-radius: 11px; cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+        }
+        .toggle-switch.on { background: var(--blue); }
+        .toggle-switch::after {
+            content: ''; position: absolute; top: 3px; left: 3px;
+            width: 16px; height: 16px; background: white; border-radius: 50%; transition: transform 0.2s;
+        }
+        .toggle-switch.on::after { transform: translateX(18px); }
+
+        .guests-footer {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);
+        }
+        .btn-reset { background: none; border: none; font-size: 13px; color: var(--gray); cursor: pointer; text-decoration: underline; }
+        .btn-apply {
+            background: var(--blue); color: white; border: none;
+            padding: 10px 28px; border-radius: 10px; font-size: 14px;
+            font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+        }
+        .btn-apply:hover { background: var(--blue-dark); }
+
+        /* ===== NAV ===== */
+        .middle-nav {
+            display: flex; justify-content: center; gap: 12px;
+            padding: 14px 0; background: var(--white); border-bottom: 1px solid var(--border);
+        }
+        .btn-nav {
+            padding: 9px 20px; border: 1.5px solid var(--border); border-radius: 25px;
+            background: var(--white); font-family: 'DM Sans', sans-serif;
+            font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+            color: var(--navy); display: flex; align-items: center; gap: 6px;
+        }
+        .btn-nav:hover, .btn-nav.active { background: var(--navy); color: white; border-color: var(--navy); }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp  { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn   { from { opacity: 0; } to { opacity: 1; } }
+
+        /* overlay để đóng dropdown */
+        .overlay { position: fixed; inset: 0; z-index: 100; display: none; }
+        .overlay.active { display: block; }
+
+        /* ===== DEMO CONTENT ===== */
+        .demo-content { max-width: 900px; margin: 40px auto; padding: 0 20px; text-align: center; }
+        .demo-content h2 { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--navy); margin-bottom: 8px; }
+        .demo-content p { color: var(--gray); font-size: 14px; }
+
+        /* ===== MODAL OVERLAY ===== */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(26,39,68,0.6); z-index: 999;
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-overlay.show { display: flex; animation: fadeIn 0.2s ease; }
+
+        /* ===== REGISTER FORM ===== */
+        #register-section {
+            max-width: 560px; width: 100%;
+            animation: slideUp 0.35s cubic-bezier(.22,.68,0,1.2);
+            position: relative; max-height: 90vh; overflow-y: auto; border-radius: 20px;
+        }
+        .reg-card { background: var(--white); border-radius: 20px; box-shadow: 0 16px 60px rgba(26,39,68,0.2); overflow: hidden; }
+
+        .reg-close {
+            position: absolute; top: 14px; right: 14px;
+            width: 32px; height: 32px; background: rgba(255,255,255,0.15);
+            border: none; border-radius: 50%; color: white; font-size: 18px;
+            cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+        }
+        .reg-close:hover { background: rgba(255,255,255,0.3); }
+
+        .reg-banner {
+            background: linear-gradient(135deg, var(--navy) 0%, #2d4a8a 100%);
+            padding: 32px 36px 28px; position: relative; overflow: hidden;
+        }
+        .reg-banner::before {
+            content: '🏨'; position: absolute; right: 28px; top: 50%; transform: translateY(-50%);
+            font-size: 64px; opacity: 0.15;
+        }
+        .reg-banner h2 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+        .reg-banner p  { font-size: 13px; color: rgba(255,255,255,0.6); }
+
+        .reg-body { padding: 32px 36px; }
+        .reg-row { display: flex; gap: 16px; }
+        .reg-row .reg-field { flex: 1; }
+        .reg-field { margin-bottom: 20px; }
+
+        .reg-label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase; color: var(--gray); margin-bottom: 7px; }
+        .reg-input-wrap { position: relative; display: flex; align-items: center; }
+        .reg-input-icon { position: absolute; left: 13px; font-size: 15px; pointer-events: none; }
+        .reg-input {
+            width: 100%; padding: 11px 14px 11px 38px;
+            border: 1.5px solid var(--border); border-radius: 10px;
+            font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--navy);
+            background: #fafafa; transition: all 0.2s; outline: none;
+        }
+        .reg-input:focus { border-color: var(--blue); background: var(--white); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+
+        .reg-email-wrap { display: flex; gap: 8px; align-items: flex-start; }
+        .reg-email-wrap .reg-input-wrap { flex: 1; }
+        .btn-send-otp {
+            flex-shrink: 0; padding: 11px 14px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: var(--navy); font-family: 'DM Sans', sans-serif;
+            font-size: 12px; font-weight: 700; border: none; border-radius: 10px;
+            cursor: pointer; transition: all 0.2s; white-space: nowrap; line-height: 1.3;
+        }
+        .btn-send-otp:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(201,168,76,0.4); }
+
+        .pw-strength { display: flex; gap: 4px; margin-top: 6px; }
+        .pw-bar { flex: 1; height: 3px; border-radius: 2px; background: var(--border); }
+        .pw-hint { font-size: 11px; color: var(--gray); margin-top: 4px; }
+
+        .reg-divider { border: none; border-top: 1px solid var(--border); margin: 8px 0 24px; }
+
+        .btn-submit-reg {
+            width: 100%; padding: 14px;
+            background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+            color: white; font-family: 'DM Sans', sans-serif;
+            font-size: 15px; font-weight: 700; border: none; border-radius: 12px;
+            cursor: pointer; transition: all 0.2s; letter-spacing: 0.3px;
+        }
+        .btn-submit-reg:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.35); }
+
+        .reg-footer-note { text-align: center; font-size: 12px; color: var(--gray); margin-top: 16px; }
+        .reg-footer-note a { color: var(--blue); text-decoration: none; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<!-- Overlay đóng dropdown -->
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+<!-- HEADER -->
+<header>
+    <a class="logo" href="#">
+        <div class="logo-icon">🏨</div>
+        <span class="logo-text">Stay<span>Viet</span></span>
+    </a>
+    <div class="header-auth">
+        <button class="btn-login">Đăng nhập</button>
+        <button class="btn-register" onclick="showRegister()">Đăng ký</button>
+    </div>
+</header>
+
+<!-- SEARCH BAR -->
+<div class="search-bar-wrapper">
+    <div class="search-bar" id="searchBar">
+
+        <!-- Điểm đến -->
+        <div class="search-field" id="fieldDest" onclick="toggleDropdown('dest')">
+            <span class="field-label">📍 Điểm đến</span>
+            <span class="field-value placeholder" id="destVal">Chọn điểm đến</span>
+            <div class="dropdown-dest" id="dropDest" onclick="event.stopPropagation()">
+                <div class="dest-search">
+                    <input type="text" placeholder="🔍  Tìm điểm đến..." id="destSearch" oninput="filterDest(this.value)">
+                </div>
+                <div id="destList"></div>
+            </div>
+        </div>
+
+        <!-- Thời gian -->
+        <div class="search-field" id="fieldDate" onclick="toggleDropdown('date')">
+            <span class="field-label">📅 Nhận / Trả phòng</span>
+            <span class="field-value placeholder" id="dateVal">Chọn ngày</span>
+            <div class="datepicker-popup" id="dropDate" onclick="event.stopPropagation()">
+                <div class="cal-header">
+                    <button class="cal-nav-btn" onclick="changeMonth(-1)">&#8249;</button>
+                    <div style="display:flex;gap:60px;font-size:13px;color:var(--gray);" id="calMonthLabels"></div>
+                    <button class="cal-nav-btn" onclick="changeMonth(1)">&#8250;</button>
+                </div>
+                <div class="cal-months" id="calMonths"></div>
+                <div class="cal-shortcuts">
+                    <button class="cal-shortcut" onclick="setShortcut(0)">📅 Tối nay</button>
+                    <button class="cal-shortcut" onclick="setShortcut(1)">🌙 Tối mai</button>
+                    <button class="cal-shortcut" onclick="setShortcutWeekend(0)">🏖️ Cuối tuần này</button>
+                    <button class="cal-shortcut" onclick="setShortcutWeekend(1)">✨ Cuối tuần tới</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Số khách -->
+        <div class="search-field" id="fieldGuests" onclick="toggleDropdown('guests')" style="border-right:none;">
+            <span class="field-label">👥 Số khách & Phòng</span>
+            <span class="field-value" id="guestsVal">2 khách, 1 phòng</span>
+            <div class="guests-popup" id="dropGuests" onclick="event.stopPropagation()">
+                <div class="guest-row">
+                    <div class="guest-info">
+                        <div class="guest-label">Người lớn</div>
+                        <div class="guest-sub">Từ 18 tuổi trở lên</div>
+                    </div>
+                    <div class="counter">
+                        <button class="counter-btn" id="adultMinus" onclick="changeCount('adults',-1)">−</button>
+                        <span class="counter-val" id="adultVal">2</span>
+                        <button class="counter-btn" onclick="changeCount('adults',1)">+</button>
+                    </div>
+                </div>
+                <div class="guest-row">
+                    <div class="guest-info">
+                        <div class="guest-label">Trẻ em</div>
+                        <div class="guest-sub">Dưới 18 tuổi</div>
+                    </div>
+                    <div class="counter">
+                        <button class="counter-btn" id="childMinus" onclick="changeCount('children',-1)">−</button>
+                        <span class="counter-val" id="childVal">0</span>
+                        <button class="counter-btn" onclick="changeCount('children',1)">+</button>
+                    </div>
+                </div>
+                <div class="guest-row">
+                    <div class="guest-info">
+                        <div class="guest-label">Phòng</div>
+                    </div>
+                    <div class="counter">
+                        <button class="counter-btn" id="roomMinus" onclick="changeCount('rooms',-1)">−</button>
+                        <span class="counter-val" id="roomVal">1</span>
+                        <button class="counter-btn" onclick="changeCount('rooms',1)">+</button>
+                    </div>
+                </div>
+                <div class="pet-row">
+                    <div class="guest-info">
+                        <div class="guest-label">Cho phép mang thú cưng</div>
+                        <div class="guest-sub">Chỉ hiển thị nơi lưu trú cho phép thú cưng</div>
+                    </div>
+                    <div class="toggle-switch" id="petToggle" onclick="togglePet()" style="margin-left:12px;"></div>
+                </div>
+                <div class="guests-footer">
+                    <button class="btn-reset" onclick="resetGuests()">Chọn lại</button>
+                    <button class="btn-apply" onclick="applyGuests()">Áp dụng</button>
+                </div>
+            </div>
+        </div>
+
+        <button class="search-btn" onclick="doSearch()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+        </button>
+    </div>
+</div>
+
+<!-- MIDDLE NAV -->
+<nav class="middle-nav">
+    <button class="btn-nav active" onclick="setActive(this)">🏠 Trang chủ</button>
+    <button class="btn-nav" onclick="setActive(this)">🏊 Hồ bơi</button>
+    <button class="btn-nav" onclick="setActive(this)">🍽️ Nhà hàng</button>
+    <button class="btn-nav" onclick="setActive(this)">🌿 Spa & Thư giãn</button>
+    <button class="btn-nav" onclick="setActive(this)">📞 Liên hệ</button>
+</nav>
+
+<!-- DEMO CONTENT -->
+<div class="demo-content">
+    <h2>Khám phá điểm lưu trú tuyệt vời</h2>
+    <p>Nhấn vào các ô tìm kiếm phía trên để trải nghiệm giao diện mới ✨</p>
+</div>
+
+<!-- MODAL ĐĂNG KÝ -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+    <div id="register-section">
+        <div class="reg-card">
+            <div class="reg-banner">
+                <button class="reg-close" onclick="hideRegister()">✕</button>
+                <h2>Tạo tài khoản</h2>
+                <p>Tham gia StayViet để khám phá hàng nghìn điểm lưu trú tuyệt vời</p>
+            </div>
+            <div class="reg-body">
+                <div class="reg-row">
+                    <div class="reg-field">
+                        <label class="reg-label">Họ và tên</label>
+                        <div class="reg-input-wrap">
+                            <span class="reg-input-icon">👤</span>
+                            <input class="reg-input" type="text" placeholder="Nguyễn Văn A">
+                        </div>
+                    </div>
+                    <div class="reg-field">
+                        <label class="reg-label">Số CCCD / CMND</label>
+                        <div class="reg-input-wrap">
+                            <span class="reg-input-icon">🪪</span>
+                            <input class="reg-input" type="text" placeholder="012345678901" maxlength="12">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reg-field">
+                    <label class="reg-label">Địa chỉ Email</label>
+                    <div class="reg-email-wrap">
+                        <div class="reg-input-wrap">
+                            <span class="reg-input-icon">✉️</span>
+                            <input class="reg-input" type="email" placeholder="example@email.com">
+                        </div>
+                        <div>
+                            <button class="btn-send-otp">Gửi mã<br>xác nhận</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reg-row">
+                    <div class="reg-field">
+                        <label class="reg-label">Số điện thoại</label>
+                        <div class="reg-input-wrap">
+                            <span class="reg-input-icon">📱</span>
+                            <input class="reg-input" type="tel" placeholder="0912 345 678" maxlength="11">
+                        </div>
+                    </div>
+                    <div class="reg-field">
+                        <label class="reg-label">Tên đăng nhập</label>
+                        <div class="reg-input-wrap">
+                            <span class="reg-input-icon">🔖</span>
+                            <input class="reg-input" type="text" placeholder="nguyenvana123">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reg-field">
+                    <label class="reg-label">Mật khẩu</label>
+                    <div class="reg-input-wrap">
+                        <span class="reg-input-icon">🔒</span>
+                        <input class="reg-input" type="password" placeholder="Tối thiểu 8 ký tự">
+                    </div>
+                    <div class="pw-strength">
+                        <div class="pw-bar"></div>
+                        <div class="pw-bar"></div>
+                        <div class="pw-bar"></div>
+                        <div class="pw-bar"></div>
+                    </div>
+                    <div class="pw-hint">Nhập mật khẩu để xem độ mạnh</div>
+                </div>
+
+                <hr class="reg-divider">
+
+                <button class="btn-submit-reg">🚀 &nbsp;Tạo tài khoản</button>
+
+                <p class="reg-footer-note">
+                    Đã có tài khoản?
+                    <a href="#" onclick="hideRegister(); return false;">Đăng nhập ngay</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ===== DATA =====
+    const destinations = [
+        { name: 'Hà Nội',           sub: 'Thủ đô',                    icon: '🏛️', region: 'Miền Bắc' },
+        { name: 'Ninh Bình',        sub: 'Tràng An, Tam Cốc',         icon: '⛰️', region: 'Miền Bắc' },
+        { name: 'Hạ Long',          sub: 'Vịnh Hạ Long',              icon: '🌊', region: 'Miền Bắc' },
+        { name: 'Đà Nẵng',          sub: 'Biển Mỹ Khê, Bà Nà Hills', icon: '🏖️', region: 'Miền Trung' },
+        { name: 'Hội An',           sub: 'Phố cổ UNESCO',             icon: '🏮', region: 'Miền Trung' },
+        { name: 'Huế',              sub: 'Cố đô',                     icon: '👑', region: 'Miền Trung' },
+        { name: 'Nha Trang',        sub: 'Thành phố biển',            icon: '🐚', region: 'Miền Nam' },
+        { name: 'Đà Lạt',           sub: 'Thành phố ngàn hoa',        icon: '🌸', region: 'Miền Nam' },
+        { name: 'TP. Hồ Chí Minh', sub: 'Trung tâm kinh tế',         icon: '🌆', region: 'Miền Nam' },
+        { name: 'Phú Quốc',         sub: 'Đảo ngọc',                  icon: '🏝️', region: 'Miền Nam' },
+        { name: 'Vũng Tàu',         sub: 'Bà Rịa-Vũng Tàu',          icon: '⚓', region: 'Miền Nam' },
+    ];
+
+    // ===== STATE =====
+    let guests = { adults: 2, children: 0, rooms: 1 };
+    let pet = false;
+    let dateStart = null, dateEnd = null;
+    let calOffset = 0;
+    let openDrop = null;
+
+    // ===== DROPDOWN =====
+    function toggleDropdown(name) {
+        if (openDrop === name) { closeAll(); return; }
+        closeAll();
+        openDrop = name;
+        document.getElementById('drop' + capitalize(name)).classList.add('open');
+        document.getElementById('overlay').classList.add('active');
+        if (name === 'dest') { renderDestList(''); setTimeout(() => document.getElementById('destSearch').focus(), 50); }
+        if (name === 'date') renderCalendar();
+    }
+    function closeAll() {
+        ['Dest','Date','Guests'].forEach(n => {
+            const el = document.getElementById('drop' + n);
+            if (el) el.classList.remove('open');
+        });
+        document.getElementById('overlay').classList.remove('active');
+        openDrop = null;
+    }
+    function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+    // ===== DEST =====
+    function renderDestList(filter) {
+        const list = document.getElementById('destList');
+        const groups = {};
+        destinations
+            .filter(d => !filter || d.name.toLowerCase().includes(filter.toLowerCase()) || d.sub.toLowerCase().includes(filter.toLowerCase()))
+            .forEach(d => { if (!groups[d.region]) groups[d.region] = []; groups[d.region].push(d); });
+        let html = '';
+        for (const [region, items] of Object.entries(groups)) {
+            html += `<div class="dest-section-title">${region}</div>`;
+            items.forEach(d => {
+                html += `<div class="dest-item" onclick="selectDest('${d.name}')">
+                    <span class="dest-icon">${d.icon}</span>
+                    <div><div>${d.name}</div><div class="dest-sub">${d.sub}</div></div>
+                </div>`;
+            });
+        }
+        list.innerHTML = html || '<div style="padding:16px;text-align:center;color:#aaa;font-size:13px">Không tìm thấy điểm đến</div>';
+    }
+    function filterDest(val) { renderDestList(val); }
+    function selectDest(name) {
+        document.getElementById('destVal').textContent = name;
+        document.getElementById('destVal').classList.remove('placeholder');
+        closeAll();
+        toggleDropdown('date');
+    }
+
+    // ===== DATE PICKER =====
+    const DAYS = ['T2','T3','T4','T5','T6','T7','CN'];
+    const MONTHS_VI = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
+    const today = new Date(); today.setHours(0,0,0,0);
+
+    function renderCalendar() {
+        const base = new Date(today.getFullYear(), today.getMonth() + calOffset, 1);
+        const m1 = new Date(base.getFullYear(), base.getMonth(), 1);
+        const m2 = new Date(base.getFullYear(), base.getMonth() + 1, 1);
+        document.getElementById('calMonthLabels').innerHTML =
+            `<span>${MONTHS_VI[m1.getMonth()]} ${m1.getFullYear()}</span><span>${MONTHS_VI[m2.getMonth()]} ${m2.getFullYear()}</span>`;
+        document.getElementById('calMonths').innerHTML = renderMonth(m1) + renderMonth(m2);
+    }
+
+    function renderMonth(firstDay) {
+        let html = `<div class="cal-month"><div class="cal-month-title">${MONTHS_VI[firstDay.getMonth()]} ${firstDay.getFullYear()}</div><div class="cal-grid">`;
+        DAYS.forEach(d => html += `<div class="cal-dow">${d}</div>`);
+        let startDow = firstDay.getDay();
+        startDow = startDow === 0 ? 6 : startDow - 1;
+        for (let i = 0; i < startDow; i++) html += `<div class="cal-day empty"></div>`;
+        const daysInMonth = new Date(firstDay.getFullYear(), firstDay.getMonth() + 1, 0).getDate();
+        for (let d = 1; d <= daysInMonth; d++) {
+            const date = new Date(firstDay.getFullYear(), firstDay.getMonth(), d);
+            const ts = date.getTime();
+            let cls = 'cal-day';
+            if (date < today) cls += ' disabled';
+            if (date.toDateString() === today.toDateString()) cls += ' today';
+            if (dateStart && ts === dateStart.getTime()) cls += ' selected-start';
+            else if (dateEnd && ts === dateEnd.getTime()) cls += ' selected-end';
+            else if (dateStart && dateEnd && date > dateStart && date < dateEnd) {
+                cls += ' in-range';
+                if (date.getTime() === new Date(dateStart.getTime() + 86400000).getTime()) cls += ' range-start';
+                if (date.getTime() === new Date(dateEnd.getTime() - 86400000).getTime()) cls += ' range-end';
+            }
+            html += `<div class="${cls}" onclick="pickDate(${ts})">${d}</div>`;
+        }
+        html += `</div></div>`;
+        return html;
+    }
+
+    function pickDate(ts) {
+        const d = new Date(ts);
+        if (d < today) return;
+        if (!dateStart || (dateStart && dateEnd) || d < dateStart) {
+            dateStart = d; dateEnd = null;
+        } else {
+            dateEnd = d;
+            updateDateVal();
+            setTimeout(closeAll, 200);
+        }
+        renderCalendar();
+    }
+
+    function updateDateVal() {
+        if (dateStart && dateEnd) {
+            const fmt = d => `${d.getDate()} thg ${d.getMonth()+1}`;
+            document.getElementById('dateVal').textContent = `${fmt(dateStart)} – ${fmt(dateEnd)}`;
+            document.getElementById('dateVal').classList.remove('placeholder');
+        }
+    }
+
+    function changeMonth(delta) { calOffset = Math.max(0, calOffset + delta); renderCalendar(); }
+
+    function setShortcut(daysFromNow) {
+        const d = new Date(today); d.setDate(d.getDate() + daysFromNow);
+        const d2 = new Date(d); d2.setDate(d2.getDate() + 1);
+        dateStart = d; dateEnd = d2; updateDateVal(); renderCalendar(); setTimeout(closeAll, 300);
+    }
+    function setShortcutWeekend(next) {
+        const d = new Date(today);
+        let daysToFri = (5 - d.getDay() + 7) % 7;
+        if (next) daysToFri += 7;
+        if (daysToFri === 0) daysToFri = 7;
+        d.setDate(d.getDate() + daysToFri);
+        const d2 = new Date(d); d2.setDate(d2.getDate() + 2);
+        dateStart = d; dateEnd = d2; updateDateVal(); renderCalendar(); setTimeout(closeAll, 300);
+    }
+
+    // ===== GUESTS =====
+    function changeCount(type, delta) {
+        if (type === 'adults')   guests.adults   = Math.max(1, guests.adults + delta);
+        if (type === 'children') guests.children = Math.max(0, guests.children + delta);
+        if (type === 'rooms')    guests.rooms    = Math.max(1, guests.rooms + delta);
+        document.getElementById('adultVal').textContent = guests.adults;
+        document.getElementById('childVal').textContent = guests.children;
+        document.getElementById('roomVal').textContent  = guests.rooms;
+        document.getElementById('adultMinus').disabled = guests.adults <= 1;
+        document.getElementById('childMinus').disabled = guests.children <= 0;
+        document.getElementById('roomMinus').disabled  = guests.rooms <= 1;
+    }
+    function togglePet() { pet = !pet; document.getElementById('petToggle').classList.toggle('on', pet); }
+    function resetGuests() {
+        guests = { adults: 2, children: 0, rooms: 1 }; pet = false;
+        changeCount('adults', 0);
+        document.getElementById('petToggle').classList.remove('on');
+    }
+    function applyGuests() {
+        const total = guests.adults + guests.children;
+        document.getElementById('guestsVal').textContent = `${total} khách, ${guests.rooms} phòng${pet ? ' 🐾' : ''}`;
+        closeAll();
+    }
+
+    function doSearch() {
+        const dest = document.getElementById('destVal').textContent;
+        const date = document.getElementById('dateVal').textContent;
+        const g    = document.getElementById('guestsVal').textContent;
+        alert(`🔍 Tìm kiếm:\n📍 ${dest}\n📅 ${date}\n👥 ${g}`);
+    }
+
+    function setActive(btn) {
+        document.querySelectorAll('.btn-nav').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    // ===== MODAL ĐĂNG KÝ =====
+    function showRegister() {
+        closeAll();
+        document.getElementById('modal-overlay').classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+    function hideRegister() {
+        document.getElementById('modal-overlay').classList.remove('show');
+        document.body.style.overflow = '';
+    }
+    function handleOverlayClick(e) {
+        if (e.target === document.getElementById('modal-overlay')) hideRegister();
+    }
+
+    // Init
+    changeCount('adults', 0);
+</script>
+</body>
+</html>
