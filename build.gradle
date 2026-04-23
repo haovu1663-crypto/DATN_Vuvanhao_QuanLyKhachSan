@@ -19,6 +19,14 @@ repositories {
 }
 
 dependencies {
+    // up clound
+    implementation group: 'com.cloudinary', name: 'cloudinary-http44', version: '1.39.0'
+
+
+    //modelMapper
+    // Source: https://mvnrepository.com/artifact/org.modelmapper/modelmapper
+    implementation 'org.modelmapper:modelmapper:3.1.1'
+
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
