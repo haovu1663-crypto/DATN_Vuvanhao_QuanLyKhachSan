@@ -14,7 +14,7 @@ public class QuanLyKhachSanApplication {
         SpringApplication.run(QuanLyKhachSanApplication.class, args);
     }
 
-    // up load
+
     @Value("${cloud-name}")
     private String cloudName;
     @Value("${api-key}")

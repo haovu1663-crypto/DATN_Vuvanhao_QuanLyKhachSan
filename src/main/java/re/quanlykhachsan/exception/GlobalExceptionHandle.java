@@ -58,4 +58,16 @@ public class GlobalExceptionHandle {
         );
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(DataConfickException.class)
+    public ResponseEntity<?> DataConFlicException(DataConfickException e)
+    {
+        Map<String, String> errors = new HashMap<>();
+        errors.put("class", e.getMessage());
+        ApiResponse<Map<String, String>> response = new ApiResponse<>(
+                " Lỗi dàng buộc khóa ngoại  ",
+                "409 ",
+                errors
+        );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
 }

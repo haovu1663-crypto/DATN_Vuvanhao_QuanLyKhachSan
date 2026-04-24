@@ -1,7 +1,9 @@
 package re.quanlykhachsan.controller;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import re.quanlykhachsan.dto.request.RoomRequest;
@@ -15,18 +17,18 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/rooms")
-@RestControllerAdvice
+@RequiredArgsConstructor
 public class RoomController {
-    private IRoomService roomService;
-    @PostMapping
-    public ResponseEntity<?> addRoom(@Valid @ModelAttribute RoomRequest roomRequest) throws IOException {
+    private final IRoomService roomService;
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> addRoom(@Valid @ModelAttribute RoomRequest roomRequest) throws IOException,ResourceNotFoundException {
         ApiResponse<RoomRespone> response = new ApiResponse<>(
                 "Add cusscess ","201 CREATED",roomService.add(roomRequest)
         );
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateRoom(@Valid @ModelAttribute RoomRequest roomRequest,Long id) throws IOException,ResourceNotFoundException {
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateRoom(@Valid @ModelAttribute RoomRequest roomRequest,@PathVariable Long id) throws IOException,ResourceNotFoundException {
         ApiResponse<RoomRespone> response = new ApiResponse<>(
                 "update cusscess ","201 CREATED",roomService.update(roomRequest,id)
         );

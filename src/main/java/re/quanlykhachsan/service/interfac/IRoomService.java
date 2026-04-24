@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface IRoomService {
-    RoomRespone add(RoomRequest roomRequest) throws IOException;
+    RoomRespone add(RoomRequest roomRequest) throws IOException,ResourceNotFoundException;
     RoomRespone update(RoomRequest roomRequest,Long id) throws IOException, ResourceNotFoundException;
     RoomRespone delete(Long id)throws ResourceNotFoundException;
     List<RoomRespone> getListRoom();

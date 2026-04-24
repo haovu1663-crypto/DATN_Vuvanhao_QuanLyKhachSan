@@ -7,9 +7,12 @@ import org.springframework.web.multipart.MultipartFile;
 import re.quanlykhachsan.dto.request.RoomRequest;
 import re.quanlykhachsan.dto.response.RoomRespone;
 import re.quanlykhachsan.entity.Room;
+import re.quanlykhachsan.entity.RoomType;
 import re.quanlykhachsan.exception.ResourceNotFoundException;
 import re.quanlykhachsan.repository.RoomRepository;
+import re.quanlykhachsan.repository.RoomTypeRepository;
 import re.quanlykhachsan.service.interfac.IRoomService;
+import re.quanlykhachsan.service.interfac.IRoomTypeService;
 import re.quanlykhachsan.upload.UploadService;
 
 import java.io.IOException;
@@ -21,10 +24,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RoomService implements IRoomService {
     private final RoomRepository roomRepository;
+    private final RoomTypeRepository roomTypeRepository;
     private final ModelMapper modelMapper;
     private final UploadService uploadService;
     @Override
-    public RoomRespone add(RoomRequest roomRequest) throws IOException {
+    public RoomRespone add(RoomRequest roomRequest) throws IOException,ResourceNotFoundException {
         Room room = modelMapper.map(roomRequest, Room.class);
         List<MultipartFile> files = roomRequest.getImages();
         List<String> imageUrls = new ArrayList<>();
@@ -34,6 +38,8 @@ public class RoomService implements IRoomService {
                 imageUrls.add(url);
             }
         }
+        RoomType roomType = roomTypeRepository.findById(roomRequest.getType_room_id()).orElseThrow(()->new ResourceNotFoundException("không tim thấy roomType có id :"+roomRequest.getType_room_id()));
+        room.setRoomType(roomType);
         room.setImages(imageUrls);
         roomRepository.save(room);
         return modelMapper.map(room, RoomRespone.class);
@@ -53,7 +59,10 @@ public class RoomService implements IRoomService {
                 imageUrls.add(url);
             }
         }
+        RoomType roomType = roomTypeRepository.findById(roomRequest.getType_room_id()).orElseThrow(()->new ResourceNotFoundException("không tim thấy roomType có id :"+roomRequest.getType_room_id()));
+        room.setRoomType(roomType);
         room.setImages(imageUrls);
+        room.setId(id);
         roomRepository.save(room);
         return modelMapper.map(room, RoomRespone.class);
     }
@@ -61,6 +70,7 @@ public class RoomService implements IRoomService {
     @Override
     public RoomRespone delete(Long id) throws ResourceNotFoundException {
         Room room = roomRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy RoomType có id: " + id + " xóa thất bại"));;
+        roomRepository.delete(room);
         return modelMapper.map(room, RoomRespone.class);
     }
 

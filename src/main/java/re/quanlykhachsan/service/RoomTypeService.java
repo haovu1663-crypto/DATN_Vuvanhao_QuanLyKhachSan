@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 import re.quanlykhachsan.dto.request.RoomTypeRequest;
 import re.quanlykhachsan.dto.response.RoomTypeResponse;
 import re.quanlykhachsan.entity.RoomType;
+import re.quanlykhachsan.exception.DataConfickException;
 import re.quanlykhachsan.exception.ResourceNotFoundException;
+import re.quanlykhachsan.repository.RoomRepository;
 import re.quanlykhachsan.repository.RoomTypeRepository;
 import re.quanlykhachsan.service.interfac.IRoomTypeService;
 
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 public class RoomTypeService implements IRoomTypeService {
     private final RoomTypeRepository roomTypeRepository;
     private final ModelMapper modelMapper;
+    private final RoomRepository roomRepository;
     public RoomTypeResponse add(RoomTypeRequest roomTypeRequest){
           RoomType roomType=modelMapper.map(roomTypeRequest,RoomType.class);
           roomTypeRepository.save(roomType);
@@ -34,13 +37,15 @@ public class RoomTypeService implements IRoomTypeService {
         roomTypeRepository.save(roomType);
         return modelMapper.map(roomType,RoomTypeResponse.class);
     }
-    public RoomTypeResponse delete(Long id) throws ResourceNotFoundException {
+    public RoomTypeResponse delete(Long id) throws ResourceNotFoundException,DataConfickException {
         RoomType roomType = roomTypeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy RoomType có id: " + id + " xóa thất bại"));
         if(!roomTypeRepository.existsById(id)){
             throw new ResourceNotFoundException("không tìm thấy RoomType có id : "+id+" xóa thất bại");
         }
-        roomTypeRepository.deleteById(id);
+        if(roomRepository.existsByRoomTypeId(id)){
+            throw new DataConfickException("không thể xóa đối tượng này ");
+        }        roomTypeRepository.deleteById(id);
         return modelMapper.map(roomType,RoomTypeResponse.class);
     }
     public List<RoomTypeResponse> getListRoomType(){
