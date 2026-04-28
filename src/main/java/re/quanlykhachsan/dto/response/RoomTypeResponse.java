@@ -10,6 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class RoomTypeResponse {
+    private Long id;
     private String type;
     private int capacity;
     private String amenities;// nội thất

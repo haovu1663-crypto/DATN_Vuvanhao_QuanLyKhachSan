@@ -77,8 +77,11 @@
 
     <nav class="flex-1 mt-8 px-6 space-y-3">
         <p class="text-[10px] uppercase font-bold tracking-widest text-slate-600 mb-4 ml-2">Main Menu</p>
-        <a href="#" class="sidebar-item active-menu flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
+        <a href="javascript:void(0)" id="menuAdd" class="sidebar-item active-menu flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
             <i class="fas fa-plus-circle text-lg"></i> Add Room
+        </a>
+        <a href="javascript:void(0)" id="menuUpdate" class="sidebar-item flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
+            <i class="fas fa-edit text-lg"></i> Update Room
         </a>
         <a href="#" class="sidebar-item flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
             <i class="fas fa-sync-alt text-lg"></i> Reset Status
@@ -117,8 +120,23 @@
 
     <div class="p-10 max-w-5xl mx-auto w-full">
         <div class="glass-card rounded-[2rem] shadow-2xl shadow-slate-200/50 p-10">
-            <form action="/rooms/save" method="POST" enctype="multipart/form-data" class="space-y-8">
-
+            <form id="addRoomForm" enctype="multipart/form-data" class="space-y-8">
+                <!-- nút search -->
+                <input type="hidden" name="id" id="roomId">
+                <div id="searchSection" class="hidden mb-10 pb-8 border-b border-slate-100">
+                    <label class="text-[13px] font-bold text-blue-600 uppercase tracking-wider mb-3 block">Tìm kiếm phòng theo ID</label>
+                    <div class="flex gap-4">
+                        <div class="relative flex-1">
+                            <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="number" id="inputSearchId" placeholder="Nhập ID phòng..."
+                                   class="input-focus w-full pl-14 pr-5 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none text-slate-700 font-medium">
+                        </div>
+                        <button type="button" onclick="fetchRoomDetail()" class="px-8 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold transition-all flex items-center gap-2">
+                            <i class="fas fa-download"></i> Tải dữ liệu
+                        </button>
+                    </div>
+                </div>
+                <!-- form add room -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="col-span-2">
                         <label class="text-[13px] font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block">Room Name</label>
@@ -131,9 +149,10 @@
                         <label class="text-[13px] font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block">Current Status</label>
                         <div class="relative">
                             <select name="status" class="input-focus w-full px-5 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none text-slate-700 font-medium appearance-none cursor-pointer">
-                                <option value="AVAILABLE text-green-500">Available</option>
-                                <option value="OCCUPIED">Occupied</option>
+                                <option value="AVAILABLE">Available</option>
+                                <option value="CURRENTLY_TENANT">Currently Tenant</option>
                                 <option value="MAINTENANCE">Maintenance</option>
+                                <option value="CLEANING">Cleaning</option>
                             </select>
                             <i class="fas fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
                         </div>
@@ -142,11 +161,9 @@
                     <div>
                         <label class="text-[13px] font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block">Room Category</label>
                         <div class="relative">
-                            <select name="roomType_id" required class="input-focus w-full px-5 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none text-slate-700 font-medium appearance-none cursor-pointer">
-                                <option value="">Select type</option>
-                                <option value="1">Standard Room</option>
-                                <option value="2">Suite Deluxe</option>
-                                <option value="3">Presidential Suite</option>
+                            <select id="roomTypeSelect" name="type_room_id" required
+                                    class="input-focus w-full px-5 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none text-slate-700 font-medium appearance-none cursor-pointer">
+                                <option value="">Đang tải danh sách...</option>
                             </select>
                             <i class="fas fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
                         </div>
@@ -156,9 +173,11 @@
                         <label class="text-[13px] font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block">Price per Night</label>
                         <div class="relative group">
                             <div class="absolute left-5 top-1/2 -translate-y-1/2 w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center font-bold">₫</div>
-                            <input type="number" name="price" step="0.01" min="0" required
+                            <input type="text" id="priceDisplay" required
                                    class="input-focus w-full pl-16 pr-5 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none text-slate-700 font-bold text-xl"
-                                   placeholder="0.00">
+                                   placeholder="0"
+                                   oninput="formatCurrency(this)">
+                            <input type="hidden" id="priceOriginal" name="price">
                         </div>
                     </div>
                 </div>
@@ -168,33 +187,63 @@
                     <div class="relative border-2 border-dashed border-slate-200 rounded-[1.5rem] p-12 text-center hover:border-blue-400 hover:bg-blue-50/20 transition-all cursor-pointer group"
                          onclick="document.getElementById('file-upload').click()">
                         <input id="file-upload" name="images" type="file" class="hidden" multiple accept="image/*" onchange="handleFiles(this.files)">
-
                         <div class="w-16 h-16 bg-blue-600/10 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                             <i class="fas fa-images text-2xl"></i>
                         </div>
                         <h3 class="text-lg font-bold text-slate-700">Drop your images here</h3>
-                        <p class="text-sm text-slate-400 font-medium mt-1">Supports JPG, PNG, WEBP (Max 10MB per file)</p>
                     </div>
-
                     <div id="preview-grid" class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-5"></div>
                 </div>
 
                 <div class="flex items-center justify-end gap-5 pt-10">
-                    <button type="reset" onclick="clearPreview()"
-                            class="px-8 py-4 rounded-2xl font-bold text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-all uppercase text-xs tracking-widest">
+                    <button type="reset" id="btnReset" onclick="clearPreview()"
+                            class="px-8 py-4 rounded-2xl font-bold text-slate-500 hover:bg-slate-100 transition-all uppercase text-xs tracking-widest">
                         Reset Form
                     </button>
-                    <button type="submit"
+
+                    <button type="button" id="btnDelete" onclick="handleDelete()"
+                            class="hidden px-10 py-4 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-2xl font-bold transition-all uppercase text-xs tracking-widest flex items-center gap-3">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+
+                    <button type="submit" id="btnSubmit"
                             class="px-10 py-4 bg-slate-900 hover:bg-blue-600 text-white rounded-2xl font-bold shadow-xl shadow-slate-200 transition-all active:scale-95 uppercase text-xs tracking-widest flex items-center gap-3">
-                        <span>Save Room</span>
-                        <i class="fas fa-arrow-right text-[10px]"></i>
+                        <span id="submitText">Save Room</span>
+                        <i id="submitIcon" class="fas fa-arrow-right text-[10px]"></i>
                     </button>
                 </div>
+
             </form>
         </div>
+
+
     </div>
 </main>
 
+<script>
+   // xửa lý price
+    function formatCurrency(input) {
+        // 1. Lấy giá trị người dùng nhập và xóa hết các ký tự không phải số
+        let value = input.value.replace(/\D/g, "");
+
+        // 2. Định dạng có dấu chấm ngăn cách hàng nghìn (7.000.000)
+        if (value !== "") {
+            // Chuyển thành số và định dạng theo chuẩn Việt Nam (.)
+            let formattedValue = new Intl.NumberFormat('de-DE').format(value);
+            input.value = formattedValue;
+
+            // 3. Cập nhật giá trị số thuần túy vào input ẩn để gửi về Server
+            document.getElementById('priceOriginal').value = value;
+        } else {
+            document.getElementById('priceOriginal').value = "";
+        }
+    }
+
+    // Bổ sung: Khi Reset form thì xóa cả input ẩn
+    document.querySelector('button[type="reset"]').addEventListener('click', () => {
+        document.getElementById('priceOriginal').value = "";
+    });
+</script>
 <script>
     function handleFiles(files) {
         const previewGrid = document.getElementById('preview-grid');
@@ -219,6 +268,128 @@
     function clearPreview() {
         document.getElementById('preview-grid').innerHTML = '';
     }
+</script>
+
+
+<script>
+    // load tên phòng
+    // Chờ trang load xong mới chạy code
+    document.addEventListener("DOMContentLoaded", function() {
+        fetchRoomTypes();
+    });
+
+    async function fetchRoomTypes() {
+        const selectElement = document.getElementById('roomTypeSelect');
+
+        try {
+            // Thay đổi URL này cho đúng với @RequestMapping ở Controller của bạn
+            // Ví dụ: /api/v1/room-types
+            const response = await fetch('/api/v1/roomtypes');
+            const result = await response.json();
+
+            // Lấy mảng dữ liệu từ đối tượng ApiResponse của bạn
+            // Lưu ý: "result" ở đây phải khớp với tên biến trong class ApiResponse bên Java
+            const roomTypes = result.data;
+
+            selectElement.innerHTML = '<option value="">Select type</option>';
+
+            roomTypes.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type.id;
+                option.textContent = type.type;
+                selectElement.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Lỗi:', error);
+            selectElement.innerHTML = '<option value="">Error loading data</option>';
+        }
+    }
+</script>
+<script>
+    // submit
+    document.getElementById('addRoomForm').addEventListener('submit', async function(e) {
+        e.preventDefault(); // Ngăn trang web load lại
+
+        const form = e.target;
+        const formData = new FormData(form); // Tự động lấy tất cả input kể cả file ảnh
+
+        // Hiệu ứng nút bấm khi đang lưu
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Saving...</span>';
+
+        try {
+            const response = await fetch('/api/v1/rooms', {
+                method: 'POST',
+                body: formData
+                // Không cần set Header Content-Type vì FormData sẽ tự động set Multipart/form-data
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alert("Thêm phòng thành công!");
+                form.reset(); // Xóa trắng form
+                clearPreview(); // Xóa ảnh preview
+                document.getElementById('priceOriginal').value = "";
+            } else {
+                alert("Lỗi: " + (result.message || "Không thể lưu phòng"));
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Lỗi kết nối đến Server!");
+        } finally {
+            // Trả lại trạng thái nút bấm
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }
+    });
+</script>
+<script>
+    // chuyển đổi giữa 2 form add và update
+
+    // Khai báo các thành phần điều khiển
+    const btnReset = document.getElementById('btnReset');
+    const btnDelete = document.getElementById('btnDelete');
+    const submitText = document.getElementById('submitText');
+    const submitIcon = document.getElementById('submitIcon');
+    const searchSection = document.getElementById('searchSection');
+
+    // Xử lý khi nhấn menu UPDATE ROOM
+    document.getElementById('menuUpdate').addEventListener('click', function() {
+        // 1. Hiện thanh tìm kiếm & Nút xóa
+        searchSection.classList.remove('hidden');
+        btnDelete.classList.remove('hidden');
+
+        // 2. Ẩn nút Reset
+        btnReset.classList.add('hidden');
+
+        // 3. Đổi nội dung nút Submit
+        submitText.innerText = "Update Room";
+        submitIcon.className = "fas fa-sync-alt text-[10px]"; // Đổi icon sang xoay
+
+        // 4. Reset form để sẵn sàng nhập ID mới
+        document.getElementById('addRoomForm').reset();
+    });
+
+    // Xử lý khi nhấn menu ADD ROOM
+    document.getElementById('menuAdd').addEventListener('click', function() {
+        // 1. Ẩn thanh tìm kiếm & Nút xóa
+        searchSection.classList.add('hidden');
+        btnDelete.classList.add('hidden');
+
+        // 2. Hiện lại nút Reset
+        btnReset.classList.remove('hidden');
+
+        // 3. Đổi nội dung nút Submit về ban đầu
+        submitText.innerText = "Save Room";
+        submitIcon.className = "fas fa-arrow-right text-[10px]";
+
+        // 4. Xóa ID cũ trong input ẩn (nếu có)
+        document.getElementById('roomId').value = "";
+        document.getElementById('addRoomForm').reset();
+    });
 </script>
 
 </body>

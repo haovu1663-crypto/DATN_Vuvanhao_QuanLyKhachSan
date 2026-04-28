@@ -55,7 +55,9 @@ public class SecurityConfig {
                         req->
                                 req.requestMatchers("/api/v1/admin/**").hasAuthority("ADMIN") // admin ms đc truy cập api này
                                         .requestMatchers("/api/v1/user/**").hasAuthority("USER")//requestMatcher để so khớp kêt quả
-                                        .requestMatchers("/api/v1/manager/**").hasAuthority("ROLE_MANAGER")// the dùng hasAuthority("ROLE_MANAGER")
+                                        .requestMatchers("/api/v1/manager/**").hasAuthority("ROLE_MANAGER")
+                                        .requestMatchers("/rooms/form").permitAll()
+                                        .requestMatchers("/api/v1/roomtypes").permitAll()// the dùng hasAuthority("ROLE_MANAGER")
                                         .anyRequest().authenticated() // các api khác thì phải xác thực thì ms vào đc(đăng nhập)
                 )
                 // cơ chế dăng nhâp http basic
