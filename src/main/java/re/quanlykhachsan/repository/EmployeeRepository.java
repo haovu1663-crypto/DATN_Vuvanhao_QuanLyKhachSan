@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import re.quanlykhachsan.entity.Employee;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee,Long> {
@@ -18,4 +19,7 @@ public interface EmployeeRepository extends JpaRepository<Employee,Long> {
     boolean existsByEmail(String email);
     boolean existsByPhone(String phone);
     boolean existsByUserName(String userName);
+
+
+    Optional<Employee> findByUserName(String username);
 }

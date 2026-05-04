@@ -12,4 +12,6 @@ public class ViewController {
     public String roomForm() {
         return "roomform";
     }
+    @GetMapping("/home")
+    public String header() { return "form"; }
 }

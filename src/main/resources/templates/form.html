@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StayViet</title>
@@ -74,6 +75,22 @@
             border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; transition: all 0.2s;
         }
         .btn-register:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(201,168,76,0.4); }
+
+        /* ===== USER AVATAR (sau đăng nhập) ===== */
+        .user-info {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .user-avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 700; color: var(--navy);
+            flex-shrink: 0;
+        }
+        .user-fullname {
+            font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9);
+            max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
 
         /* ===== MENU BUTTON ===== */
         .menu-wrap { position: relative; }
@@ -408,25 +425,37 @@
 
         .reg-footer-note { text-align: center; font-size: 12px; color: var(--gray); margin-top: 16px; }
         .reg-footer-note a { color: var(--blue); text-decoration: none; font-weight: 600; }
+        #login-section {
+            max-width: 450px; /* Form login thường gọn hơn form đăng ký */
+            width: 100%;
+            animation: slideUp 0.35s cubic-bezier(.22,.68,0,1.2);
+            position: relative;
+            border-radius: 20px;
+        }
+
     </style>
 </head>
 <body>
 
-<!-- Overlay đóng dropdown -->
 <div class="overlay" id="overlay" onclick="closeAll()"></div>
 
-<!-- HEADER -->
 <header>
     <a class="logo" href="#">
         <div class="logo-icon">🏨</div>
         <span class="logo-text">Stay<span>Viet</span></span>
     </a>
     <div class="header-auth">
-        <button class="btn-login">Đăng nhập</button>
-        <button class="btn-register" onclick="showRegister()">Đăng ký</button>
 
-        <!-- MENU -->
-        <div class="menu-wrap" id="menuWrap">
+        <button class="btn-login" id="btnLogin" onclick="showLogin()">Đăng nhập</button>
+        <button class="btn-register" id="btnRegister" onclick="showRegister()">Đăng ký</button>
+
+        <!-- Thông tin user (hiện sau khi đăng nhập) -->
+        <div class="user-info" id="userInfo" style="display:none;">
+            <div class="user-avatar" id="userAvatar">?</div>
+            <span class="user-fullname" id="userFullname"></span>
+        </div>
+
+        <div class="menu-wrap" id="menuWrap" style="display:none;">
             <button class="btn-menu" id="btnMenu" onclick="toggleMenu()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
                     <line x1="3" y1="6"  x2="21" y2="6"/>
@@ -438,48 +467,22 @@
 
             <div class="menu-dropdown" id="menuDropdown" onclick="event.stopPropagation()">
                 <div class="menu-section-title">Chuyến đi</div>
-
-                <button class="menu-item" onclick="menuAction('dat-phong')">
-                    <span class="menu-icon">🛏️</span>
-                    Đặt phòng
-                </button>
-                <button class="menu-item" onclick="menuAction('lich-su')">
-                    <span class="menu-icon">🕐</span>
-                    Lịch sử đặt phòng
-                </button>
-                <button class="menu-item" onclick="menuAction('yeu-thich')">
-                    <span class="menu-icon">❤️</span>
-                    Yêu thích
-                </button>
-
+                <button class="menu-item" onclick="menuAction('dat-phong')"><span class="menu-icon">🛏️</span>Đặt phòng</button>
+                <button class="menu-item" onclick="menuAction('lich-su')"><span class="menu-icon">🕐</span>Lịch sử đặt phòng</button>
+                <button class="menu-item" onclick="menuAction('yeu-thich')"><span class="menu-icon">❤️</span>Yêu thích</button>
                 <hr class="menu-divider">
                 <div class="menu-section-title">Quản lý</div>
-
-                <button class="menu-item" onclick="menuAction('quan-ly-phong')">
-                    <span class="menu-icon">🏨</span>
-                    Quản lý phòng
-                </button>
-                <button class="menu-item" onclick="menuAction('ho-tro')">
-                    <span class="menu-icon">💬</span>
-                    Hỗ trợ & Trợ giúp
-                </button>
-
+                <button class="menu-item" onclick="menuAction('quan-ly-phong')"><span class="menu-icon">🏨</span>Quản lý phòng</button>
+                <button class="menu-item" onclick="menuAction('ho-tro')"><span class="menu-icon">💬</span>Hỗ trợ & Trợ giúp</button>
                 <hr class="menu-divider">
-
-                <button class="menu-item danger" onclick="menuAction('dang-xuat')">
-                    <span class="menu-icon">🚪</span>
-                    Đăng xuất
-                </button>
+                <button class="menu-item danger" onclick="handleLogout()"><span class="menu-icon">🚪</span>Đăng xuất</button>
             </div>
         </div>
     </div>
 </header>
 
-<!-- SEARCH BAR -->
 <div class="search-bar-wrapper">
     <div class="search-bar" id="searchBar">
-
-        <!-- Điểm đến -->
         <div class="search-field" id="fieldDest" onclick="toggleDropdown('dest')">
             <span class="field-label">📍 Điểm đến</span>
             <span class="field-value placeholder" id="destVal">Chọn điểm đến</span>
@@ -490,8 +493,6 @@
                 <div id="destList"></div>
             </div>
         </div>
-
-        <!-- Thời gian -->
         <div class="search-field" id="fieldDate" onclick="toggleDropdown('date')">
             <span class="field-label">📅 Nhận / Trả phòng</span>
             <span class="field-value placeholder" id="dateVal">Chọn ngày</span>
@@ -510,17 +511,12 @@
                 </div>
             </div>
         </div>
-
-        <!-- Số khách -->
         <div class="search-field" id="fieldGuests" onclick="toggleDropdown('guests')" style="border-right:none;">
             <span class="field-label">👥 Số khách & Phòng</span>
             <span class="field-value" id="guestsVal">2 khách, 1 phòng</span>
             <div class="guests-popup" id="dropGuests" onclick="event.stopPropagation()">
                 <div class="guest-row">
-                    <div class="guest-info">
-                        <div class="guest-label">Người lớn</div>
-                        <div class="guest-sub">Từ 18 tuổi trở lên</div>
-                    </div>
+                    <div class="guest-info"><div class="guest-label">Người lớn</div><div class="guest-sub">Từ 18 tuổi trở lên</div></div>
                     <div class="counter">
                         <button class="counter-btn" id="adultMinus" onclick="changeCount('adults',-1)">−</button>
                         <span class="counter-val" id="adultVal">2</span>
@@ -528,10 +524,7 @@
                     </div>
                 </div>
                 <div class="guest-row">
-                    <div class="guest-info">
-                        <div class="guest-label">Trẻ em</div>
-                        <div class="guest-sub">Dưới 18 tuổi</div>
-                    </div>
+                    <div class="guest-info"><div class="guest-label">Trẻ em</div><div class="guest-sub">Dưới 18 tuổi</div></div>
                     <div class="counter">
                         <button class="counter-btn" id="childMinus" onclick="changeCount('children',-1)">−</button>
                         <span class="counter-val" id="childVal">0</span>
@@ -539,9 +532,7 @@
                     </div>
                 </div>
                 <div class="guest-row">
-                    <div class="guest-info">
-                        <div class="guest-label">Phòng</div>
-                    </div>
+                    <div class="guest-info"><div class="guest-label">Phòng</div></div>
                     <div class="counter">
                         <button class="counter-btn" id="roomMinus" onclick="changeCount('rooms',-1)">−</button>
                         <span class="counter-val" id="roomVal">1</span>
@@ -549,10 +540,7 @@
                     </div>
                 </div>
                 <div class="pet-row">
-                    <div class="guest-info">
-                        <div class="guest-label">Cho phép mang thú cưng</div>
-                        <div class="guest-sub">Chỉ hiển thị nơi lưu trú cho phép thú cưng</div>
-                    </div>
+                    <div class="guest-info"><div class="guest-label">Cho phép mang thú cưng</div><div class="guest-sub">Chỉ hiển thị nơi lưu trú cho phép thú cưng</div></div>
                     <div class="toggle-switch" id="petToggle" onclick="togglePet()" style="margin-left:12px;"></div>
                 </div>
                 <div class="guests-footer">
@@ -561,7 +549,6 @@
                 </div>
             </div>
         </div>
-
         <button class="search-btn" onclick="doSearch()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -570,7 +557,6 @@
     </div>
 </div>
 
-<!-- MIDDLE NAV -->
 <nav class="middle-nav">
     <button class="btn-nav active" onclick="setActive(this)">🏠 Trang chủ</button>
     <button class="btn-nav" onclick="setActive(this)">🏊 Hồ bơi</button>
@@ -579,13 +565,12 @@
     <button class="btn-nav" onclick="setActive(this)">📞 Liên hệ</button>
 </nav>
 
-<!-- DEMO CONTENT -->
 <div class="demo-content">
     <h2>Khám phá điểm lưu trú tuyệt vời</h2>
     <p>Nhấn vào các ô tìm kiếm phía trên để trải nghiệm giao diện mới ✨</p>
 </div>
 
-<!-- MODAL ĐĂNG KÝ -->
+<!-- MODAL ĐĂNG KÝ (ĐÃ BỎ CCCD) -->
 <div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
     <div id="register-section">
         <div class="reg-card">
@@ -595,20 +580,12 @@
                 <p>Tham gia StayViet để khám phá hàng nghìn điểm lưu trú tuyệt vời</p>
             </div>
             <div class="reg-body">
-                <div class="reg-row">
-                    <div class="reg-field">
-                        <label class="reg-label">Họ và tên</label>
-                        <div class="reg-input-wrap">
-                            <span class="reg-input-icon">👤</span>
-                            <input class="reg-input" type="text" placeholder="Nguyễn Văn A">
-                        </div>
-                    </div>
-                    <div class="reg-field">
-                        <label class="reg-label">Số CCCD / CMND</label>
-                        <div class="reg-input-wrap">
-                            <span class="reg-input-icon">🪪</span>
-                            <input class="reg-input" type="text" placeholder="012345678901" maxlength="12">
-                        </div>
+                <div class="reg-field">
+                    <label class="reg-label">Họ và tên</label>
+                    <div class="reg-input-wrap">
+                        <span class="reg-input-icon">👤</span>
+                        <!-- Thêm id để JS lấy dữ liệu -->
+                        <input class="reg-input" id="reg-fullname" type="text" placeholder="Nguyễn Văn A">
                     </div>
                 </div>
 
@@ -617,7 +594,7 @@
                     <div class="reg-email-wrap">
                         <div class="reg-input-wrap">
                             <span class="reg-input-icon">✉️</span>
-                            <input class="reg-input" type="email" placeholder="example@email.com">
+                            <input class="reg-input" id="reg-email" type="email" placeholder="example@email.com">
                         </div>
                         <div>
                             <button class="btn-send-otp">Gửi mã<br>xác nhận</button>
@@ -630,14 +607,14 @@
                         <label class="reg-label">Số điện thoại</label>
                         <div class="reg-input-wrap">
                             <span class="reg-input-icon">📱</span>
-                            <input class="reg-input" type="tel" placeholder="0912 345 678" maxlength="11">
+                            <input class="reg-input" id="reg-phone" type="tel" placeholder="0912 345 678" maxlength="11">
                         </div>
                     </div>
                     <div class="reg-field">
                         <label class="reg-label">Tên đăng nhập</label>
                         <div class="reg-input-wrap">
                             <span class="reg-input-icon">🔖</span>
-                            <input class="reg-input" type="text" placeholder="nguyenvana123">
+                            <input class="reg-input" id="reg-username" type="text" placeholder="nguyenvana123">
                         </div>
                     </div>
                 </div>
@@ -646,32 +623,61 @@
                     <label class="reg-label">Mật khẩu</label>
                     <div class="reg-input-wrap">
                         <span class="reg-input-icon">🔒</span>
-                        <input class="reg-input" type="password" placeholder="Tối thiểu 8 ký tự">
+                        <input class="reg-input" id="reg-password" type="password" placeholder="Tối thiểu 8 ký tự">
                     </div>
                     <div class="pw-strength">
-                        <div class="pw-bar"></div>
-                        <div class="pw-bar"></div>
-                        <div class="pw-bar"></div>
-                        <div class="pw-bar"></div>
+                        <div class="pw-bar"></div><div class="pw-bar"></div><div class="pw-bar"></div><div class="pw-bar"></div>
                     </div>
                     <div class="pw-hint">Nhập mật khẩu để xem độ mạnh</div>
                 </div>
 
                 <hr class="reg-divider">
+                <!-- Thêm onclick để gọi hàm gửi dữ liệu -->
+                <button class="btn-submit-reg" onclick="submitRegister()">🚀 &nbsp;Tạo tài khoản</button>
+                <p class="reg-footer-note">Đã có tài khoản? <a href="#" onclick="hideRegister(); showLogin(); return false;">Đăng nhập ngay</a></p>
+            </div>
+        </div>
+    </div>
+</div>
 
-                <button class="btn-submit-reg">🚀 &nbsp;Tạo tài khoản</button>
+<!-- MODAL ĐĂNG NHẬP -->
+<div class="modal-overlay" id="modal-login-overlay" onclick="handleLoginOverlayClick(event)">
+    <div id="login-section">
+        <div class="reg-card">
+            <div class="reg-banner">
+                <button class="reg-close" onclick="hideLogin()">✕</button>
+                <h2>Chào mừng trở lại</h2>
+                <p>Đăng nhập để tiếp tục hành trình khám phá cùng StayViet</p>
+            </div>
+            <div class="reg-body">
+                <div class="reg-field">
+                    <label class="reg-label">Tên đăng nhập</label>
+                    <div class="reg-input-wrap">
+                        <span class="reg-input-icon">🔖</span>
+                        <input class="reg-input" id="login-username" type="text" placeholder="nguyenvana123">
+                    </div>
+                </div>
 
-                <p class="reg-footer-note">
-                    Đã có tài khoản?
-                    <a href="#" onclick="hideRegister(); return false;">Đăng nhập ngay</a>
-                </p>
+                <div class="reg-field">
+                    <label class="reg-label">Mật khẩu</label>
+                    <div class="reg-input-wrap">
+                        <span class="reg-input-icon">🔒</span>
+                        <input class="reg-input" id="login-password" type="password" placeholder="••••••••">
+                    </div>
+                    <div style="text-align: right; margin-top: 8px;">
+                        <a href="#" style="font-size: 12px; color: var(--blue); text-decoration: none; font-weight: 500;">Quên mật khẩu?</a>
+                    </div>
+                </div>
+
+                <hr class="reg-divider">
+                <button class="btn-submit-reg" onclick="submitLogin()">🚀 &nbsp;Đăng nhập ngay</button>
+                <p class="reg-footer-note">Chưa có tài khoản? <a href="#" onclick="hideLogin(); showRegister(); return false;">Đăng ký miễn phí</a></p>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // ===== DATA =====
     const destinations = [
         { name: 'Hà Nội',           sub: 'Thủ đô',                    icon: '🏛️', region: 'Miền Bắc' },
         { name: 'Ninh Bình',        sub: 'Tràng An, Tam Cốc',         icon: '⛰️', region: 'Miền Bắc' },
@@ -686,14 +692,12 @@
         { name: 'Vũng Tàu',         sub: 'Bà Rịa-Vũng Tàu',          icon: '⚓', region: 'Miền Nam' },
     ];
 
-    // ===== STATE =====
     let guests = { adults: 2, children: 0, rooms: 1 };
     let pet = false;
     let dateStart = null, dateEnd = null;
     let calOffset = 0;
     let openDrop = null;
 
-    // ===== DROPDOWN =====
     function toggleDropdown(name) {
         if (openDrop === name) { closeAll(); return; }
         closeAll();
@@ -717,7 +721,6 @@
     }
     function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
-    // ===== DEST =====
     function renderDestList(filter) {
         const list = document.getElementById('destList');
         const groups = {};
@@ -744,7 +747,6 @@
         toggleDropdown('date');
     }
 
-    // ===== DATE PICKER =====
     const DAYS = ['T2','T3','T4','T5','T6','T7','CN'];
     const MONTHS_VI = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
     const today = new Date(); today.setHours(0,0,0,0);
@@ -806,7 +808,6 @@
     }
 
     function changeMonth(delta) { calOffset = Math.max(0, calOffset + delta); renderCalendar(); }
-
     function setShortcut(daysFromNow) {
         const d = new Date(today); d.setDate(d.getDate() + daysFromNow);
         const d2 = new Date(d); d2.setDate(d2.getDate() + 1);
@@ -822,7 +823,6 @@
         dateStart = d; dateEnd = d2; updateDateVal(); renderCalendar(); setTimeout(closeAll, 300);
     }
 
-    // ===== GUESTS =====
     function changeCount(type, delta) {
         if (type === 'adults')   guests.adults   = Math.max(1, guests.adults + delta);
         if (type === 'children') guests.children = Math.max(0, guests.children + delta);
@@ -858,7 +858,6 @@
         btn.classList.add('active');
     }
 
-    // ============= MENUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU ======
     function toggleMenu() {
         const drop = document.getElementById('menuDropdown');
         const btn  = document.getElementById('btnMenu');
@@ -872,21 +871,10 @@
     }
 
     function menuAction(action) {
-        document.getElementById('menuDropdown').classList.remove('open');
-        document.getElementById('btnMenu').classList.remove('open');
-        document.getElementById('overlay').classList.remove('active');
-        const labels = {
-            'dat-phong':    '🛏️ Đặt phòng',
-            'lich-su':      '🕐 Lịch sử đặt phòng',
-            'yeu-thich':    '❤️ Yêu thích',
-            'quan-ly-phong':'🏨 Quản lý phòng',
-            'ho-tro':       '💬 Hỗ trợ & Trợ giúp',
-            'dang-xuat':    '🚪 Đăng xuất',
-        };
-        alert(`Bạn đã chọn: ${labels[action]}\n\n(Tính năng đang được phát triển)`);
+        closeAll();
+        alert(`Tính năng đang phát triển cho hành động: ${action}`);
     }
 
-    // =====+++++++ MODAL ĐĂNG KÝ =====+++++++++++
     function showRegister() {
         closeAll();
         document.getElementById('modal-overlay').classList.add('show');
@@ -900,8 +888,237 @@
         if (e.target === document.getElementById('modal-overlay')) hideRegister();
     }
 
-    // Init
     changeCount('adults', 0);
+</script>
+
+<!-- nut đăng ký -->
+<script>
+    function submitRegister() {
+        // 1. Thu thập dữ liệu từ các ID (giữ nguyên như bước trước)
+        const fullname = document.getElementById('reg-fullname').value;
+        const email    = document.getElementById('reg-email').value;
+        const phone    = document.getElementById('reg-phone').value;
+        const username = document.getElementById('reg-username').value;
+        const password = document.getElementById('reg-password').value;
+
+        if(!fullname || !email || !phone || !username || !password) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Thiếu thông tin',
+                text: 'Vui lòng điền đầy đủ các trường bắt buộc!',
+                confirmButtonColor: '#1a2744' // Màu navy giống CSS của bạn
+            });
+            return;
+        }
+
+        const params = new URLSearchParams();
+        params.append('fullname', fullname);
+        params.append('email', email);
+        params.append('phone', phone);
+        params.append('username', username);
+        params.append('password', password);
+
+        // Hiệu ứng Loading khi đang chờ Backend xử lý
+        Swal.showLoading();
+
+        fetch('/api/v1/customer/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params
+        })
+            .then(async response => {
+                if (!response.ok) {
+                    // Lấy nội dung lỗi từ DataConfickException bên Java
+                    const errorText = await response.text();
+                    throw new Error(errorText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Thông báo thành công đẹp mắt
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Chúc mừng!',
+                    text: 'Tài khoản của bạn đã được tạo thành công.',
+                    confirmButtonColor: '#c9a84c', // Màu gold giống CSS của bạn
+                    timer: 2500
+                });
+                hideRegister();
+                document.querySelectorAll('.reg-input').forEach(input => input.value = '');
+            })
+            .catch(error => {
+                // Hiển thị lỗi cụ thể từ Java (ví dụ: "Emailnayfy đã được sử dụng")[cite: 4]
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Đăng ký thất bại',
+                    text: error.message,
+                    confirmButtonColor: '#dc2626'
+                });
+            });
+    }
+
+</script>
+
+<!-- đăng nhâp-->
+<script>
+
+    function showLogin() {
+        closeAll(); // Đóng các dropdown khác nếu đang mở
+        document.getElementById('modal-login-overlay').classList.add('show');
+        document.body.style.overflow = 'hidden'; // Chặn cuộn trang khi mở modal
+    }
+
+    // Hàm ẩn modal Đăng nhập
+    function hideLogin() {
+        document.getElementById('modal-login-overlay').classList.remove('show');
+        document.body.style.overflow = '';
+    }
+
+    // Hàm đóng modal khi click ra ngoài vùng form (phần nền mờ)
+    function handleLoginOverlayClick(e) {
+        if (e.target === document.getElementById('modal-login-overlay')) {
+            hideLogin();
+        }
+    }
+    // Hàm xử lý Đăng nhập
+    function submitLogin() {
+        const username = document.getElementById('login-username').value;
+        const password = document.getElementById('login-password').value;
+
+        if (!username || !password) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Chú ý',
+                text: 'Vui lòng nhập tên đăng nhập và mật khẩu!',
+                confirmButtonColor: '#1a2744'
+            });
+            return;
+        }
+
+        Swal.showLoading();
+
+        // Sử dụng URLSearchParams vì Backend của bạn dùng @ModelAttribute
+        const params = new URLSearchParams();
+        params.append('username', username);
+        params.append('password', password);
+
+        // Endpoint dựa trên CustomerController của bạn[cite: 6]
+        fetch('/api/v1/customer/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params
+        })
+            .then(async response => {
+                if (!response.ok) {
+                    // Xử lý thông báo lỗi từ RuntimeException trong CustomerService
+                    const errorMsg = await response.text();
+                    throw new Error(errorMsg);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // LƯU DỮ LIỆU VÀO LOCALSTORAGE
+                // data sẽ khớp với cấu trúc JwtRespone: accessToken, userId, fullName...[cite: 7, 8]
+                localStorage.setItem('accessToken', data.accessToken);
+                localStorage.setItem('userId', data.userId);
+                localStorage.setItem('fullName', data.fullName);
+                localStorage.setItem('expirationDate',data.expirationDate)
+
+                // Cập nhật giao diện header ngay lập tức
+                updateAuthUI(true, data.fullName);
+                hideLogin();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công',
+                    text: `Chào mừng ${data.fullName}! Đang chuyển hướng...`,
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+                // Xoá redirect nếu muốn ở lại trang, hoặc giữ nguyên nếu cần chuyển trang
+                // setTimeout(() => window.location.href = '/home', 1500);
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: error.message || 'Tên đăng nhập hoặc mật khẩu không đúng',
+                    confirmButtonColor: '#dc2626'
+                });
+            });
+
+    }
+</script>
+<!-- ===== QUẢN LÝ TRẠNG THÁI ĐĂNG NHẬP ===== -->
+<script>
+    // ---- Cập nhật giao diện header theo trạng thái đăng nhập ----
+    function updateAuthUI(isLoggedIn, fullName) {
+        const btnLogin    = document.getElementById('btnLogin');
+        const btnRegister = document.getElementById('btnRegister');
+        const menuWrap    = document.getElementById('menuWrap');
+        const userInfo    = document.getElementById('userInfo');
+        const userAvatar  = document.getElementById('userAvatar');
+        const userFullname= document.getElementById('userFullname');
+
+        if (isLoggedIn && fullName) {
+            // Ẩn nút Đăng nhập / Đăng ký
+            btnLogin.style.display    = 'none';
+            btnRegister.style.display = 'none';
+            // Hiện tên user và menu
+            userInfo.style.display    = 'flex';
+            menuWrap.style.display    = 'block';
+            // Lấy chữ cái đầu làm avatar
+            userFullname.textContent  = fullName;
+            userAvatar.textContent    = fullName.trim().charAt(0).toUpperCase();
+        } else {
+            // Hiện nút Đăng nhập / Đăng ký
+            btnLogin.style.display    = '';
+            btnRegister.style.display = '';
+            // Ẩn tên user và menu
+            userInfo.style.display    = 'none';
+            menuWrap.style.display    = 'none';
+        }
+    }
+
+    // ---- Đăng xuất ----
+    function handleLogout() {
+        closeAll();
+        Swal.fire({
+            icon: 'question',
+            title: 'Đăng xuất?',
+            text: 'Bạn có chắc muốn đăng xuất khỏi StayViet?',
+            showCancelButton: true,
+            confirmButtonText: 'Đăng xuất',
+            cancelButtonText: 'Hủy',
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#1a2744'
+        }).then(result => {
+            if (result.isConfirmed) {
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('userId');
+                localStorage.removeItem('fullName');
+                updateAuthUI(false);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Đã đăng xuất',
+                    text: 'Hẹn gặp lại bạn sớm nhé!',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }
+        });
+    }
+
+    // ---- Kiểm tra trạng thái đăng nhập khi tải trang ----
+    (function checkLoginOnLoad() {
+        const token    = localStorage.getItem('accessToken');
+        const fullName = localStorage.getItem('fullName');
+        if (token && fullName) {
+            updateAuthUI(true, fullName);
+        } else {
+            updateAuthUI(false);
+        }
+    })();
 </script>
 </body>
 </html>

@@ -7,24 +7,23 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Employee {
+@Getter
+@Setter
+public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-     private String name;
-    @Enumerated(EnumType.STRING)
-     private Department department;
-    @Column(unique = true)
-    private String email;
-    @Column(unique = true)
-    private String phone;
-    private double salary;
-    @Column(unique = true)
-    private String userName;
+    @Column(nullable = false, unique = true)
+    private String username;
     private String password;
+    @Column(nullable = false, unique = true)
+    private String email;
+    @Column(nullable = false, unique = true)
+    private String phone;
+    private String fullname;
+    private String cccd;
     private String role;
+
 }
