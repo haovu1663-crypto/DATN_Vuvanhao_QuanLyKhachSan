@@ -48,4 +48,11 @@ public class RoomController {
         );
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+    @GetMapping("/status")
+    public ResponseEntity<?> getRoomsStatus(){
+        ApiResponse<List<RoomRespone>> response = new ApiResponse<>(
+                "get rooms","400",roomService.getListRoomByStatusAvailble()
+        );
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

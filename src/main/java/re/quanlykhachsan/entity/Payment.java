@@ -22,7 +22,7 @@ public class Payment {
     private MethodBooking method;
     private String Status;
     private LocalDateTime paymentDate;
-
+    private String paymentType;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id")
     private Booking booking;

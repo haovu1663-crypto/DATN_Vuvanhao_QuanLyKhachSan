@@ -23,6 +23,10 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     private StatusBooking statusBooking;
     private Double toyalPrice;
+    private LocalDate enventCheckinDate;
+    private LocalDate enventCheckoutDate;
+
+
 
     //
     @ManyToOne(fetch = FetchType.LAZY)

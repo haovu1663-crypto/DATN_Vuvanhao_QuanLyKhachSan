@@ -23,7 +23,7 @@ public class Room {
     private String name;
     @Enumerated(EnumType.STRING)
     private StatusRoom status;
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     private List<String> images;
     private Double price;
     @ManyToOne(fetch = FetchType.LAZY)

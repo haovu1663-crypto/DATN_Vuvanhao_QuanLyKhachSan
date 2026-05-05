@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Khách Sạn - Header Demo</title>
+    <title>StayViet</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -43,11 +44,8 @@
         }
 
         .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-            flex-shrink: 0;
+            display: flex; align-items: center; gap: 10px;
+            text-decoration: none; flex-shrink: 0;
         }
         .logo-icon {
             width: 36px; height: 36px;
@@ -58,157 +56,153 @@
         }
         .logo-text {
             font-family: 'Playfair Display', serif;
-            font-size: 20px;
-            color: var(--white);
-            letter-spacing: 0.5px;
+            font-size: 20px; color: var(--white); letter-spacing: 0.5px;
         }
         .logo-text span { color: var(--gold); }
 
-        .header-auth {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            flex-shrink: 0;
-        }
+        .header-auth { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
         .btn-login {
-            font-family: 'DM Sans', sans-serif;
-            font-size: 13px;
-            font-weight: 500;
-            color: rgba(255,255,255,0.8);
-            background: none;
+            font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+            color: rgba(255,255,255,0.8); background: none;
             border: 1px solid rgba(255,255,255,0.25);
-            padding: 7px 18px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
+            padding: 7px 18px; border-radius: 20px; cursor: pointer; transition: all 0.2s;
         }
         .btn-login:hover { background: rgba(255,255,255,0.1); color: #fff; }
         .btn-register {
-            font-family: 'DM Sans', sans-serif;
-            font-size: 13px;
-            font-weight: 600;
+            font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
             color: var(--navy);
             background: linear-gradient(135deg, var(--gold), var(--gold-light));
-            border: none;
-            padding: 8px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
+            border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; transition: all 0.2s;
         }
         .btn-register:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(201,168,76,0.4); }
 
+        /* ===== USER AVATAR (sau đăng nhập) ===== */
+        .user-info {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .user-avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 700; color: var(--navy);
+            flex-shrink: 0;
+        }
+        .user-fullname {
+            font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9);
+            max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+
+        /* ===== MENU BUTTON ===== */
+        .menu-wrap { position: relative; }
+        .btn-menu {
+            font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+            color: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.25);
+            padding: 8px 16px; border-radius: 20px; cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; gap: 7px;
+        }
+        .btn-menu:hover, .btn-menu.open { background: rgba(255,255,255,0.18); color: #fff; border-color: rgba(255,255,255,0.5); }
+        .btn-menu svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+        .menu-dropdown {
+            position: absolute; top: calc(100% + 10px); right: 0;
+            width: 230px; background: var(--white);
+            border: 1px solid var(--border); border-radius: 16px;
+            box-shadow: 0 12px 40px rgba(26,39,68,0.18);
+            z-index: 500; overflow: hidden;
+            display: none; animation: fadeDown 0.15s ease;
+        }
+        .menu-dropdown.open { display: block; }
+
+        .menu-section-title {
+            font-size: 10px; font-weight: 800; letter-spacing: 0.9px;
+            text-transform: uppercase; color: var(--gray);
+            padding: 14px 18px 6px;
+        }
+        .menu-item {
+            display: flex; align-items: center; gap: 13px;
+            padding: 11px 18px; cursor: pointer;
+            transition: background 0.15s; color: var(--navy);
+            font-size: 14px; font-weight: 500;
+            border: none; background: none; width: 100%;
+            text-align: left; font-family: 'DM Sans', sans-serif;
+        }
+        .menu-item:hover { background: #f0f4ff; }
+        .menu-item .menu-icon {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: #f0f4ff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; flex-shrink: 0;
+        }
+        .menu-item.danger { color: #dc2626; }
+        .menu-item.danger .menu-icon { background: #fff1f1; }
+        .menu-item.danger:hover { background: #fff1f1; }
+
+        .menu-divider { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
+
         /* ===== SEARCH BAR ===== */
         .search-bar-wrapper {
-            background: var(--white);
-            border-bottom: 1px solid var(--border);
-            padding: 18px 5%;
-            display: flex;
-            justify-content: center;
+            background: var(--white); border-bottom: 1px solid var(--border);
+            padding: 18px 5%; display: flex; justify-content: center;
         }
-
         .search-bar {
-            display: flex;
-            align-items: stretch;
-            background: var(--white);
-            border: 1.5px solid var(--border);
-            border-radius: var(--radius);
-            overflow: visible;
-            box-shadow: var(--shadow);
-            max-width: 860px;
-            width: 100%;
-            position: relative;
+            display: flex; align-items: stretch; background: var(--white);
+            border: 1.5px solid var(--border); border-radius: var(--radius);
+            overflow: visible; box-shadow: var(--shadow);
+            max-width: 860px; width: 100%; position: relative;
         }
-
         .search-field {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 12px 18px;
-            border-right: 1px solid var(--border);
-            cursor: pointer;
-            position: relative;
-            min-width: 0;
+            flex: 1; display: flex; flex-direction: column;
+            padding: 12px 18px; border-right: 1px solid var(--border);
+            cursor: pointer; position: relative; min-width: 0;
         }
         .search-field:last-of-type { border-right: none; }
         .search-field:hover { background: #f7f5f0; border-radius: 0; }
         .search-field:first-child:hover { border-radius: var(--radius) 0 0 var(--radius); }
 
         .field-label {
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 0.8px;
-            text-transform: uppercase;
-            color: var(--gray);
-            margin-bottom: 3px;
+            font-size: 10px; font-weight: 600; letter-spacing: 0.8px;
+            text-transform: uppercase; color: var(--gray); margin-bottom: 3px;
         }
         .field-value {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--navy);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-size: 14px; font-weight: 600; color: var(--navy);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .field-value.placeholder { color: #bbb; font-weight: 400; }
 
         .search-btn {
             background: linear-gradient(135deg, var(--blue), var(--blue-dark));
-            border: none;
-            color: white;
-            width: 56px;
+            border: none; color: white; width: 56px;
             border-radius: 0 calc(var(--radius) - 2px) calc(var(--radius) - 2px) 0;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            flex-shrink: 0;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; flex-shrink: 0;
         }
         .search-btn:hover { background: linear-gradient(135deg, var(--blue-dark), #1e3a8a); }
         .search-btn svg { width: 20px; height: 20px; }
 
         /* ===== DROPDOWN ĐIỂM ĐẾN ===== */
         .dropdown-dest {
-            position: absolute;
-            top: calc(100% + 8px);
-            left: 0;
-            width: 280px;
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            z-index: 200;
-            overflow: hidden;
-            display: none;
+            position: absolute; top: calc(100% + 8px); left: 0;
+            width: 280px; background: var(--white);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            box-shadow: var(--shadow); z-index: 200; overflow: hidden; display: none;
         }
         .dropdown-dest.open { display: block; animation: fadeDown 0.15s ease; }
 
-        .dest-search {
-            padding: 10px 14px;
-            border-bottom: 1px solid var(--border);
-        }
+        .dest-search { padding: 10px 14px; border-bottom: 1px solid var(--border); }
         .dest-search input {
             width: 100%; border: none; outline: none;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 14px; color: var(--navy);
+            font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--navy);
         }
-
         .dest-section-title {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 0.8px;
-            text-transform: uppercase;
-            color: var(--gray);
-            padding: 10px 14px 4px;
+            font-size: 10px; font-weight: 700; letter-spacing: 0.8px;
+            text-transform: uppercase; color: var(--gray); padding: 10px 14px 4px;
         }
         .dest-item {
-            display: flex; align-items: center; gap: 10px;
-            padding: 9px 14px;
-            cursor: pointer;
-            transition: background 0.15s;
-            font-size: 14px;
-            color: var(--navy);
-            font-weight: 500;
+            display: flex; align-items: center; gap: 10px; padding: 9px 14px;
+            cursor: pointer; transition: background 0.15s;
+            font-size: 14px; color: var(--navy); font-weight: 500;
         }
         .dest-item:hover { background: #f0f4ff; }
         .dest-item .dest-icon { font-size: 16px; }
@@ -216,25 +210,14 @@
 
         /* ===== DATE PICKER POPUP ===== */
         .datepicker-popup {
-            position: absolute;
-            top: calc(100% + 8px);
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            z-index: 200;
-            padding: 20px;
-            width: 620px;
-            display: none;
+            position: absolute; top: calc(100% + 8px); left: 50%;
+            transform: translateX(-50%); background: var(--white);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            box-shadow: var(--shadow); z-index: 200; padding: 20px; width: 620px; display: none;
         }
         .datepicker-popup.open { display: block; animation: fadeDown 0.15s ease; }
 
-        .cal-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 16px;
-        }
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
         .cal-nav-btn {
             background: none; border: 1px solid var(--border);
             width: 32px; height: 32px; border-radius: 50%;
@@ -247,18 +230,13 @@
         .cal-months { display: flex; gap: 24px; }
         .cal-month { flex: 1; }
         .cal-month-title {
-            text-align: center;
-            font-family: 'Playfair Display', serif;
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--navy);
-            margin-bottom: 12px;
+            text-align: center; font-family: 'Playfair Display', serif;
+            font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 12px;
         }
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
         .cal-dow {
-            text-align: center; font-size: 10px;
-            font-weight: 700; color: var(--gray);
-            letter-spacing: 0.5px; padding: 4px 0;
+            text-align: center; font-size: 10px; font-weight: 700;
+            color: var(--gray); letter-spacing: 0.5px; padding: 4px 0;
         }
         .cal-day {
             text-align: center; font-size: 13px; font-weight: 500;
@@ -269,24 +247,19 @@
         .cal-day.disabled { color: #ccc; cursor: default; }
         .cal-day.empty { cursor: default; }
         .cal-day.selected-start, .cal-day.selected-end {
-            background: var(--blue) !important;
-            color: white !important; font-weight: 700;
-            border-radius: 8px;
+            background: var(--blue) !important; color: white !important;
+            font-weight: 700; border-radius: 8px;
         }
         .cal-day.in-range { background: #dbeafe; color: var(--blue); border-radius: 0; }
         .cal-day.range-start { border-radius: 8px 0 0 8px; }
-        .cal-day.range-end { border-radius: 0 8px 8px 0; }
+        .cal-day.range-end   { border-radius: 0 8px 8px 0; }
         .cal-day.today::after {
             content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
             width: 4px; height: 4px; border-radius: 50%; background: var(--gold);
         }
-
-        .cal-shortcuts {
-            display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap;
-        }
+        .cal-shortcuts { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
         .cal-shortcut {
-            font-size: 12px; font-weight: 500;
-            padding: 6px 14px; border-radius: 20px;
+            font-size: 12px; font-weight: 500; padding: 6px 14px; border-radius: 20px;
             border: 1px solid var(--border); background: var(--white);
             cursor: pointer; transition: all 0.15s; color: var(--navy);
         }
@@ -294,37 +267,25 @@
 
         /* ===== GUESTS POPUP ===== */
         .guests-popup {
-            position: absolute;
-            top: calc(100% + 8px);
-            right: 0;
-            width: 300px;
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            z-index: 200;
-            padding: 20px;
-            display: none;
+            position: absolute; top: calc(100% + 8px); right: 0;
+            width: 300px; background: var(--white);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            box-shadow: var(--shadow); z-index: 200; padding: 20px; display: none;
         }
         .guests-popup.open { display: block; animation: fadeDown 0.15s ease; }
 
         .guest-row {
             display: flex; align-items: center; justify-content: space-between;
-            padding: 14px 0;
-            border-bottom: 1px solid var(--border);
+            padding: 14px 0; border-bottom: 1px solid var(--border);
         }
         .guest-row:last-of-type { border-bottom: none; }
         .guest-info { flex: 1; }
         .guest-label { font-size: 14px; font-weight: 600; color: var(--navy); }
         .guest-sub { font-size: 11px; color: var(--gray); margin-top: 1px; }
-
-        .counter {
-            display: flex; align-items: center; gap: 12px;
-        }
+        .counter { display: flex; align-items: center; gap: 12px; }
         .counter-btn {
             width: 32px; height: 32px; border-radius: 50%;
-            border: 1.5px solid var(--border);
-            background: white; cursor: pointer;
+            border: 1.5px solid var(--border); background: white; cursor: pointer;
             font-size: 18px; font-weight: 300;
             display: flex; align-items: center; justify-content: center;
             color: var(--navy); transition: all 0.15s; line-height: 1;
@@ -333,22 +294,15 @@
         .counter-btn:disabled { opacity: 0.3; cursor: default; }
         .counter-val { font-size: 16px; font-weight: 700; color: var(--navy); min-width: 24px; text-align: center; }
 
-        .pet-row {
-            display: flex; align-items: flex-start; justify-content: space-between;
-            padding: 14px 0;
-        }
+        .pet-row { display: flex; align-items: flex-start; justify-content: space-between; padding: 14px 0; }
         .toggle-switch {
             position: relative; width: 40px; height: 22px;
-            background: #ddd; border-radius: 11px;
-            cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+            background: #ddd; border-radius: 11px; cursor: pointer; transition: background 0.2s; flex-shrink: 0;
         }
         .toggle-switch.on { background: var(--blue); }
         .toggle-switch::after {
-            content: ''; position: absolute;
-            top: 3px; left: 3px;
-            width: 16px; height: 16px;
-            background: white; border-radius: 50%;
-            transition: transform 0.2s;
+            content: ''; position: absolute; top: 3px; left: 3px;
+            width: 16px; height: 16px; background: white; border-radius: 50%; transition: transform 0.2s;
         }
         .toggle-switch.on::after { transform: translateX(18px); }
 
@@ -358,100 +312,319 @@
         }
         .btn-reset { background: none; border: none; font-size: 13px; color: var(--gray); cursor: pointer; text-decoration: underline; }
         .btn-apply {
-            background: var(--blue); color: white;
-            border: none; padding: 10px 28px;
-            border-radius: 10px; font-size: 14px;
-            font-weight: 600; cursor: pointer; transition: all 0.2s;
-            font-family: 'DM Sans', sans-serif;
+            background: var(--blue); color: white; border: none;
+            padding: 10px 28px; border-radius: 10px; font-size: 14px;
+            font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif;
         }
         .btn-apply:hover { background: var(--blue-dark); }
 
         /* ===== NAV ===== */
         .middle-nav {
             display: flex; justify-content: center; gap: 12px;
-            padding: 14px 0;
-            background: var(--white);
-            border-bottom: 1px solid var(--border);
+            padding: 14px 0; background: var(--white); border-bottom: 1px solid var(--border);
         }
         .btn-nav {
-            padding: 9px 20px;
-            border: 1.5px solid var(--border);
-            border-radius: 25px;
-            background: var(--white);
-            font-family: 'DM Sans', sans-serif;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: var(--navy);
-            display: flex; align-items: center; gap: 6px;
+            padding: 9px 20px; border: 1.5px solid var(--border); border-radius: 25px;
+            background: var(--white); font-family: 'DM Sans', sans-serif;
+            font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+            color: var(--navy); display: flex; align-items: center; gap: 6px;
         }
-        .btn-nav:hover, .btn-nav.active {
-            background: var(--navy); color: white; border-color: var(--navy);
-        }
+        .btn-nav:hover, .btn-nav.active { background: var(--navy); color: white; border-color: var(--navy); }
 
-        /* ===== ANIMATION ===== */
-        @keyframes fadeDown {
-            from { opacity: 0; transform: translateY(-8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp  { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn   { from { opacity: 0; } to { opacity: 1; } }
 
-        /* ===== DEMO CONTENT ===== */
-        .demo-content {
-            max-width: 900px; margin: 40px auto; padding: 0 20px;
-            text-align: center;
-        }
-        .demo-content h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 28px; color: var(--navy); margin-bottom: 8px;
-        }
-        .demo-content p { color: var(--gray); font-size: 14px; }
-
-        /* overlay to close */
-        .overlay {
-            position: fixed; inset: 0; z-index: 100;
-            display: none;
-        }
+        /* overlay để đóng dropdown */
+        .overlay { position: fixed; inset: 0; z-index: 100; display: none; }
         .overlay.active { display: block; }
 
-        /* Wrapper cho form đăng ký được inject vào */
-        #register-section {
-            display: none;
-            max-width: 560px;
-            margin: 48px auto 60px;
-            padding: 0 20px;
+        /* ===== DEMO CONTENT ===== */
+        .demo-content { max-width: 900px; margin: 40px auto; padding: 0 20px; text-align: center; }
+        .demo-content h2 { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--navy); margin-bottom: 8px; }
+        .demo-content p { color: var(--gray); font-size: 14px; }
+
+        /* ===== MODAL OVERLAY ===== */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(26,39,68,0.6); z-index: 999;
+            align-items: center; justify-content: center; padding: 20px;
         }
-        #register-section.show { display: block; }
+        .modal-overlay.show { display: flex; animation: fadeIn 0.2s ease; }
+
+        /* ===== REGISTER FORM ===== */
+        #register-section {
+            max-width: 560px; width: 100%;
+            animation: slideUp 0.35s cubic-bezier(.22,.68,0,1.2);
+            position: relative; max-height: 90vh; overflow-y: auto; border-radius: 20px;
+        }
+        .reg-card { background: var(--white); border-radius: 20px; box-shadow: 0 16px 60px rgba(26,39,68,0.2); overflow: hidden; }
+
+        .reg-close {
+            position: absolute; top: 14px; right: 14px;
+            width: 32px; height: 32px; background: rgba(255,255,255,0.15);
+            border: none; border-radius: 50%; color: white; font-size: 18px;
+            cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+        }
+        .reg-close:hover { background: rgba(255,255,255,0.3); }
+
+        .reg-banner {
+            background: linear-gradient(135deg, var(--navy) 0%, #2d4a8a 100%);
+            padding: 32px 36px 28px; position: relative; overflow: hidden;
+        }
+        .reg-banner::before {
+            content: '🏨'; position: absolute; right: 28px; top: 50%; transform: translateY(-50%);
+            font-size: 64px; opacity: 0.15;
+        }
+        .reg-banner h2 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+        .reg-banner p  { font-size: 13px; color: rgba(255,255,255,0.6); }
+
+        .reg-body { padding: 32px 36px; }
+        .reg-row { display: flex; gap: 16px; }
+        .reg-row .reg-field { flex: 1; }
+        .reg-field { margin-bottom: 20px; }
+
+        .reg-label { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase; color: var(--gray); margin-bottom: 7px; }
+        .reg-input-wrap { position: relative; display: flex; align-items: center; }
+        .reg-input-icon { position: absolute; left: 13px; font-size: 15px; pointer-events: none; }
+        .reg-input {
+            width: 100%; padding: 11px 14px 11px 38px;
+            border: 1.5px solid var(--border); border-radius: 10px;
+            font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--navy);
+            background: #fafafa; transition: all 0.2s; outline: none;
+        }
+        .reg-input:focus { border-color: var(--blue); background: var(--white); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+
+        .reg-email-wrap { display: flex; gap: 8px; align-items: flex-start; }
+        .reg-email-wrap .reg-input-wrap { flex: 1; }
+        .btn-send-otp {
+            flex-shrink: 0; padding: 11px 14px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: var(--navy); font-family: 'DM Sans', sans-serif;
+            font-size: 12px; font-weight: 700; border: none; border-radius: 10px;
+            cursor: pointer; transition: all 0.2s; white-space: nowrap; line-height: 1.3;
+        }
+        .btn-send-otp:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(201,168,76,0.4); }
+
+        .pw-strength { display: flex; gap: 4px; margin-top: 6px; }
+        .pw-bar { flex: 1; height: 3px; border-radius: 2px; background: var(--border); }
+        .pw-hint { font-size: 11px; color: var(--gray); margin-top: 4px; }
+
+        .reg-divider { border: none; border-top: 1px solid var(--border); margin: 8px 0 24px; }
+
+        .btn-submit-reg {
+            width: 100%; padding: 14px;
+            background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+            color: white; font-family: 'DM Sans', sans-serif;
+            font-size: 15px; font-weight: 700; border: none; border-radius: 12px;
+            cursor: pointer; transition: all 0.2s; letter-spacing: 0.3px;
+        }
+        .btn-submit-reg:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.35); }
+
+        .reg-footer-note { text-align: center; font-size: 12px; color: var(--gray); margin-top: 16px; }
+        .reg-footer-note a { color: var(--blue); text-decoration: none; font-weight: 600; }
+        #login-section {
+            max-width: 450px;
+            width: 100%;
+            animation: slideUp 0.35s cubic-bezier(.22,.68,0,1.2);
+            position: relative;
+            border-radius: 20px;
+        }
+
+        /* ===== MODAL ĐẶT PHÒNG ===== */
+        #modal-booking-overlay {
+            display: none; position: fixed; inset: 0; z-index: 600;
+            background: rgba(15,23,42,0.55); backdrop-filter: blur(4px);
+            align-items: center; justify-content: center; padding: 16px;
+        }
+        #modal-booking-overlay.show { display: flex; animation: fadeIn 0.2s ease; }
+
+        #booking-section {
+            max-width: 540px; width: 100%;
+            animation: slideUp 0.35s cubic-bezier(.22,.68,0,1.2);
+            position: relative; max-height: 92vh; overflow-y: auto; border-radius: 20px;
+        }
+        .bk-card { background: var(--white); border-radius: 20px; box-shadow: 0 16px 60px rgba(26,39,68,0.25); overflow: hidden; }
+        .bk-banner {
+            background: linear-gradient(135deg, var(--navy) 0%, #2d4a8a 100%);
+            padding: 26px 30px 22px; position: relative; overflow: hidden;
+        }
+        .bk-banner::before { content: '🛏️'; position: absolute; right: 24px; top: 50%; transform: translateY(-50%); font-size: 56px; opacity: 0.12; }
+        .bk-banner h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--white); margin-bottom: 2px; }
+        .bk-banner p  { font-size: 13px; color: rgba(255,255,255,0.55); }
+        .bk-close {
+            position: absolute; top: 14px; right: 14px; width: 30px; height: 30px;
+            background: rgba(255,255,255,0.15); border: none; border-radius: 50%; color: white;
+            font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+        .bk-close:hover { background: rgba(255,255,255,0.3); }
+        .bk-room-info {
+            display: flex; align-items: center; gap: 14px;
+            background: rgba(255,255,255,0.08); border-radius: 10px; padding: 10px 14px; margin-top: 14px;
+        }
+        .bk-room-icon { font-size: 28px; }
+        .bk-room-name { font-size: 15px; font-weight: 700; color: #fff; }
+        .bk-room-type { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 1px; }
+        .bk-body { padding: 26px 30px; }
+        .bk-label { font-size: 11px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase; color: var(--gray); margin-bottom: 8px; display: block; }
+        .bk-date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .bk-date-box {
+            border: 1.5px solid var(--border); border-radius: 12px;
+            padding: 12px 14px; cursor: pointer; transition: all 0.2s; background: #fafafa;
+        }
+        .bk-date-box:hover { border-color: var(--blue); background: #fff; }
+        .bk-date-box.active { border-color: var(--blue); background: #fff; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        .bk-date-icon { font-size: 16px; margin-bottom: 4px; display: block; }
+        .bk-date-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--gray); }
+        .bk-date-val { font-size: 15px; font-weight: 700; color: var(--navy); margin-top: 2px; }
+        .bk-date-val.empty { font-size: 13px; font-weight: 400; color: #bbb; }
+        .bk-cal-popup {
+            display: none; border: 1.5px solid var(--border); border-radius: 14px;
+            padding: 16px; margin-bottom: 14px; background: #fafafa;
+        }
+        .bk-cal-popup.open { display: block; animation: fadeDown 0.15s ease; }
+        .bk-cal-months { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .bk-cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .bk-cal-nav {
+            width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border);
+            background: var(--white); cursor: pointer; font-size: 14px;
+            display: flex; align-items: center; justify-content: center; color: var(--navy); transition: all 0.15s;
+        }
+        .bk-cal-nav:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+        .bk-cal-title { font-family: 'Playfair Display', serif; font-size: 13px; font-weight: 700; color: var(--navy); }
+        .bk-cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 1px; }
+        .bk-dow { text-align: center; font-size: 9px; font-weight: 700; color: var(--gray); letter-spacing: 0.4px; padding: 3px 0; }
+        .bk-day {
+            text-align: center; font-size: 12px; font-weight: 500; padding: 6px 2px;
+            border-radius: 6px; cursor: pointer; color: var(--navy); transition: all 0.12s; position: relative;
+        }
+        .bk-day:hover:not(.bk-disabled):not(.bk-empty) { background: #e8efff; }
+        .bk-day.bk-disabled { color: #ddd; cursor: default; }
+        .bk-day.bk-empty { cursor: default; }
+        .bk-day.bk-start, .bk-day.bk-end { background: var(--blue) !important; color: #fff !important; font-weight: 700; border-radius: 6px !important; }
+        .bk-day.bk-in-range { background: #dbeafe; color: var(--blue); border-radius: 0; }
+        .bk-day.bk-range-s  { border-radius: 6px 0 0 6px; }
+        .bk-day.bk-range-e  { border-radius: 0 6px 6px 0; }
+        .bk-day.bk-today::after {
+            content: ''; position: absolute; bottom: 1px; left: 50%; transform: translateX(-50%);
+            width: 3px; height: 3px; border-radius: 50%; background: var(--gold);
+        }
+        .bk-nights-badge {
+            display: none; text-align: center; font-size: 12px; color: var(--blue);
+            font-weight: 600; padding: 6px; background: #eff6ff; border-radius: 8px; margin-bottom: 14px;
+        }
+        .bk-nights-badge.show { display: block; }
+        .bk-guests-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .bk-guest-box { border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; background: #fafafa; }
+        .bk-guest-ctrl { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+        .bk-counter-btn {
+            width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--border);
+            background: var(--white); cursor: pointer; font-size: 16px; font-weight: 300;
+            display: flex; align-items: center; justify-content: center; color: var(--navy); transition: all 0.15s;
+        }
+        .bk-counter-btn:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
+        .bk-counter-btn:disabled { opacity: 0.3; cursor: default; }
+        .bk-counter-val { font-size: 17px; font-weight: 700; color: var(--navy); min-width: 22px; text-align: center; }
+        .bk-textarea {
+            width: 100%; border: 1.5px solid var(--border); border-radius: 12px;
+            padding: 12px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--navy);
+            background: #fafafa; resize: none; outline: none; transition: all 0.2s; margin-bottom: 20px;
+        }
+        .bk-textarea:focus { border-color: var(--blue); background: var(--white); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        .bk-summary { background: #f0f4ff; border-radius: 12px; padding: 16px 18px; margin-bottom: 20px; }
+        .bk-summary-title { font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--gray); margin-bottom: 12px; }
+        .bk-sum-row { display: flex; justify-content: space-between; font-size: 14px; color: var(--navy); margin-bottom: 8px; }
+        .bk-sum-row.total { font-weight: 700; font-size: 16px; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 4px; }
+        .bk-sum-row.total span:last-child { color: var(--blue); }
+        .btn-submit-booking {
+            width: 100%; padding: 14px; border-radius: 12px;
+            background: linear-gradient(135deg, var(--navy), #2d4a8a);
+            color: white; font-family: 'DM Sans', sans-serif;
+            font-size: 15px; font-weight: 700; border: none; cursor: pointer;
+            transition: all 0.2s; letter-spacing: 0.3px;
+        }
+        .btn-submit-booking:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(26,39,68,0.35); }
+        .btn-submit-booking:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* ===== EMAIL OTP TRONG FORM ĐẶT PHÒNG ===== */
+        .bk-email-wrap { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 20px; }
+        .bk-email-input-wrap { position: relative; flex: 1; }
+        .bk-email-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 15px; pointer-events: none; }
+        .bk-email-input {
+            width: 100%; padding: 12px 14px 12px 36px;
+            border: 1.5px solid var(--border); border-radius: 12px;
+            font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--navy);
+            background: #fafafa; outline: none; transition: all 0.2s;
+        }
+        .bk-email-input:focus { border-color: var(--blue); background: var(--white); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        .bk-email-input.error { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,0.1); }
+        .btn-send-otp-bk {
+            flex-shrink: 0; padding: 12px 14px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: var(--navy); font-family: 'DM Sans', sans-serif;
+            font-size: 12px; font-weight: 700; border: none; border-radius: 12px;
+            cursor: pointer; transition: all 0.2s; white-space: nowrap; line-height: 1.4; text-align: center;
+        }
+        .btn-send-otp-bk:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(201,168,76,0.4); }
+        .btn-send-otp-bk:disabled { background: #e0e0e0; color: #999; cursor: not-allowed; transform: none; box-shadow: none; }
+        .bk-otp-hint { font-size: 11px; color: var(--gray); margin-top: -14px; margin-bottom: 16px; }
+        .bk-otp-hint.success { color: #16a34a; font-weight: 600; }
+
     </style>
 </head>
 <body>
 
-<!-- Overlay -->
 <div class="overlay" id="overlay" onclick="closeAll()"></div>
 
-<!-- HEADER -->
 <header>
     <a class="logo" href="#">
         <div class="logo-icon">🏨</div>
         <span class="logo-text">Stay<span>Viet</span></span>
     </a>
-
     <div class="header-auth">
-        <button class="btn-login">Đăng nhập</button>
-        <button class="btn-register" onclick="showRegister()">Đăng ký</button>
+
+        <button class="btn-login" id="btnLogin" onclick="showLogin()">Đăng nhập</button>
+        <button class="btn-register" id="btnRegister" onclick="showRegister()">Đăng ký</button>
+
+        <!-- Thông tin user (hiện sau khi đăng nhập) -->
+        <div class="user-info" id="userInfo" style="display:none;">
+            <div class="user-avatar" id="userAvatar">?</div>
+            <span class="user-fullname" id="userFullname"></span>
+        </div>
+
+        <div class="menu-wrap" id="menuWrap" style="display:none;">
+            <button class="btn-menu" id="btnMenu" onclick="toggleMenu()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <line x1="3" y1="6"  x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+                Menu
+            </button>
+
+            <div class="menu-dropdown" id="menuDropdown" onclick="event.stopPropagation()">
+                <div class="menu-section-title">Chuyến đi</div>
+                <button class="menu-item" onclick="menuAction('dat-phong')"><span class="menu-icon">🛏️</span>Đặt phòng</button>
+                <button class="menu-item" onclick="menuAction('lich-su')"><span class="menu-icon">🕐</span>Lịch sử đặt phòng</button>
+                <button class="menu-item" onclick="menuAction('yeu-thich')"><span class="menu-icon">❤️</span>Yêu thích</button>
+                <hr class="menu-divider">
+                <div class="menu-section-title">Quản lý</div>
+                <button class="menu-item" onclick="menuAction('quan-ly-phong')"><span class="menu-icon">🏨</span>Quản lý phòng</button>
+                <button class="menu-item" onclick="menuAction('ho-tro')"><span class="menu-icon">💬</span>Hỗ trợ & Trợ giúp</button>
+                <hr class="menu-divider">
+                <button class="menu-item danger" onclick="handleLogout()"><span class="menu-icon">🚪</span>Đăng xuất</button>
+            </div>
+        </div>
     </div>
 </header>
 
-<!-- SEARCH BAR -->
 <div class="search-bar-wrapper">
     <div class="search-bar" id="searchBar">
-
-        <!-- FIELD: Điểm đến -->
         <div class="search-field" id="fieldDest" onclick="toggleDropdown('dest')">
             <span class="field-label">📍 Điểm đến</span>
             <span class="field-value placeholder" id="destVal">Chọn điểm đến</span>
-
-            <!-- DROPDOWN ĐIỂM ĐẾN -->
             <div class="dropdown-dest" id="dropDest" onclick="event.stopPropagation()">
                 <div class="dest-search">
                     <input type="text" placeholder="🔍  Tìm điểm đến..." id="destSearch" oninput="filterDest(this.value)">
@@ -459,13 +632,9 @@
                 <div id="destList"></div>
             </div>
         </div>
-
-        <!-- FIELD: Thời gian -->
         <div class="search-field" id="fieldDate" onclick="toggleDropdown('date')">
             <span class="field-label">📅 Nhận / Trả phòng</span>
             <span class="field-value placeholder" id="dateVal">Chọn ngày</span>
-
-            <!-- DATE PICKER -->
             <div class="datepicker-popup" id="dropDate" onclick="event.stopPropagation()">
                 <div class="cal-header">
                     <button class="cal-nav-btn" onclick="changeMonth(-1)">&#8249;</button>
@@ -481,51 +650,36 @@
                 </div>
             </div>
         </div>
-
-        <!-- FIELD: Số khách -->
         <div class="search-field" id="fieldGuests" onclick="toggleDropdown('guests')" style="border-right:none;">
             <span class="field-label">👥 Số khách & Phòng</span>
             <span class="field-value" id="guestsVal">2 khách, 1 phòng</span>
-
-            <!-- GUESTS POPUP -->
             <div class="guests-popup" id="dropGuests" onclick="event.stopPropagation()">
                 <div class="guest-row">
-                    <div class="guest-info">
-                        <div class="guest-label">Người lớn</div>
-                        <div class="guest-sub">Từ 18 tuổi trở lên</div>
-                    </div>
+                    <div class="guest-info"><div class="guest-label">Người lớn</div><div class="guest-sub">Từ 18 tuổi trở lên</div></div>
                     <div class="counter">
-                        <button class="counter-btn" id="adultMinus" onclick="changeCount('adults', -1)">−</button>
+                        <button class="counter-btn" id="adultMinus" onclick="changeCount('adults',-1)">−</button>
                         <span class="counter-val" id="adultVal">2</span>
-                        <button class="counter-btn" onclick="changeCount('adults', 1)">+</button>
+                        <button class="counter-btn" onclick="changeCount('adults',1)">+</button>
                     </div>
                 </div>
                 <div class="guest-row">
-                    <div class="guest-info">
-                        <div class="guest-label">Trẻ em</div>
-                        <div class="guest-sub">Dưới 18 tuổi</div>
-                    </div>
+                    <div class="guest-info"><div class="guest-label">Trẻ em</div><div class="guest-sub">Dưới 18 tuổi</div></div>
                     <div class="counter">
-                        <button class="counter-btn" id="childMinus" onclick="changeCount('children', -1)">−</button>
+                        <button class="counter-btn" id="childMinus" onclick="changeCount('children',-1)">−</button>
                         <span class="counter-val" id="childVal">0</span>
-                        <button class="counter-btn" onclick="changeCount('children', 1)">+</button>
+                        <button class="counter-btn" onclick="changeCount('children',1)">+</button>
                     </div>
                 </div>
                 <div class="guest-row">
-                    <div class="guest-info">
-                        <div class="guest-label">Phòng</div>
-                    </div>
+                    <div class="guest-info"><div class="guest-label">Phòng</div></div>
                     <div class="counter">
-                        <button class="counter-btn" id="roomMinus" onclick="changeCount('rooms', -1)">−</button>
+                        <button class="counter-btn" id="roomMinus" onclick="changeCount('rooms',-1)">−</button>
                         <span class="counter-val" id="roomVal">1</span>
-                        <button class="counter-btn" onclick="changeCount('rooms', 1)">+</button>
+                        <button class="counter-btn" onclick="changeCount('rooms',1)">+</button>
                     </div>
                 </div>
                 <div class="pet-row">
-                    <div class="guest-info">
-                        <div class="guest-label">Cho phép mang thú cưng</div>
-                        <div class="guest-sub">Chỉ hiển thị nơi lưu trú cho phép thú cưng</div>
-                    </div>
+                    <div class="guest-info"><div class="guest-label">Cho phép mang thú cưng</div><div class="guest-sub">Chỉ hiển thị nơi lưu trú cho phép thú cưng</div></div>
                     <div class="toggle-switch" id="petToggle" onclick="togglePet()" style="margin-left:12px;"></div>
                 </div>
                 <div class="guests-footer">
@@ -534,7 +688,6 @@
                 </div>
             </div>
         </div>
-
         <button class="search-btn" onclick="doSearch()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -543,7 +696,6 @@
     </div>
 </div>
 
-<!-- MIDDLE NAV -->
 <nav class="middle-nav">
     <button class="btn-nav active" onclick="setActive(this)">🏠 Trang chủ</button>
     <button class="btn-nav" onclick="setActive(this)">🏊 Hồ bơi</button>
@@ -552,39 +704,202 @@
     <button class="btn-nav" onclick="setActive(this)">📞 Liên hệ</button>
 </nav>
 
-<!-- DEMO CONTENT -->
-<div class="demo-content" id="home-content">
-    <h2>Khám phá điểm lưu trú tuyệt vời</h2>
-    <p>Nhấn vào các ô tìm kiếm phía trên để trải nghiệm giao diện mới ✨</p>
+<!-- ===== DANH SÁCH PHÒNG ===== -->
+<section id="room-section" style="max-width:1100px;margin:32px auto;padding:0 5%;">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+        <div>
+            <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--navy);margin:0 0 4px;">Phòng đang trống</h2>
+            <p id="room-count-text" style="font-size:13px;color:var(--gray);margin:0;">Đang tải danh sách phòng...</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div id="type-filter-wrap" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+            <select id="room-sort" onchange="sortAndRender()" style="font-family:'DM Sans',sans-serif;font-size:13px;padding:7px 12px;border:1.5px solid var(--border);border-radius:20px;background:var(--white);color:var(--navy);cursor:pointer;outline:none;">
+                <option value="price_asc">Giá tăng dần</option>
+                <option value="price_desc">Giá giảm dần</option>
+                <option value="name_asc">Tên A → Z</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="room-skeleton" style="display:flex;flex-direction:column;gap:14px;">
+        <div style="height:160px;border-radius:16px;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;"></div>
+        <div style="height:160px;border-radius:16px;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;"></div>
+        <div style="height:160px;border-radius:16px;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;"></div>
+    </div>
+
+    <div id="room-grid" style="display:none;flex-direction:column;gap:14px;"></div>
+
+    <div id="room-empty" style="display:none;text-align:center;padding:60px 0;">
+        <div style="font-size:48px;margin-bottom:12px;">🏨</div>
+        <p style="font-size:16px;font-weight:600;color:var(--navy);margin:0 0 6px;">Không có phòng trống</p>
+        <p style="font-size:13px;color:var(--gray);">Hiện tại tất cả phòng đang được sử dụng. Vui lòng thử lại sau.</p>
+    </div>
+    <div id="room-error" style="display:none;text-align:center;padding:60px 0;">
+        <div style="font-size:48px;margin-bottom:12px;">⚠️</div>
+        <p style="font-size:16px;font-weight:600;color:#dc2626;margin:0 0 6px;">Không thể tải danh sách phòng</p>
+        <p id="room-error-msg" style="font-size:13px;color:var(--gray);"></p>
+        <button onclick="loadRooms()" style="margin-top:14px;padding:10px 24px;background:var(--navy);color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Thử lại</button>
+    </div>
+
+</section>
+
+<style>
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .rc { display:flex; background:var(--white); border:1.5px solid var(--border); border-radius:16px; overflow:hidden; transition:border-color .2s, box-shadow .2s; }
+    .rc:hover { border-color:#b0bcd4; box-shadow:0 4px 24px rgba(26,39,68,0.10); }
+    .rc-img { width:220px; min-width:220px; background:#f0f2f8; display:flex; align-items:center; justify-content:center; flex-direction:column; color:#b0b8cc; font-size:13px; position:relative; overflow:hidden; }
+    .rc-img img { width:100%; height:100%; object-fit:cover; display:block; }
+    .rc-img-ph { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; height:100%; width:100%; min-height:160px; }
+    .rc-body { flex:1; padding:18px 22px 16px; display:flex; flex-direction:column; gap:3px; min-width:0; }
+    .rc-type { font-size:11px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--gold); }
+    .rc-name { font-family:'Playfair Display',serif; font-size:18px; font-weight:500; color:var(--navy); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin:0; }
+    .rc-id   { font-size:11px; color:var(--gray); margin-top:1px; }
+    .rc-badge { font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; display:inline-block; margin-top:6px; }
+    .rc-badge.available   { background:#dcfce7; color:#166534; }
+    .rc-badge.occupied    { background:#fee2e2; color:#991b1b; }
+    .rc-badge.maintenance { background:#fef9c3; color:#854d0e; }
+    .rc-footer { display:flex; align-items:flex-end; justify-content:space-between; margin-top:auto; padding-top:12px; border-top:1px solid var(--border); }
+    .rc-price-night { font-size:11px; color:var(--gray); }
+    .rc-price { font-size:21px; font-weight:700; color:var(--navy); line-height:1.2; }
+    .rc-btn-group { display:flex; gap:8px; }
+    .rc-btn-outline { font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; padding:8px 14px; border-radius:10px; border:1.5px solid var(--border); background:var(--white); color:var(--navy); cursor:pointer; transition:all .15s; }
+    .rc-btn-outline:hover { background:#f0f4ff; border-color:#b0bcd4; }
+    .rc-btn-book { font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; padding:8px 18px; border-radius:10px; border:none; background:var(--navy); color:#fff; cursor:pointer; transition:all .15s; }
+    .rc-btn-book:hover { background:#2d4a8a; }
+    .type-chip { font-size:12px; font-weight:500; padding:6px 14px; border-radius:20px; border:1.5px solid var(--border); background:var(--white); color:var(--gray); cursor:pointer; transition:all .15s; font-family:'DM Sans',sans-serif; }
+    .type-chip:hover { border-color:var(--navy); color:var(--navy); }
+    .type-chip.active { background:var(--navy); color:#fff; border-color:var(--navy); }
+</style>
+
+<!-- MODAL ĐĂNG KÝ (ĐÃ BỎ CCCD) -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+    <div id="register-section">
+        <div class="reg-card">
+            <div class="reg-banner">
+                <button class="reg-close" onclick="hideRegister()">✕</button>
+                <h2>Tạo tài khoản</h2>
+                <p>Tham gia StayViet để khám phá hàng nghìn điểm lưu trú tuyệt vời</p>
+            </div>
+            <div class="reg-body">
+                <div class="reg-field">
+                    <label class="reg-label">Họ và tên</label>
+                    <div class="reg-input-wrap">
+                        <span class="reg-input-icon">👤</span>
+                        <!-- Thêm id để JS lấy dữ liệu -->
+                        <input class="reg-input" id="reg-fullname" type="text" placeholder="Nguyễn Văn A">
+                    </div>
+                </div>
+
+                <div class="reg-field">
+                    <label class="reg-label">Địa chỉ Email</label>
+                    <div class="reg-email-wrap">
+                        <div class="reg-input-wrap">
+                            <span class="reg-input-icon">✉️</span>
+                            <input class="reg-input" id="reg-email" type="email" placeholder="example@email.com">
+                        </div>
+                        <div>
+                            <button class="btn-send-otp">Gửi mã<br>xác nhận</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reg-row">
+                    <div class="reg-field">
+                        <label class="reg-label">Số điện thoại</label>
+                        <div class="reg-input-wrap">
+                            <span class="reg-input-icon">📱</span>
+                            <input class="reg-input" id="reg-phone" type="tel" placeholder="0912 345 678" maxlength="11">
+                        </div>
+                    </div>
+                    <div class="reg-field">
+                        <label class="reg-label">Tên đăng nhập</label>
+                        <div class="reg-input-wrap">
+                            <span class="reg-input-icon">🔖</span>
+                            <input class="reg-input" id="reg-username" type="text" placeholder="nguyenvana123">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reg-field">
+                    <label class="reg-label">Mật khẩu</label>
+                    <div class="reg-input-wrap">
+                        <span class="reg-input-icon">🔒</span>
+                        <input class="reg-input" id="reg-password" type="password" placeholder="Tối thiểu 8 ký tự">
+                    </div>
+                    <div class="pw-strength">
+                        <div class="pw-bar"></div><div class="pw-bar"></div><div class="pw-bar"></div><div class="pw-bar"></div>
+                    </div>
+                    <div class="pw-hint">Nhập mật khẩu để xem độ mạnh</div>
+                </div>
+
+                <hr class="reg-divider">
+                <!-- Thêm onclick để gọi hàm gửi dữ liệu -->
+                <button class="btn-submit-reg" onclick="submitRegister()">🚀 &nbsp;Tạo tài khoản</button>
+                <p class="reg-footer-note">Đã có tài khoản? <a href="#" onclick="hideRegister(); showLogin(); return false;">Đăng nhập ngay</a></p>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- REGISTER SECTION — nội dung được load từ register.html -->
-<div id="register-section"></div>
+<!-- MODAL ĐĂNG NHẬP -->
+<div class="modal-overlay" id="modal-login-overlay" onclick="handleLoginOverlayClick(event)">
+    <div id="login-section">
+        <div class="reg-card">
+            <div class="reg-banner">
+                <button class="reg-close" onclick="hideLogin()">✕</button>
+                <h2>Chào mừng trở lại</h2>
+                <p>Đăng nhập để tiếp tục hành trình khám phá cùng StayViet</p>
+            </div>
+            <div class="reg-body">
+                <div class="reg-field">
+                    <label class="reg-label">Tên đăng nhập</label>
+                    <div class="reg-input-wrap">
+                        <span class="reg-input-icon">🔖</span>
+                        <input class="reg-input" id="login-username" type="text" placeholder="nguyenvana123">
+                    </div>
+                </div>
+
+                <div class="reg-field">
+                    <label class="reg-label">Mật khẩu</label>
+                    <div class="reg-input-wrap">
+                        <span class="reg-input-icon">🔒</span>
+                        <input class="reg-input" id="login-password" type="password" placeholder="••••••••">
+                    </div>
+                    <div style="text-align: right; margin-top: 8px;">
+                        <a href="#" style="font-size: 12px; color: var(--blue); text-decoration: none; font-weight: 500;">Quên mật khẩu?</a>
+                    </div>
+                </div>
+
+                <hr class="reg-divider">
+                <button class="btn-submit-reg" onclick="submitLogin()">🚀 &nbsp;Đăng nhập ngay</button>
+                <p class="reg-footer-note">Chưa có tài khoản? <a href="#" onclick="hideLogin(); showRegister(); return false;">Đăng ký miễn phí</a></p>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
-    // ===== DATA =====
     const destinations = [
-        { name: 'Hà Nội', sub: 'Thủ đô', icon: '🏛️', region: 'Miền Bắc' },
-        { name: 'Ninh Bình', sub: 'Tràng An, Tam Cốc', icon: '⛰️', region: 'Miền Bắc' },
-        { name: 'Hạ Long', sub: 'Vịnh Hạ Long', icon: '🌊', region: 'Miền Bắc' },
-        { name: 'Đà Nẵng', sub: 'Biển Mỹ Khê, Bà Nà Hills', icon: '🏖️', region: 'Miền Trung' },
-        { name: 'Hội An', sub: 'Phố cổ UNESCO', icon: '🏮', region: 'Miền Trung' },
-        { name: 'Huế', sub: 'Cố đô', icon: '👑', region: 'Miền Trung' },
-        { name: 'Nha Trang', sub: 'Thành phố biển', icon: '🐚', region: 'Miền Nam' },
-        { name: 'Đà Lạt', sub: 'Thành phố ngàn hoa', icon: '🌸', region: 'Miền Nam' },
-        { name: 'TP. Hồ Chí Minh', sub: 'Trung tâm kinh tế', icon: '🌆', region: 'Miền Nam' },
-        { name: 'Phú Quốc', sub: 'Đảo ngọc', icon: '🏝️', region: 'Miền Nam' },
-        { name: 'Vũng Tàu', sub: 'Bà Rịa-Vũng Tàu', icon: '⚓', region: 'Miền Nam' },
+        { name: 'Hà Nội',           sub: 'Thủ đô',                    icon: '🏛️', region: 'Miền Bắc' },
+        { name: 'Ninh Bình',        sub: 'Tràng An, Tam Cốc',         icon: '⛰️', region: 'Miền Bắc' },
+        { name: 'Hạ Long',          sub: 'Vịnh Hạ Long',              icon: '🌊', region: 'Miền Bắc' },
+        { name: 'Đà Nẵng',          sub: 'Biển Mỹ Khê, Bà Nà Hills', icon: '🏖️', region: 'Miền Trung' },
+        { name: 'Hội An',           sub: 'Phố cổ UNESCO',             icon: '🏮', region: 'Miền Trung' },
+        { name: 'Huế',              sub: 'Cố đô',                     icon: '👑', region: 'Miền Trung' },
+        { name: 'Nha Trang',        sub: 'Thành phố biển',            icon: '🐚', region: 'Miền Nam' },
+        { name: 'Đà Lạt',           sub: 'Thành phố ngàn hoa',        icon: '🌸', region: 'Miền Nam' },
+        { name: 'TP. Hồ Chí Minh', sub: 'Trung tâm kinh tế',         icon: '🌆', region: 'Miền Nam' },
+        { name: 'Phú Quốc',         sub: 'Đảo ngọc',                  icon: '🏝️', region: 'Miền Nam' },
+        { name: 'Vũng Tàu',         sub: 'Bà Rịa-Vũng Tàu',          icon: '⚓', region: 'Miền Nam' },
     ];
 
-    // ===== STATE =====
     let guests = { adults: 2, children: 0, rooms: 1 };
     let pet = false;
-    let dateStart = null, dateEnd = null, pickingEnd = false;
-    let calOffset = 0; // months from today
-
-    // ===== DROPDOWN TOGGLE =====
+    let dateStart = null, dateEnd = null;
+    let calOffset = 0;
     let openDrop = null;
+
     function toggleDropdown(name) {
         if (openDrop === name) { closeAll(); return; }
         closeAll();
@@ -599,25 +914,29 @@
             const el = document.getElementById('drop' + n);
             if (el) el.classList.remove('open');
         });
+        const menuDrop = document.getElementById('menuDropdown');
+        const menuBtn  = document.getElementById('btnMenu');
+        if (menuDrop) menuDrop.classList.remove('open');
+        if (menuBtn)  menuBtn.classList.remove('open');
         document.getElementById('overlay').classList.remove('active');
         openDrop = null;
     }
     function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
-    // ===== DEST =====
     function renderDestList(filter) {
         const list = document.getElementById('destList');
         const groups = {};
-        destinations.filter(d => !filter || d.name.toLowerCase().includes(filter.toLowerCase()) || d.sub.toLowerCase().includes(filter.toLowerCase()))
+        destinations
+            .filter(d => !filter || d.name.toLowerCase().includes(filter.toLowerCase()) || d.sub.toLowerCase().includes(filter.toLowerCase()))
             .forEach(d => { if (!groups[d.region]) groups[d.region] = []; groups[d.region].push(d); });
         let html = '';
         for (const [region, items] of Object.entries(groups)) {
             html += `<div class="dest-section-title">${region}</div>`;
             items.forEach(d => {
                 html += `<div class="dest-item" onclick="selectDest('${d.name}')">
-          <span class="dest-icon">${d.icon}</span>
-          <div><div>${d.name}</div><div class="dest-sub">${d.sub}</div></div>
-        </div>`;
+                    <span class="dest-icon">${d.icon}</span>
+                    <div><div>${d.name}</div><div class="dest-sub">${d.sub}</div></div>
+                </div>`;
             });
         }
         list.innerHTML = html || '<div style="padding:16px;text-align:center;color:#aaa;font-size:13px">Không tìm thấy điểm đến</div>';
@@ -630,7 +949,6 @@
         toggleDropdown('date');
     }
 
-    // ===== DATE PICKER =====
     const DAYS = ['T2','T3','T4','T5','T6','T7','CN'];
     const MONTHS_VI = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
     const today = new Date(); today.setHours(0,0,0,0);
@@ -641,15 +959,14 @@
         const m2 = new Date(base.getFullYear(), base.getMonth() + 1, 1);
         document.getElementById('calMonthLabels').innerHTML =
             `<span>${MONTHS_VI[m1.getMonth()]} ${m1.getFullYear()}</span><span>${MONTHS_VI[m2.getMonth()]} ${m2.getFullYear()}</span>`;
-        document.getElementById('calMonths').innerHTML =
-            renderMonth(m1) + renderMonth(m2);
+        document.getElementById('calMonths').innerHTML = renderMonth(m1) + renderMonth(m2);
     }
 
     function renderMonth(firstDay) {
         let html = `<div class="cal-month"><div class="cal-month-title">${MONTHS_VI[firstDay.getMonth()]} ${firstDay.getFullYear()}</div><div class="cal-grid">`;
         DAYS.forEach(d => html += `<div class="cal-dow">${d}</div>`);
-        let startDow = firstDay.getDay(); // 0=Sun
-        startDow = startDow === 0 ? 6 : startDow - 1; // Mon=0
+        let startDow = firstDay.getDay();
+        startDow = startDow === 0 ? 6 : startDow - 1;
         for (let i = 0; i < startDow; i++) html += `<div class="cal-day empty"></div>`;
         const daysInMonth = new Date(firstDay.getFullYear(), firstDay.getMonth() + 1, 0).getDate();
         for (let d = 1; d <= daysInMonth; d++) {
@@ -665,7 +982,7 @@
                 if (date.getTime() === new Date(dateStart.getTime() + 86400000).getTime()) cls += ' range-start';
                 if (date.getTime() === new Date(dateEnd.getTime() - 86400000).getTime()) cls += ' range-end';
             }
-            html += `<div class="${cls}" onclick="pickDate(${date.getTime()})">${d}</div>`;
+            html += `<div class="${cls}" onclick="pickDate(${ts})">${d}</div>`;
         }
         html += `</div></div>`;
         return html;
@@ -675,9 +992,9 @@
         const d = new Date(ts);
         if (d < today) return;
         if (!dateStart || (dateStart && dateEnd) || d < dateStart) {
-            dateStart = d; dateEnd = null; pickingEnd = true;
+            dateStart = d; dateEnd = null;
         } else {
-            dateEnd = d; pickingEnd = false;
+            dateEnd = d;
             updateDateVal();
             setTimeout(closeAll, 200);
         }
@@ -693,7 +1010,6 @@
     }
 
     function changeMonth(delta) { calOffset = Math.max(0, calOffset + delta); renderCalendar(); }
-
     function setShortcut(daysFromNow) {
         const d = new Date(today); d.setDate(d.getDate() + daysFromNow);
         const d2 = new Date(d); d2.setDate(d2.getDate() + 1);
@@ -701,8 +1017,7 @@
     }
     function setShortcutWeekend(next) {
         const d = new Date(today);
-        let dow = d.getDay(); // 0=Sun
-        let daysToFri = (5 - dow + 7) % 7;
+        let daysToFri = (5 - d.getDay() + 7) % 7;
         if (next) daysToFri += 7;
         if (daysToFri === 0) daysToFri = 7;
         d.setDate(d.getDate() + daysToFri);
@@ -710,20 +1025,23 @@
         dateStart = d; dateEnd = d2; updateDateVal(); renderCalendar(); setTimeout(closeAll, 300);
     }
 
-    // ===== GUESTS =====
     function changeCount(type, delta) {
-        if (type === 'adults') guests.adults = Math.max(1, guests.adults + delta);
+        if (type === 'adults')   guests.adults   = Math.max(1, guests.adults + delta);
         if (type === 'children') guests.children = Math.max(0, guests.children + delta);
-        if (type === 'rooms') guests.rooms = Math.max(1, guests.rooms + delta);
+        if (type === 'rooms')    guests.rooms    = Math.max(1, guests.rooms + delta);
         document.getElementById('adultVal').textContent = guests.adults;
         document.getElementById('childVal').textContent = guests.children;
-        document.getElementById('roomVal').textContent = guests.rooms;
+        document.getElementById('roomVal').textContent  = guests.rooms;
         document.getElementById('adultMinus').disabled = guests.adults <= 1;
         document.getElementById('childMinus').disabled = guests.children <= 0;
-        document.getElementById('roomMinus').disabled = guests.rooms <= 1;
+        document.getElementById('roomMinus').disabled  = guests.rooms <= 1;
     }
     function togglePet() { pet = !pet; document.getElementById('petToggle').classList.toggle('on', pet); }
-    function resetGuests() { guests = { adults: 2, children: 0, rooms: 1 }; pet = false; changeCount('adults',0); }
+    function resetGuests() {
+        guests = { adults: 2, children: 0, rooms: 1 }; pet = false;
+        changeCount('adults', 0);
+        document.getElementById('petToggle').classList.remove('on');
+    }
     function applyGuests() {
         const total = guests.adults + guests.children;
         document.getElementById('guestsVal').textContent = `${total} khách, ${guests.rooms} phòng${pet ? ' 🐾' : ''}`;
@@ -733,7 +1051,7 @@
     function doSearch() {
         const dest = document.getElementById('destVal').textContent;
         const date = document.getElementById('dateVal').textContent;
-        const g = document.getElementById('guestsVal').textContent;
+        const g    = document.getElementById('guestsVal').textContent;
         alert(`🔍 Tìm kiếm:\n📍 ${dest}\n📅 ${date}\n👥 ${g}`);
     }
 
@@ -742,78 +1060,989 @@
         btn.classList.add('active');
     }
 
-    // ===== REGISTER — load từ register.html =====
-    let registerLoaded = false;
+    function toggleMenu() {
+        const drop = document.getElementById('menuDropdown');
+        const btn  = document.getElementById('btnMenu');
+        const isOpen = drop.classList.contains('open');
+        closeAll();
+        if (!isOpen) {
+            drop.classList.add('open');
+            btn.classList.add('open');
+            document.getElementById('overlay').classList.add('active');
+        }
+    }
+
+    function menuAction(action) {
+        closeAll();
+        alert(`Tính năng đang phát triển cho hành động: ${action}`);
+    }
 
     function showRegister() {
-        document.getElementById('home-content').style.display = 'none';
-        const sec = document.getElementById('register-section');
-        sec.classList.add('show');
+        closeAll();
+        document.getElementById('modal-overlay').classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+    function hideRegister() {
+        document.getElementById('modal-overlay').classList.remove('show');
+        document.body.style.overflow = '';
+    }
+    function handleOverlayClick(e) {
+        if (e.target === document.getElementById('modal-overlay')) hideRegister();
+    }
 
-        if (registerLoaded) {
-            sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    changeCount('adults', 0);
+</script>
+
+<!-- nut đăng ký -->
+<script>
+    function submitRegister() {
+        // 1. Thu thập dữ liệu từ các ID (giữ nguyên như bước trước)
+        const fullname = document.getElementById('reg-fullname').value;
+        const email    = document.getElementById('reg-email').value;
+        const phone    = document.getElementById('reg-phone').value;
+        const username = document.getElementById('reg-username').value;
+        const password = document.getElementById('reg-password').value;
+
+        if(!fullname || !email || !phone || !username || !password) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Thiếu thông tin',
+                text: 'Vui lòng điền đầy đủ các trường bắt buộc!',
+                confirmButtonColor: '#1a2744' // Màu navy giống CSS của bạn
+            });
             return;
         }
 
-        // Hiển thị loading nhẹ
-        sec.innerHTML = `
-      <div style="text-align:center;padding:60px 20px;color:var(--gray);">
-        <div style="font-size:32px;margin-bottom:12px;">⏳</div>
-        <div style="font-size:14px;">Đang tải form đăng ký...</div>
-      </div>`;
+        const params = new URLSearchParams();
+        params.append('fullname', fullname);
+        params.append('email', email);
+        params.append('phone', phone);
+        params.append('username', username);
+        params.append('password', password);
 
-        fetch('register.html')
-            .then(res => {
-                if (!res.ok) throw new Error('Không tải được register.html');
-                return res.text();
+        // Hiệu ứng Loading khi đang chờ Backend xử lý
+        Swal.showLoading();
+
+        fetch('/api/v1/customer/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params
+        })
+            .then(async response => {
+                if (!response.ok) {
+                    // Lấy nội dung lỗi từ DataConfickException bên Java
+                    const errorText = await response.text();
+                    throw new Error(errorText);
+                }
+                return response.json();
             })
-            .then(html => {
-                // Parse HTML từ file register.html
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-
-                // Lấy nội dung bên trong <body>
-                const content = doc.body.innerHTML;
-
-                // Inject vào #register-section
-                sec.innerHTML = content;
-
-                // Thực thi các <script> bên trong content vừa inject
-                sec.querySelectorAll('script').forEach(oldScript => {
-                    const newScript = document.createElement('script');
-                    newScript.textContent = oldScript.textContent;
-                    document.body.appendChild(newScript);
-                    oldScript.remove();
+            .then(data => {
+                // Thông báo thành công đẹp mắt
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Chúc mừng!',
+                    text: 'Tài khoản của bạn đã được tạo thành công.',
+                    confirmButtonColor: '#c9a84c', // Màu gold giống CSS của bạn
+                    timer: 2500
                 });
-
-                // Expose hideRegister cho form dùng
-                window.hideRegister = hideRegister;
-
-                registerLoaded = true;
-                sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                hideRegister();
+                document.querySelectorAll('.reg-input').forEach(input => input.value = '');
             })
-            .catch(err => {
-                sec.innerHTML = `
-          <div style="text-align:center;padding:40px 20px;color:#ef4444;">
-            <div style="font-size:32px;margin-bottom:12px;">⚠️</div>
-            <div style="font-size:14px;font-weight:600;">Không thể tải form đăng ký</div>
-            <div style="font-size:12px;color:var(--gray);margin-top:6px;">
-              Hãy đảm bảo file <code>register.html</code> nằm cùng thư mục với file này.<br>
-              Lỗi: ${err.message}
-            </div>
-          </div>`;
+            .catch(error => {
+                // Hiển thị lỗi cụ thể từ Java (ví dụ: "Emailnayfy đã được sử dụng")[cite: 4]
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Đăng ký thất bại',
+                    text: error.message,
+                    confirmButtonColor: '#dc2626'
+                });
             });
     }
 
-    function hideRegister() {
-        const sec = document.getElementById('register-section');
-        sec.classList.remove('show');
-        document.getElementById('home-content').style.display = '';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+</script>
+
+<!-- đăng nhâp-->
+<script>
+
+    function showLogin() {
+        closeAll(); // Đóng các dropdown khác nếu đang mở
+        document.getElementById('modal-login-overlay').classList.add('show');
+        document.body.style.overflow = 'hidden'; // Chặn cuộn trang khi mở modal
     }
 
-    // Init
-    changeCount('adults', 0);
+    // Hàm ẩn modal Đăng nhập
+    function hideLogin() {
+        document.getElementById('modal-login-overlay').classList.remove('show');
+        document.body.style.overflow = '';
+    }
+
+    // Hàm đóng modal khi click ra ngoài vùng form (phần nền mờ)
+    function handleLoginOverlayClick(e) {
+        if (e.target === document.getElementById('modal-login-overlay')) {
+            hideLogin();
+        }
+    }
+    // Hàm xử lý Đăng nhập
+    function submitLogin() {
+        const username = document.getElementById('login-username').value;
+        const password = document.getElementById('login-password').value;
+
+        if (!username || !password) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Chú ý',
+                text: 'Vui lòng nhập tên đăng nhập và mật khẩu!',
+                confirmButtonColor: '#1a2744'
+            });
+            return;
+        }
+
+        Swal.showLoading();
+
+        // Sử dụng URLSearchParams vì Backend của bạn dùng @ModelAttribute
+        const params = new URLSearchParams();
+        params.append('username', username);
+        params.append('password', password);
+
+        // Endpoint dựa trên CustomerController của bạn[cite: 6]
+        fetch('/api/v1/customer/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params
+        })
+            .then(async response => {
+                if (!response.ok) {
+                    // Xử lý thông báo lỗi từ RuntimeException trong CustomerService
+                    const errorMsg = await response.text();
+                    throw new Error(errorMsg);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // LƯU DỮ LIỆU VÀO LOCALSTORAGE
+                // data sẽ khớp với cấu trúc JwtRespone: accessToken, userId, fullName...[cite: 7, 8]
+                localStorage.setItem('accessToken', data.accessToken);
+                localStorage.setItem('userId', data.userId);
+                localStorage.setItem('fullName', data.fullName);
+                localStorage.setItem('expirationDate', data.expirationDate);
+                // Cập nhật giao diện header ngay lập tức
+                updateAuthUI(true, data.fullName);
+                hideLogin();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công',
+                    text: `Chào mừng ${data.fullName}! Đang chuyển hướng...`,
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+                // Xoá redirect nếu muốn ở lại trang, hoặc giữ nguyên nếu cần chuyển trang
+                // setTimeout(() => window.location.href = '/home', 1500);
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: error.message || 'Tên đăng nhập hoặc mật khẩu không đúng',
+                    confirmButtonColor: '#dc2626'
+                });
+            });
+
+    }
+</script>
+<script>
+    // ===== ROOM LISTING - API /api/v1/rooms/status =====
+    let allRooms    = [];   // dữ liệu gốc từ API (RoomRespone[])
+    let roomTypes   = {};   // cache: type_room_id -> RoomTypeResponse
+    let filterTypeId = null; // null = tất cả
+
+    // ---- Gọi API lấy danh sách phòng trống ----
+    async function loadRooms() {
+        showState('skeleton');
+        try {
+            const token = localStorage.getItem('accessToken');
+            const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+
+            const res = await fetch('/api/v1/rooms/status', { headers });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const json = await res.json();
+
+            // Backend trả về ApiResponse { data: RoomRespone[] }
+            allRooms = Array.isArray(json.data) ? json.data : (Array.isArray(json) ? json : []);
+
+            if (allRooms.length === 0) { showState('empty'); return; }
+
+            // Lấy thông tin RoomType cho từng type_room_id duy nhất
+            await loadRoomTypes([...new Set(allRooms.map(r => r.type_room_id).filter(Boolean))]);
+
+            buildTypeFilter();
+            sortAndRender();
+            showState('grid');
+
+        } catch (err) {
+            document.getElementById('room-error-msg').textContent = err.message || 'Lỗi kết nối máy chủ';
+            showState('error');
+        }
+    }
+
+    // ---- Lấy thông tin từng RoomType theo id ----
+    async function loadRoomTypes(ids) {
+        // Thử lấy tất cả RoomType một lần từ /api/v1/roomtypes
+        try {
+            const res = await fetch('/api/v1/roomtypes');
+            if (res.ok) {
+                const json = await res.json();
+                const list = Array.isArray(json.data) ? json.data : (Array.isArray(json) ? json : []);
+                list.forEach(rt => { roomTypes[rt.id] = rt; });
+                return;
+            }
+        } catch(_) {}
+        // Fallback: fetch từng id một
+        for (const id of ids) {
+            if (roomTypes[id]) continue;
+            try {
+                const res = await fetch('/api/v1/roomtypes/' + id);
+                if (res.ok) { const json = await res.json(); roomTypes[id] = json.data || json; }
+            } catch(_) {}
+        }
+    }
+
+    // ---- Build filter chips theo loại phòng ----
+    function buildTypeFilter() {
+        const wrap = document.getElementById('type-filter-wrap');
+        const typeMap = {};
+        allRooms.forEach(r => {
+            if (!r.type_room_id) return;
+            const rt = roomTypes[r.type_room_id];
+            typeMap[r.type_room_id] = rt ? rt.type : ('Loại ' + r.type_room_id);
+        });
+
+        let html = '<button class="type-chip active" onclick="filterByType(null,this)">Tất cả</button>';
+        Object.entries(typeMap).forEach(([id, name]) => {
+            html += '<button class="type-chip" onclick="filterByType(' + id + ',this)">' + name + '</button>';
+        });
+        wrap.innerHTML = html;
+    }
+
+    function filterByType(typeId, btn) {
+        filterTypeId = typeId;
+        document.querySelectorAll('.type-chip').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        sortAndRender();
+    }
+
+    // ---- Sắp xếp + render ----
+    function sortAndRender() {
+        const sort  = document.getElementById('room-sort').value;
+        let rooms = filterTypeId
+            ? allRooms.filter(r => r.type_room_id == filterTypeId)
+            : [...allRooms];
+
+        if (sort === 'price_asc')  rooms.sort((a,b) => (a.price||0) - (b.price||0));
+        if (sort === 'price_desc') rooms.sort((a,b) => (b.price||0) - (a.price||0));
+        if (sort === 'name_asc')   rooms.sort((a,b) => (a.name||'').localeCompare(b.name||''));
+
+        const countEl = document.getElementById('room-count-text');
+        countEl.textContent = 'Tìm thấy ' + rooms.length + ' phòng trống' + (filterTypeId ? ' trong loại này' : '');
+
+        const grid = document.getElementById('room-grid');
+        grid.innerHTML = rooms.length ? rooms.map(renderRoomCard).join('') : renderNoMatch();
+        grid.style.display = 'flex';
+    }
+
+    function renderNoMatch() {
+        return '<div style="text-align:center;padding:40px 0;color:var(--gray);font-size:14px;">Không tìm thấy phòng phù hợp với bộ lọc</div>';
+    }
+
+    // ---- Render 1 card phòng (dữ liệu từ RoomRespone) ----
+    function renderRoomCard(r) {
+        const rt = roomTypes[r.type_room_id] || {};
+        const typeName  = rt.type        || '—';
+        const capacity  = rt.capacity    ? rt.capacity + ' người' : '—';
+        const amenities = rt.amenities   || '';
+        const desc      = rt.description || '';
+        const price     = r.price ? new Intl.NumberFormat('vi-VN').format(r.price) + ' ₫' : '—';
+
+        // Trạng thái
+        const statusMap = { AVAILABLE: ['Còn trống','available'], OCCUPIED: ['Đang thuê','occupied'], MAINTENANCE: ['Bảo trì','maintenance'] };
+        const [statusLabel, statusCls] = statusMap[r.status] || ['Không rõ','occupied'];
+
+        // Nội thất (tối đa 4 tag)
+        const amenityTags = amenities.split(',').map(a=>a.trim()).filter(Boolean).slice(0,4)
+            .map(a => '<span style="background:#f0f4ff;color:var(--navy);font-size:11px;font-weight:500;padding:2px 8px;border-radius:6px;">' + a + '</span>').join('');
+
+        // Nút đặt phòng (chỉ khi AVAILABLE)
+        const canBook = r.status === 'AVAILABLE';
+        const bookBtn = canBook
+            ? '<button class="rc-btn-book" onclick="openBooking(' + JSON.stringify(r).replace(/"/g,"&quot;") + ')">Đặt phòng</button>'
+            : '<button class="rc-btn-book" disabled style="background:#e0e0e0;color:#999;cursor:not-allowed;">Không thể đặt</button>';
+
+        // Render phần ảnh — carousel với mũi tên nếu có nhiều ảnh
+        const hasImg = Array.isArray(r.images) && r.images.length > 0;
+        const carouselId = 'carousel-' + (r.id || Math.random().toString(36).slice(2));
+        const imgHtml = hasImg
+            ? '<img id="' + carouselId + '-img" src="' + r.images[0] + '" alt="' + (r.name||'Phòng') + '" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;">'
+            + (r.images.length > 1
+                ? '<button onclick="slideImg(event,\'' + carouselId + '\',' + JSON.stringify(r.images).replace(/"/g,'&quot;') + ',-1)" style="position:absolute;left:6px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.45);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;line-height:1;transition:background .2s;" onmouseover="this.style.background=\'rgba(0,0,0,0.75)\'" onmouseout="this.style.background=\'rgba(0,0,0,0.45)\'">&#8249;</button>'
+                + '<button onclick="slideImg(event,\'' + carouselId + '\',' + JSON.stringify(r.images).replace(/"/g,'&quot;') + ',1)" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.45);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;line-height:1;transition:background .2s;" onmouseover="this.style.background=\'rgba(0,0,0,0.75)\'" onmouseout="this.style.background=\'rgba(0,0,0,0.45)\'">&#8250;</button>'
+                + '<span id="' + carouselId + '-badge" style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.55);color:#fff;font-size:11px;font-weight:500;padding:2px 8px;border-radius:10px;">1 / ' + r.images.length + '</span>'
+                : '')
+            : '<div class="rc-img-ph">'
+            + '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round">'
+            + '<rect x="2" y="7" width="20" height="14" rx="2"/>'
+            + '<path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>'
+            + '<circle cx="12" cy="14" r="2"/>'
+            + '</svg>'
+            + '<span>Chưa có ảnh</span>'
+            + '</div>';
+
+        return '<div class="rc">' +
+            '<div class="rc-img">' + imgHtml + '</div>' +
+            '<div class="rc-body">' +
+            '<div class="rc-type">' + typeName + '</div>' +
+            '<div class="rc-name">' + (r.name || 'Phòng #' + r.id) + '</div>' +
+            '<div class="rc-id">ID: ' + (r.id || r.type_room_id || '—') + (capacity !== '—' ? ' &nbsp;·&nbsp; Tối đa ' + capacity : '') + '</div>' +
+            '<span class="rc-badge ' + statusCls + '">' + statusLabel + '</span>' +
+            (amenityTags ? '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;">' + amenityTags + '</div>' : '') +
+            (desc ? '<div style="font-size:13px;color:var(--gray);line-height:1.5;margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">' + desc + '</div>' : '') +
+            '<div class="rc-footer">' +
+            '<div>' +
+            '<div class="rc-price-night">Giá mỗi đêm</div>' +
+            '<div class="rc-price">' + price + '</div>' +
+            '</div>' +
+            '<div class="rc-btn-group">' +
+            bookBtn +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>';
+    }
+
+
+    // ---- Email OTP trong booking ----
+    let _bkOtpCountdown = 0;
+
+    function bkOnEmailInput() {
+        const email = document.getElementById('bk-email').value.trim();
+        const btn   = document.getElementById('btn-bk-send-otp');
+        const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        document.getElementById('bk-email').classList.toggle('error', email.length > 0 && !valid);
+        btn.disabled = !valid || _bkOtpCountdown > 0;
+    }
+
+    function bkSendOtp() {
+        const emailEl = document.getElementById('bk-email');
+        const hintEl  = document.getElementById('bk-otp-hint');
+        const btn     = document.getElementById('btn-bk-send-otp');
+        const email   = emailEl.value.trim();
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            emailEl.classList.add('error');
+            hintEl.textContent = '⚠️ Vui lòng nhập email hợp lệ.';
+            hintEl.className = 'bk-otp-hint';
+            return;
+        }
+
+        btn.disabled = true;
+        hintEl.textContent = '⏳ Đang gửi...';
+        hintEl.className = 'bk-otp-hint';
+
+        fetch('/api/v1/otp/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        })
+            .then(async res => {
+                if (!res.ok) throw new Error(await res.text());
+                hintEl.textContent = '✅ Mã xác nhận đã gửi đến ' + email + '. Vui lòng kiểm tra hộp thư.';
+                hintEl.className = 'bk-otp-hint success';
+                bkStartOtpCountdown(60);
+            })
+            .catch(err => {
+                hintEl.textContent = '❌ Gửi thất bại: ' + (err.message || 'Lỗi kết nối');
+                hintEl.className = 'bk-otp-hint';
+                btn.disabled = false;
+            });
+    }
+
+    function bkStartOtpCountdown(seconds) {
+        const btn = document.getElementById('btn-bk-send-otp');
+        _bkOtpCountdown = seconds;
+        clearInterval(window._bkOtpTimer);
+        window._bkOtpTimer = setInterval(() => {
+            _bkOtpCountdown--;
+            if (_bkOtpCountdown <= 0) {
+                clearInterval(window._bkOtpTimer);
+                btn.innerHTML = 'Gửi lại<br>mã';
+                btn.disabled  = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+                    document.getElementById('bk-email').value.trim()
+                );
+            } else {
+                btn.innerHTML = 'Gửi lại<br>(' + _bkOtpCountdown + 's)';
+                btn.disabled  = true;
+            }
+        }, 1000);
+    }
+
+    // ---- Mở modal booking từ card ----
+    function openBooking(room) {
+        const rt = roomTypes[room.type_room_id] || {};
+        showBooking(room.id, room.name || ('Phòng #' + room.id), rt.type || 'Phòng', room.price || 0);
+    }
+
+    // ---- Hiển thị đúng trạng thái ----
+    function showState(state) {
+        document.getElementById('room-skeleton').style.display = state === 'skeleton' ? 'flex'  : 'none';
+        document.getElementById('room-grid').style.display     = state === 'grid'     ? 'flex'  : 'none';
+        document.getElementById('room-empty').style.display    = state === 'empty'    ? 'block' : 'none';
+        document.getElementById('room-error').style.display    = state === 'error'    ? 'block' : 'none';
+    }
+
+    // ---- Carousel: chuyển ảnh bằng mũi tên ----
+    const _carouselIndex = {};
+    function slideImg(event, id, images, dir) {
+        event.stopPropagation();
+        const total = images.length;
+        if (!total) return;
+        _carouselIndex[id] = ((_carouselIndex[id] || 0) + dir + total) % total;
+        const idx = _carouselIndex[id];
+        const imgEl   = document.getElementById(id + '-img');
+        const badgeEl = document.getElementById(id + '-badge');
+        if (imgEl)   imgEl.src = images[idx];
+        if (badgeEl) badgeEl.textContent = (idx + 1) + ' / ' + total;
+    }
+
+    // Tự động load khi trang khởi động
+    document.addEventListener('DOMContentLoaded', loadRooms);
+</script>
+
+<!-- ===== MODAL ĐẶT PHÒNG ===== -->
+<div id="modal-booking-overlay" onclick="handleBookingOverlayClick(event)">
+    <div id="booking-section">
+        <div class="bk-card">
+            <!-- Banner -->
+            <div class="bk-banner">
+                <button class="bk-close" onclick="hideBooking()">✕</button>
+                <h2>Đặt phòng</h2>
+                <p>Hoàn tất thông tin bên dưới để xác nhận đặt phòng</p>
+                <div class="bk-room-info">
+                    <div class="bk-room-icon">🛏️</div>
+                    <div>
+                        <div class="bk-room-name" id="bk-room-name">—</div>
+                        <div class="bk-room-type" id="bk-room-type">—</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bk-body">
+
+                <!-- Chọn ngày -->
+                <label class="bk-label">📅 Ngày nhận & trả phòng</label>
+                <div class="bk-date-row">
+                    <div class="bk-date-box" id="bk-box-checkin" onclick="bkToggleCal()">
+                        <span class="bk-date-icon">🏠</span>
+                        <div class="bk-date-label">Nhận phòng</div>
+                        <div class="bk-date-val empty" id="bk-val-checkin">Chọn ngày</div>
+                    </div>
+                    <div class="bk-date-box" id="bk-box-checkout" onclick="bkToggleCal()">
+                        <span class="bk-date-icon">🚪</span>
+                        <div class="bk-date-label">Trả phòng</div>
+                        <div class="bk-date-val empty" id="bk-val-checkout">Chọn ngày</div>
+                    </div>
+                </div>
+
+                <!-- Calendar inline -->
+                <div class="bk-cal-popup" id="bk-cal-popup">
+                    <div class="bk-cal-header">
+                        <button class="bk-cal-nav" onclick="bkNavMonth(-1)">&#8249;</button>
+                        <span></span>
+                        <button class="bk-cal-nav" onclick="bkNavMonth(1)">&#8250;</button>
+                    </div>
+                    <div class="bk-cal-months" id="bk-cal-months"></div>
+                    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                        <button onclick="bkShortcut(1)"  style="font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--white);cursor:pointer;color:var(--navy);">1 đêm</button>
+                        <button onclick="bkShortcut(2)"  style="font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--white);cursor:pointer;color:var(--navy);">2 đêm</button>
+                        <button onclick="bkShortcut(3)"  style="font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--white);cursor:pointer;color:var(--navy);">3 đêm</button>
+                        <button onclick="bkShortcut(7)"  style="font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--white);cursor:pointer;color:var(--navy);">1 tuần</button>
+                        <button onclick="bkClearDates()" style="font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid #fca5a5;background:#fff1f1;cursor:pointer;color:#dc2626;">Xóa</button>
+                    </div>
+                </div>
+
+                <!-- Badge số đêm -->
+                <div class="bk-nights-badge" id="bk-nights-badge">🌙 Đang chọn 0 đêm</div>
+
+                <!-- Số khách -->
+                <label class="bk-label">👥 Số khách</label>
+                <div class="bk-guests-row">
+                    <div class="bk-guest-box">
+                        <div class="bk-date-label">Người lớn</div>
+                        <div class="bk-guest-ctrl">
+                            <button class="bk-counter-btn" onclick="bkChangeGuest('adults',-1)" id="bk-adults-minus">−</button>
+                            <span class="bk-counter-val" id="bk-adults-val">1</span>
+                            <button class="bk-counter-btn" onclick="bkChangeGuest('adults',1)">+</button>
+                        </div>
+                    </div>
+                    <div class="bk-guest-box">
+                        <div class="bk-date-label">Trẻ em</div>
+                        <div class="bk-guest-ctrl">
+                            <button class="bk-counter-btn" onclick="bkChangeGuest('children',-1)" id="bk-children-minus">−</button>
+                            <span class="bk-counter-val" id="bk-children-val">0</span>
+                            <button class="bk-counter-btn" onclick="bkChangeGuest('children',1)">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email xác nhận -->
+                <label class="bk-label">✉️ Email xác nhận đặt phòng</label>
+                <div class="bk-email-wrap">
+                    <div class="bk-email-input-wrap">
+                        <span class="bk-email-icon">✉️</span>
+                        <input class="bk-email-input" id="bk-email" type="email" placeholder="example@email.com" oninput="bkOnEmailInput()">
+                    </div>
+                    <button class="btn-send-otp-bk" id="btn-bk-send-otp" onclick="bkSendOtp()" disabled>
+                        Gửi mã<br>xác nhận
+                    </button>
+                </div>
+                <div class="bk-otp-hint" id="bk-otp-hint"></div>
+
+                <!-- Ghi chú -->
+                <label class="bk-label">📝 Yêu cầu đặc biệt (tùy chọn)</label>
+                <textarea class="bk-textarea" id="bk-notes" rows="3" placeholder="Ví dụ: phòng tầng cao, giường đôi, đến muộn..."></textarea>
+
+                <!-- Tóm tắt giá -->
+                <div class="bk-summary" id="bk-summary" style="display:none;">
+                    <div class="bk-summary-title">Tóm tắt chi phí</div>
+                    <div class="bk-sum-row"><span id="bk-sum-desc">—</span><span id="bk-sum-room">—</span></div>
+                    <div class="bk-sum-row"><span>Phí dịch vụ (5%)</span><span id="bk-sum-fee">—</span></div>
+                    <div class="bk-sum-row" style="color:var(--gray);font-size:13px;"><span>Tổng cộng</span><span id="bk-sum-total">—</span></div>
+                    <div class="bk-sum-row total">
+                        <span>💳 Tiền cọc thanh toán <span style="font-size:11px;font-weight:500;color:var(--gold);background:#fff8e1;padding:2px 7px;border-radius:20px;margin-left:4px;">30%</span></span>
+                        <span id="bk-sum-deposit" style="color:#e67e00;">—</span>
+                    </div>
+                    <div style="font-size:11px;color:var(--gray);margin-top:6px;line-height:1.5;">
+                        💡 Phần còn lại (<span id="bk-sum-remain">—</span>) sẽ thanh toán khi nhận phòng.
+                    </div>
+                </div>
+
+                <button class="btn-submit-booking" id="btn-submit-booking" onclick="submitBooking()" disabled>
+                    Chọn ngày để đặt phòng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ===== BOOKING MODAL STATE =====
+    const bkState = {
+        roomId: null, roomName: '', roomType: '', pricePerNight: 0,
+        checkIn: null, checkOut: null,
+        adults: 1, children: 0,
+        calOffset: 0, selecting: 'start'
+    };
+
+    const BK_MONTHS = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
+    const BK_DAYS   = ['CN','T2','T3','T4','T5','T6','T7'];
+
+    function showBooking(roomId, roomName, roomType, pricePerNight) {
+        bkState.roomId = roomId;
+        bkState.roomName = roomName;
+        bkState.roomType = roomType;
+        bkState.pricePerNight = pricePerNight;
+        bkState.checkIn = null; bkState.checkOut = null;
+        bkState.adults = 1; bkState.children = 0;
+        bkState.calOffset = 0; bkState.selecting = 'start';
+
+        document.getElementById('bk-room-name').textContent = roomName;
+        document.getElementById('bk-room-type').textContent = roomType + ' · ' + new Intl.NumberFormat('vi-VN').format(pricePerNight) + ' ₫/đêm';
+        bkResetUI();
+        bkRenderCal();
+        document.getElementById('modal-booking-overlay').classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function hideBooking() {
+        document.getElementById('modal-booking-overlay').classList.remove('show');
+        document.body.style.overflow = '';
+    }
+
+    function handleBookingOverlayClick(e) {
+        if (e.target === document.getElementById('modal-booking-overlay')) hideBooking();
+    }
+
+    function bkResetUI() {
+        document.getElementById('bk-val-checkin').textContent  = 'Chọn ngày';
+        document.getElementById('bk-val-checkin').className    = 'bk-date-val empty';
+        document.getElementById('bk-val-checkout').textContent = 'Chọn ngày';
+        document.getElementById('bk-val-checkout').className   = 'bk-date-val empty';
+        document.getElementById('bk-nights-badge').classList.remove('show');
+        document.getElementById('bk-summary').style.display = 'none';
+        document.getElementById('bk-adults-val').textContent   = '1';
+        document.getElementById('bk-children-val').textContent = '0';
+        document.getElementById('bk-notes').value = '';
+        // Reset email OTP
+        document.getElementById('bk-email').value = '';
+        document.getElementById('bk-email').classList.remove('error');
+        document.getElementById('bk-otp-hint').textContent = '';
+        document.getElementById('bk-otp-hint').className = 'bk-otp-hint';
+        const otpBtn = document.getElementById('btn-bk-send-otp');
+        otpBtn.disabled = true;
+        otpBtn.innerHTML = 'Gửi mã<br>xác nhận';
+        clearInterval(window._bkOtpTimer);
+        bkUpdateBtn();
+    }
+
+    function bkToggleCal() {
+        document.getElementById('bk-cal-popup').classList.toggle('open');
+    }
+
+    function bkNavMonth(dir) {
+        bkState.calOffset += dir;
+        bkRenderCal();
+    }
+
+    function bkRenderCal() {
+        const now = new Date(); now.setHours(0,0,0,0);
+        const container = document.getElementById('bk-cal-months');
+        container.innerHTML = '';
+        for (let m = 0; m < 2; m++) {
+            const base = new Date(now.getFullYear(), now.getMonth() + bkState.calOffset + m, 1);
+            const year = base.getFullYear(), month = base.getMonth();
+            const firstDow = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            let html = `<div>
+            <div class="bk-cal-title" style="text-align:center;margin-bottom:10px;">${BK_MONTHS[month]} ${year}</div>
+            <div class="bk-cal-grid">`;
+            BK_DAYS.forEach(d => { html += `<div class="bk-dow">${d}</div>`; });
+            for (let i = 0; i < firstDow; i++) html += `<div class="bk-day bk-empty"></div>`;
+            for (let d = 1; d <= daysInMonth; d++) {
+                const date = new Date(year, month, d);
+                const isPast = date < now;
+                const ts = date.getTime();
+                const isToday = date.getTime() === now.getTime();
+                const isStart = bkState.checkIn  && ts === bkState.checkIn.getTime();
+                const isEnd   = bkState.checkOut && ts === bkState.checkOut.getTime();
+                const inRange = bkState.checkIn && bkState.checkOut && ts > bkState.checkIn.getTime() && ts < bkState.checkOut.getTime();
+                const isRangeS = inRange && new Date(ts - 86400000).getTime() <= bkState.checkIn.getTime();
+                const isRangeE = inRange && new Date(ts + 86400000).getTime() >= bkState.checkOut.getTime();
+                let cls = 'bk-day';
+                if (isPast)    cls += ' bk-disabled';
+                if (isToday)   cls += ' bk-today';
+                if (isStart)   cls += ' bk-start';
+                if (isEnd)     cls += ' bk-end';
+                if (inRange)   cls += ' bk-in-range';
+                if (isRangeS)  cls += ' bk-range-s';
+                if (isRangeE)  cls += ' bk-range-e';
+                const clickable = !isPast ? `onclick="bkSelectDate(${year},${month},${d})"` : '';
+                html += `<div class="${cls}" ${clickable}>${d}</div>`;
+            }
+            html += `</div></div>`;
+            container.innerHTML += html;
+        }
+    }
+
+    function bkSelectDate(y, m, d) {
+        const date = new Date(y, m, d);
+        if (bkState.selecting === 'start' || (bkState.checkIn && date <= bkState.checkIn)) {
+            bkState.checkIn  = date;
+            bkState.checkOut = null;
+            bkState.selecting = 'end';
+        } else {
+            bkState.checkOut = date;
+            bkState.selecting = 'start';
+            document.getElementById('bk-cal-popup').classList.remove('open');
+        }
+        bkUpdateDates();
+        bkRenderCal();
+    }
+
+    function bkShortcut(nights) {
+        const today = new Date(); today.setHours(0,0,0,0);
+        bkState.checkIn  = new Date(today);
+        bkState.checkOut = new Date(today.getTime() + nights * 86400000);
+        bkState.selecting = 'start';
+        document.getElementById('bk-cal-popup').classList.remove('open');
+        bkUpdateDates();
+        bkRenderCal();
+    }
+
+    function bkClearDates() {
+        bkState.checkIn = null; bkState.checkOut = null; bkState.selecting = 'start';
+        bkUpdateDates(); bkRenderCal();
+    }
+
+    function bkUpdateDates() {
+        const fmt = d => d ? d.toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric' }) : null;
+        const ciEl = document.getElementById('bk-val-checkin');
+        const coEl = document.getElementById('bk-val-checkout');
+        if (bkState.checkIn)  { ciEl.textContent = fmt(bkState.checkIn);  ciEl.className = 'bk-date-val'; }
+        else                  { ciEl.textContent = 'Chọn ngày';           ciEl.className = 'bk-date-val empty'; }
+        if (bkState.checkOut) { coEl.textContent = fmt(bkState.checkOut); coEl.className = 'bk-date-val'; }
+        else                  { coEl.textContent = 'Chọn ngày';           coEl.className = 'bk-date-val empty'; }
+
+        const badge = document.getElementById('bk-nights-badge');
+        if (bkState.checkIn && bkState.checkOut) {
+            const nights = Math.round((bkState.checkOut - bkState.checkIn) / 86400000);
+            badge.textContent = `🌙 ${nights} đêm`;
+            badge.classList.add('show');
+            bkUpdateSummary(nights);
+        } else {
+            badge.classList.remove('show');
+            document.getElementById('bk-summary').style.display = 'none';
+        }
+        bkUpdateBtn();
+    }
+
+    function bkUpdateSummary(nights) {
+        const roomTotal = nights * bkState.pricePerNight;
+        const fee       = Math.round(roomTotal * 0.05);
+        const total     = roomTotal + fee;
+        const deposit   = Math.round(total * 0.30);
+        const remain    = total - deposit;
+        const fmt = n => new Intl.NumberFormat('vi-VN').format(n) + ' ₫';
+        document.getElementById('bk-sum-desc').textContent    = `${bkState.roomName} × ${nights} đêm`;
+        document.getElementById('bk-sum-room').textContent    = fmt(roomTotal);
+        document.getElementById('bk-sum-fee').textContent     = fmt(fee);
+        document.getElementById('bk-sum-total').textContent   = fmt(total);
+        document.getElementById('bk-sum-deposit').textContent = fmt(deposit);
+        document.getElementById('bk-sum-remain').textContent  = fmt(remain);
+        document.getElementById('bk-summary').style.display   = 'block';
+    }
+
+    function bkChangeGuest(type, delta) {
+        if (type === 'adults') {
+            bkState.adults = Math.max(1, bkState.adults + delta);
+            document.getElementById('bk-adults-val').textContent = bkState.adults;
+            document.getElementById('bk-adults-minus').disabled = bkState.adults <= 1;
+        } else {
+            bkState.children = Math.max(0, bkState.children + delta);
+            document.getElementById('bk-children-val').textContent = bkState.children;
+            document.getElementById('bk-children-minus').disabled = bkState.children <= 0;
+        }
+    }
+
+    function bkUpdateBtn() {
+        const btn = document.getElementById('btn-submit-booking');
+        const ready = bkState.checkIn && bkState.checkOut;
+        btn.disabled = !ready;
+        btn.textContent = ready ? '✅ Xác nhận đặt phòng' : 'Chọn ngày để đặt phòng';
+    }
+
+    function submitBooking() {
+        if (!bkState.checkIn || !bkState.checkOut) return;
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            Swal.fire({ icon: 'warning', title: 'Chưa đăng nhập', text: 'Vui lòng đăng nhập để đặt phòng.', confirmButtonColor: '#1a2744' })
+                .then(() => { hideBooking(); showLogin(); });
+            return;
+        }
+        const nights = Math.round((bkState.checkOut - bkState.checkIn) / 86400000);
+        const payload = {
+            roomId:    bkState.roomId,
+            checkIn:   bkState.checkIn.toISOString().split('T')[0],
+            checkOut:  bkState.checkOut.toISOString().split('T')[0],
+            adults:    bkState.adults,
+            children:  bkState.children,
+            notes:     document.getElementById('bk-notes').value.trim()
+        };
+        Swal.showLoading();
+        fetch('/api/v1/booking', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify(payload)
+        })
+            .then(async res => {
+                if (!res.ok) throw new Error(await res.text());
+                return res.json();
+            })
+            .then(() => {
+                hideBooking();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Đặt phòng thành công! 🎉',
+                    html: `<b>${bkState.roomName}</b><br>${nights} đêm · ${bkState.adults + bkState.children} khách`,
+                    confirmButtonColor: '#1a2744', confirmButtonText: 'Xem lịch sử đặt phòng'
+                });
+            })
+            .catch(err => {
+                Swal.fire({ icon: 'error', title: 'Đặt phòng thất bại', text: err.message, confirmButtonColor: '#dc2626' });
+            });
+    }
+</script>
+
+<!-- ===== QUẢN LÝ TRẠNG THÁI ĐĂNG NHẬP ===== -->
+<script>
+    // ---- Cập nhật giao diện header theo trạng thái đăng nhập ----
+    function updateAuthUI(isLoggedIn, fullName) {
+        const btnLogin    = document.getElementById('btnLogin');
+        const btnRegister = document.getElementById('btnRegister');
+        const menuWrap    = document.getElementById('menuWrap');
+        const userInfo    = document.getElementById('userInfo');
+        const userAvatar  = document.getElementById('userAvatar');
+        const userFullname= document.getElementById('userFullname');
+
+        if (isLoggedIn && fullName) {
+            // Ẩn nút Đăng nhập / Đăng ký
+            btnLogin.style.display    = 'none';
+            btnRegister.style.display = 'none';
+            // Hiện tên user và menu
+            userInfo.style.display    = 'flex';
+            menuWrap.style.display    = 'block';
+            // Lấy chữ cái đầu làm avatar
+            userFullname.textContent  = fullName;
+            userAvatar.textContent    = fullName.trim().charAt(0).toUpperCase();
+        } else {
+            // Hiện nút Đăng nhập / Đăng ký
+            btnLogin.style.display    = '';
+            btnRegister.style.display = '';
+            // Ẩn tên user và menu
+            userInfo.style.display    = 'none';
+            menuWrap.style.display    = 'none';
+        }
+    }
+
+    // ---- Đăng xuất ----
+    function handleLogout() {
+        closeAll();
+        Swal.fire({
+            icon: 'question',
+            title: 'Đăng xuất?',
+            text: 'Bạn có chắc muốn đăng xuất khỏi StayViet?',
+            showCancelButton: true,
+            confirmButtonText: 'Đăng xuất',
+            cancelButtonText: 'Hủy',
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#1a2744'
+        }).then(result => {
+            if (result.isConfirmed) {
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('userId');
+                localStorage.removeItem('fullName');
+                localStorage.removeItem('expirationDate');
+                updateAuthUI(false);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Đã đăng xuất',
+                    text: 'Hẹn gặp lại bạn sớm nhé!',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }
+        });
+    }
+
+    // ---- Kiểm tra trạng thái đăng nhập khi tải trang ----
+    (function checkLoginOnLoad() {
+        const token    = localStorage.getItem('accessToken');
+        const fullName = localStorage.getItem('fullName');
+        if (token && fullName) {
+            updateAuthUI(true, fullName);
+        } else {
+            updateAuthUI(false);
+        }
+    })();
+</script>
+<script>
+    // ===== CÁC HÀM XỬ LÝ LỊCH (BỔ SUNG CHO PHẦN BỊ CẮT) =====
+    function bkNavMonth(dir) {
+        bkState.calOffset += dir;
+        bkRenderCal();
+    }
+
+    // Hàm format Date sang chuỗi YYYY-MM-DD để gửi lên Backend
+    function formatDateToAPI(dateObj) {
+        if (!dateObj) return '';
+        const d = new Date(dateObj);
+        let month = '' + (d.getMonth() + 1);
+        let day = '' + d.getDate();
+        const year = d.getFullYear();
+
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+
+        return [year, month, day].join('-');
+    }
+
+    // ===== HÀM GỌI API ĐẶT PHÒNG =====
+    function submitBooking() {
+        // Kiểm tra dữ liệu đầu vào
+        if (!bkState.checkIn || !bkState.checkOut) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Chưa chọn ngày',
+                text: 'Vui lòng chọn ngày nhận và trả phòng!',
+                confirmButtonColor: '#1a2744'
+            });
+            return;
+        }
+
+        const email = document.getElementById('bk-email').value.trim();
+        if (!email) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Thiếu Email',
+                text: 'Vui lòng nhập email xác nhận đặt phòng!',
+                confirmButtonColor: '#1a2744'
+            });
+            return;
+        }
+
+        // Format ngày theo chuẩn YYYY-MM-DD để gửi lên backend
+        const eventcheckinDate = formatDateToAPI(bkState.checkIn);
+        const eventcheckoutDate = formatDateToAPI(bkState.checkOut);
+        const notes = document.getElementById('bk-notes').value.trim();
+
+        Swal.showLoading();
+
+        // Chuẩn bị params gửi lên API
+        const params = new URLSearchParams();
+        params.append('roomId', bkState.roomId);
+        params.append('eventcheckinDate', eventcheckinDate); // Đúng yêu cầu của bạn
+        params.append('eventcheckoutDate', eventcheckoutDate); // Đúng yêu cầu của bạn
+        params.append('adults', bkState.adults);
+        params.append('children', bkState.children);
+        params.append('email', email);
+        params.append('notes', notes);
+
+        // Lấy token nếu user đã đăng nhập
+        const token = localStorage.getItem('accessToken');
+        const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+        if (token) {
+            headers['Authorization'] = 'Bearer ' + token;
+        }
+
+        fetch('/api/v1/booking/bookingonline', {
+            method: 'POST',
+            headers: headers,
+            body: params
+        })
+            .then(async response => {
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || 'Có lỗi xảy ra khi đặt phòng');
+                }
+                return response.json();
+            })
+            .then(data => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Đặt phòng thành công!',
+                    text: 'Hệ thống đã ghi nhận thông tin đặt phòng của bạn. Vui lòng kiểm tra Email.',
+                    confirmButtonColor: '#c9a84c'
+                });
+                hideBooking();
+                // Optional: Có thể gọi lại hàm loadRooms() ở đây để cập nhật lại trạng thái phòng
+                // loadRooms();
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Đặt phòng thất bại',
+                    text: error.message,
+                    confirmButtonColor: '#dc2626'
+                });
+            });
+    }
 </script>
 </body>
 </html>

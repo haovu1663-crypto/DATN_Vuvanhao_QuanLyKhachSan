@@ -14,4 +14,8 @@ public class ViewController {
     }
     @GetMapping("/home")
     public String header() { return "form"; }
+    @GetMapping("/demo")
+    public String demo() {
+        return "header";
+    }
 }

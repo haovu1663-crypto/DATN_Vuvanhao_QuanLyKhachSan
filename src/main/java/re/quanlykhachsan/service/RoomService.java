@@ -1,5 +1,6 @@
 package re.quanlykhachsan.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import re.quanlykhachsan.dto.request.RoomRequest;
 import re.quanlykhachsan.dto.response.RoomRespone;
 import re.quanlykhachsan.entity.Room;
 import re.quanlykhachsan.entity.RoomType;
+import re.quanlykhachsan.entity.StatusRoom;
 import re.quanlykhachsan.exception.ResourceNotFoundException;
 import re.quanlykhachsan.repository.RoomRepository;
 import re.quanlykhachsan.repository.RoomTypeRepository;
@@ -75,8 +77,36 @@ public class RoomService implements IRoomService {
     }
 
     @Override
+    @Transactional
     public List<RoomRespone> getListRoom() {
         List<Room> rooms = roomRepository.findAll();
         return rooms.stream().map(n ->modelMapper.map(n,RoomRespone.class)).collect(Collectors.toList());
+    }
+
+
+    @Override
+    @Transactional
+    public List<RoomRespone> getListRoomByStatusAvailble() {
+        // Lấy danh sách các phòng có trạng thái AVAILABLE[cite: 2]
+        List<Room> rooms = roomRepository.findByStatus(StatusRoom.AVAILABLE);
+
+        return rooms.stream().map(room -> {
+            // Map các field cơ bản (name, price, status)
+            RoomRespone response = modelMapper.map(room, RoomRespone.class);
+
+            // Trích xuất id từ RoomType của thực thể Room sang type_room_id của DTO[cite: 1, 2, 3]
+            if (room.getRoomType() != null) {
+                response.setType_room_id(room.getRoomType().getId());
+            }
+            response.setImages(room.getImages());
+            return response;
+        }).collect(Collectors.toList());
+    }
+    // update room khi có ng đăt phòng
+    @Override
+    public void upadteRoomCurrnetlyTenant(Long roomid) throws ResourceNotFoundException {
+        Room room = roomRepository.findById(roomid).orElseThrow(()->new ResourceNotFoundException("không tìm thấy room"));
+        room.setStatus(StatusRoom.CURRENTLY_TENANT);
+        roomRepository.save(room);
     }
 }
