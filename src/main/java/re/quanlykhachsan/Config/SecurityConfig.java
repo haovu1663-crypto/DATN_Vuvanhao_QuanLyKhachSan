@@ -94,7 +94,8 @@ public class SecurityConfig {
                                         .requestMatchers("/api/v1/roomtypes").permitAll()// the dùng hasAuthority("ROLE_MANAGER")
                                         .requestMatchers("/home").permitAll()
                                         .requestMatchers("/demo").permitAll()
-
+                                        .requestMatchers("/rooms/form").permitAll()
+                                        .requestMatchers("/api/v1/employees/register").permitAll()
                                         .anyRequest().authenticated() // các api khác thì phải xác thực thì ms vào đc(đăng nhập)
                 )
                 // ✅ đăng ký EntryPoint ở đây

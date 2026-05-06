@@ -18,4 +18,5 @@ public class JwtRespone {
    private String fullName;
    private Date expirationDate;
    private final LocalDateTime timestamp = LocalDateTime.now();
+    private String role;
 }

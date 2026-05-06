@@ -34,6 +34,7 @@ public class EmployeeService implements IEmployeeSevice {
         }
         Employee employee = modelMapper.map(employeeRequest, Employee.class);
         employee.setPassword(passwordEncoder.encode(employeeRequest.getPassword()));
+        employee.setRole("ROLE_EMPLOYEE");
         employeeRepository.save(employee);
         return modelMapper.map(employee, EmployeeResponse.class);
     }

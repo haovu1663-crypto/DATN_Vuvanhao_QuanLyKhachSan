@@ -572,6 +572,42 @@
         .bk-otp-hint { font-size: 11px; color: var(--gray); margin-top: -14px; margin-bottom: 16px; }
         .bk-otp-hint.success { color: #16a34a; font-weight: 600; }
 
+
+        /* ===== MODAL THANH TOÁN ===== */
+        #payment-section {
+            max-width: 480px; width: 100%;
+            animation: slideUp 0.35s cubic-bezier(.22,.68,0,1.2);
+            position: relative; max-height: 90vh; overflow-y: auto; border-radius: 20px;
+        }
+        .pay-qr-box {
+            background: #f8fafc; border: 1.5px dashed var(--border);
+            border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 20px;
+        }
+        .pay-qr-img {
+            width: 180px; height: 180px; object-fit: contain;
+            background: white; padding: 10px; border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin: 0 auto 12px; display: block;
+        }
+        .pay-info-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 0; border-bottom: 1px solid var(--border);
+        }
+        .pay-info-row:last-child { border-bottom: none; }
+        .pay-info-label { font-size: 13px; color: var(--gray); }
+        .pay-info-val { font-size: 14px; font-weight: 700; color: var(--navy); text-align: right; }
+        .pay-info-val.highlight { color: #e67e00; font-size: 16px; }
+
+        .btn-copy {
+            background: none; border: none; color: var(--blue);
+            cursor: pointer; font-size: 14px; margin-left: 8px; transition: 0.2s;
+        }
+        .btn-copy:hover { color: var(--blue-dark); transform: scale(1.1); }
+
+        .pay-guide {
+            font-size: 12px; color: var(--gray); text-align: center;
+            background: #eff6ff; padding: 12px; border-radius: 10px; margin-top: 16px;
+        }
+
     </style>
 </head>
 <body>
@@ -611,7 +647,7 @@
                 <button class="menu-item" onclick="menuAction('yeu-thich')"><span class="menu-icon">❤️</span>Yêu thích</button>
                 <hr class="menu-divider">
                 <div class="menu-section-title">Quản lý</div>
-                <button class="menu-item" onclick="menuAction('quan-ly-phong')"><span class="menu-icon">🏨</span>Quản lý phòng</button>
+                <button class="menu-item" id="menu-quan-ly-phong" onclick="menuAction('quan-ly-phong')"><span class="menu-icon">🏨</span>Quản lý phòng</button>
                 <button class="menu-item" onclick="menuAction('ho-tro')"><span class="menu-icon">💬</span>Hỗ trợ & Trợ giúp</button>
                 <hr class="menu-divider">
                 <button class="menu-item danger" onclick="handleLogout()"><span class="menu-icon">🚪</span>Đăng xuất</button>
@@ -740,6 +776,69 @@
         <p style="font-size:16px;font-weight:600;color:#dc2626;margin:0 0 6px;">Không thể tải danh sách phòng</p>
         <p id="room-error-msg" style="font-size:13px;color:var(--gray);"></p>
         <button onclick="loadRooms()" style="margin-top:14px;padding:10px 24px;background:var(--navy);color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Thử lại</button>
+    </div>
+
+    <!-- ===== MODAL THANH TOÁN ===== -->
+    <div class="modal-overlay" id="modal-payment-overlay" onclick="handlePaymentOverlayClick(event)">
+        <div id="payment-section">
+            <div class="reg-card">
+                <div class="reg-banner" style="background: linear-gradient(135deg, #1e3a8a 0%, #172554 100%);">
+                    <button class="reg-close" onclick="hidePaymentModal()">✕</button>
+                    <h2>Thanh toán tiền cọc</h2>
+                    <p>Vui lòng chuyển khoản để hoàn tất đặt phòng</p>
+                </div>
+                <div class="reg-body" style="padding: 24px 30px;">
+
+                    <div class="pay-qr-box">
+                        <!-- Ảnh QR giả định, bạn có thể thay bằng API tạo QR thực tế (như VietQR) sau -->
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=DemoThanhToan&bgcolor=ffffff" alt="QR Code" class="pay-qr-img">
+                        <div style="font-size: 13px; font-weight: 600; color: var(--navy);">Quét mã QR qua ứng dụng Ngân hàng</div>
+                    </div>
+
+                    <div>
+                        <div class="pay-info-row">
+                            <span class="pay-info-label">Ngân hàng</span>
+                            <span class="pay-info-val">Vietcombank (VCB)</span>
+                        </div>
+                        <div class="pay-info-row">
+                            <span class="pay-info-label">Chủ tài khoản</span>
+                            <span class="pay-info-val">NGUYEN VAN A</span>
+                        </div>
+                        <div class="pay-info-row">
+                            <span class="pay-info-label">Số tài khoản</span>
+                            <div style="display: flex; align-items: center;">
+                                <span class="pay-info-val" id="pay-stk">1234567890</span>
+                                <button class="btn-copy" onclick="copyText('pay-stk')" title="Sao chép">📋</button>
+                            </div>
+                        </div>
+                        <div class="pay-info-row">
+                            <span class="pay-info-label">Số tiền cần chuyển</span>
+                            <div style="display: flex; align-items: center;">
+                                <span class="pay-info-val highlight" id="pay-amount">—</span>
+                                <button class="btn-copy" onclick="copyText('pay-amount')" title="Sao chép">📋</button>
+                            </div>
+                        </div>
+                        <div class="pay-info-row">
+                            <span class="pay-info-label">Nội dung chuyển khoản</span>
+                            <div style="display: flex; align-items: center;">
+                                <span class="pay-info-val" id="pay-content">STAYVIET Demo</span>
+                                <button class="btn-copy" onclick="copyText('pay-content')" title="Sao chép">📋</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pay-guide">
+                        Sau khi chuyển khoản thành công, hệ thống sẽ tự động xác nhận trong vòng 1-3 phút.
+                    </div>
+
+                    <hr class="reg-divider" style="margin: 20px 0;">
+
+                    <button class="btn-submit-reg" style="background: linear-gradient(135deg, #16a34a, #15803d);" onclick="confirmPaymentPaid()">
+                        ✅ &nbsp;Tôi đã chuyển khoản
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
 </section>
@@ -1072,10 +1171,7 @@
         }
     }
 
-    function menuAction(action) {
-        closeAll();
-        alert(`Tính năng đang phát triển cho hành động: ${action}`);
-    }
+
 
     function showRegister() {
         closeAll();
@@ -1224,7 +1320,16 @@
                 localStorage.setItem('accessToken', data.accessToken);
                 localStorage.setItem('userId', data.userId);
                 localStorage.setItem('fullName', data.fullName);
-                localStorage.setItem('expirationDate', data.expirationDate);
+
+                // Lưu trực tiếp giá trị chuỗi từ backend trả về
+                const userRole = data.role || 'ROLE_USER';
+                localStorage.setItem('userRole', userRole);
+
+                // Tự tính expirationDate — tránh lưu "undefined" nếu backend không trả về
+                // ⚠️ Sửa 3600000 cho khớp jwt.expired trong application.properties (hiện là 1 giờ)
+                const _exp = data.expirationDate ? new Date(data.expirationDate).getTime() : NaN;
+                const _expFinal = (!isNaN(_exp) && _exp > Date.now()) ? _exp : Date.now() + 3600000;
+                localStorage.setItem('expirationDate', new Date(_expFinal).toISOString());
                 // Cập nhật giao diện header ngay lập tức
                 updateAuthUI(true, data.fullName);
                 hideLogin();
@@ -1249,6 +1354,9 @@
             });
 
     }
+
+    //== ẩn quản lý phòng nếu là user ===//
+
 </script>
 <script>
     // ===== ROOM LISTING - API /api/v1/rooms/status =====
@@ -1874,12 +1982,13 @@
 <script>
     // ---- Cập nhật giao diện header theo trạng thái đăng nhập ----
     function updateAuthUI(isLoggedIn, fullName) {
-        const btnLogin    = document.getElementById('btnLogin');
-        const btnRegister = document.getElementById('btnRegister');
-        const menuWrap    = document.getElementById('menuWrap');
-        const userInfo    = document.getElementById('userInfo');
-        const userAvatar  = document.getElementById('userAvatar');
-        const userFullname= document.getElementById('userFullname');
+        const btnLogin        = document.getElementById('btnLogin');
+        const btnRegister     = document.getElementById('btnRegister');
+        const menuWrap        = document.getElementById('menuWrap');
+        const userInfo        = document.getElementById('userInfo');
+        const userAvatar      = document.getElementById('userAvatar');
+        const userFullname    = document.getElementById('userFullname');
+        const btnQuanLyPhong  = document.getElementById('menu-quan-ly-phong');
 
         if (isLoggedIn && fullName) {
             // Ẩn nút Đăng nhập / Đăng ký
@@ -1891,6 +2000,13 @@
             // Lấy chữ cái đầu làm avatar
             userFullname.textContent  = fullName;
             userAvatar.textContent    = fullName.trim().charAt(0).toUpperCase();
+
+            // Ẩn/hiện nút "Quản lý phòng" theo role
+            const role = localStorage.getItem('userRole') || '';
+            if (btnQuanLyPhong) {
+                // Chỉ hiện cho ADMIN và MANAGER, ẩn với ROLE_USER
+                btnQuanLyPhong.style.display = (role === 'ROLE_USER') ? 'none' : 'flex';
+            }
         } else {
             // Hiện nút Đăng nhập / Đăng ký
             btnLogin.style.display    = '';
@@ -1898,6 +2014,8 @@
             // Ẩn tên user và menu
             userInfo.style.display    = 'none';
             menuWrap.style.display    = 'none';
+            // Ẩn nút quản lý phòng khi chưa đăng nhập
+            if (btnQuanLyPhong) btnQuanLyPhong.style.display = 'none';
         }
     }
 
@@ -1931,12 +2049,36 @@
         });
     }
 
+    // ---- Kiểm tra token còn hạn không (không xoá session, chỉ đọc) ----
+    function isTokenValid() {
+        const token = localStorage.getItem('accessToken');
+        const exp   = localStorage.getItem('expirationDate');
+        if (!token) return false;
+        // Nếu không có exp hoặc bị lưu sai → coi token vẫn hợp lệ (tương thích cũ)
+        if (!exp || exp === 'undefined' || exp === 'null') return true;
+        const expMs = new Date(exp).getTime();
+        if (isNaN(expMs)) return true;
+        return Date.now() < expMs;
+    }
+
     // ---- Kiểm tra trạng thái đăng nhập khi tải trang ----
     (function checkLoginOnLoad() {
         const token    = localStorage.getItem('accessToken');
         const fullName = localStorage.getItem('fullName');
         if (token && fullName) {
             updateAuthUI(true, fullName);
+            // Nếu token hết hạn thì nhắc nhở nhẹ, KHÔNG tự đăng xuất
+            if (!isTokenValid()) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Phiên đăng nhập sắp hết hạn',
+                    text: 'Vui lòng đăng nhập lại để đảm bảo không bị gián đoạn.',
+                    confirmButtonText: 'Đăng nhập lại',
+                    confirmButtonColor: '#1a2744',
+                    showCancelButton: true,
+                    cancelButtonText: 'Tiếp tục'
+                }).then(r => { if (r.isConfirmed) showLogin(); });
+            }
         } else {
             updateAuthUI(false);
         }
@@ -1994,22 +2136,46 @@
 
         Swal.showLoading();
 
+        // Kiểm tra đăng nhập — nếu chưa có token thì yêu cầu đăng nhập
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Chưa đăng nhập',
+                text: 'Vui lòng đăng nhập để đặt phòng.',
+                confirmButtonColor: '#1a2744'
+            }).then(() => { hideBooking(); showLogin(); });
+            return;
+        }
+
+        // Nếu token hết hạn thì nhắc đăng nhập lại, không tự đăng xuất
+        if (!isTokenValid()) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Phiên đăng nhập hết hạn',
+                text: 'Token đã hết hạn, vui lòng đăng nhập lại để đặt phòng.',
+                confirmButtonColor: '#1a2744'
+            }).then(() => { hideBooking(); showLogin(); });
+            return;
+        }
+
+        const customerId = localStorage.getItem('userId');
+
         // Chuẩn bị params gửi lên API
         const params = new URLSearchParams();
-        params.append('roomId', bkState.roomId);
-        params.append('eventcheckinDate', eventcheckinDate); // Đúng yêu cầu của bạn
-        params.append('eventcheckoutDate', eventcheckoutDate); // Đúng yêu cầu của bạn
-        params.append('adults', bkState.adults);
-        params.append('children', bkState.children);
-        params.append('email', email);
-        params.append('notes', notes);
+        params.append('roomId',            bkState.roomId);
+        params.append('customerId',        customerId);          // bắt buộc để BookingService tìm Customer
+        params.append('enventCheckinDate', eventcheckinDate);
+        params.append('enventCheckoutDate', eventcheckoutDate);
+        params.append('adults',            bkState.adults);
+        params.append('children',          bkState.children);
+        params.append('email',             email);
+        params.append('notes',             notes);
 
-        // Lấy token nếu user đã đăng nhập
-        const token = localStorage.getItem('accessToken');
-        const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
-        if (token) {
-            headers['Authorization'] = 'Bearer ' + token;
-        }
+        const headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': 'Bearer ' + token   // luôn gửi kèm token
+        };
 
         fetch('/api/v1/booking/bookingonline', {
             method: 'POST',
@@ -2017,6 +2183,17 @@
             body: params
         })
             .then(async response => {
+                if (response.status === 401) {
+                    Swal.close();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Phiên đăng nhập hết hạn',
+                        text: 'Vui lòng đăng nhập lại để tiếp tục đặt phòng.',
+                        confirmButtonText: 'Đăng nhập lại',
+                        confirmButtonColor: '#1a2744'
+                    }).then(() => { hideBooking(); showLogin(); });
+                    return null;
+                }
                 if (!response.ok) {
                     const errorText = await response.text();
                     throw new Error(errorText || 'Có lỗi xảy ra khi đặt phòng');
@@ -2024,15 +2201,14 @@
                 return response.json();
             })
             .then(data => {
+                if (!data) return; // bị xử lý ở nhánh 401 rồi
                 Swal.fire({
                     icon: 'success',
-                    title: 'Đặt phòng thành công!',
+                    title: 'Đặt phòng thành công! 🎉',
                     text: 'Hệ thống đã ghi nhận thông tin đặt phòng của bạn. Vui lòng kiểm tra Email.',
                     confirmButtonColor: '#c9a84c'
                 });
                 hideBooking();
-                // Optional: Có thể gọi lại hàm loadRooms() ở đây để cập nhật lại trạng thái phòng
-                // loadRooms();
             })
             .catch(error => {
                 Swal.fire({
@@ -2042,6 +2218,226 @@
                     confirmButtonColor: '#dc2626'
                 });
             });
+    }
+</script>
+
+
+
+
+<script>
+    // ===== LOGIC MODAL THANH TOÁN =====
+
+    // Hàm này được gọi khi ấn nút "Xác nhận đặt phòng" (đã có sẵn id="btn-submit-booking" trong code của bạn)
+    // ===== STATE lưu kết quả sau khi booking thành công =====
+    let _bookingResult = { bookingId: null, depositAmount: 0 };
+
+    function submitBooking() {
+        if (!bkState.checkIn || !bkState.checkOut) {
+            Swal.fire({ icon: 'warning', title: 'Chưa chọn ngày', text: 'Vui lòng chọn ngày nhận và trả phòng!', confirmButtonColor: '#1a2744' });
+            return;
+        }
+        const email = document.getElementById('bk-email').value.trim();
+        if (!email) {
+            Swal.fire({ icon: 'warning', title: 'Thiếu Email', text: 'Vui lòng nhập email xác nhận đặt phòng!', confirmButtonColor: '#1a2744' });
+            return;
+        }
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            Swal.fire({ icon: 'warning', title: 'Chưa đăng nhập', text: 'Vui lòng đăng nhập để đặt phòng.', confirmButtonColor: '#1a2744' })
+                .then(() => { hideBooking(); showLogin(); });
+            return;
+        }
+        if (!isTokenValid()) {
+            Swal.fire({ icon: 'warning', title: 'Phiên đăng nhập hết hạn', text: 'Vui lòng đăng nhập lại.', confirmButtonColor: '#1a2744' })
+                .then(() => { hideBooking(); showLogin(); });
+            return;
+        }
+
+        // Tính tiền cọc từ summary đang hiển thị
+        const depositEl = document.getElementById('bk-sum-deposit');
+        const depositRaw = depositEl ? depositEl.textContent.replace(/[^0-9]/g, '') : '0';
+        _bookingResult.depositAmount = parseInt(depositRaw) || 0;
+
+        Swal.showLoading();
+
+        const params = new URLSearchParams();
+        params.append('roomId',             bkState.roomId);
+        params.append('customerId',         localStorage.getItem('userId'));
+        params.append('enventCheckinDate',  formatDateToAPI(bkState.checkIn));
+        params.append('enventCheckoutDate', formatDateToAPI(bkState.checkOut));
+        params.append('adults',             bkState.adults);
+        params.append('children',           bkState.children);
+        params.append('email',              email);
+        params.append('notes',              document.getElementById('bk-notes').value.trim());
+
+        fetch('/api/v1/booking/bookingonline', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': 'Bearer ' + token
+            },
+            body: params
+        })
+            .then(async response => {
+                if (response.status === 401) {
+                    Swal.fire({ icon: 'warning', title: 'Phiên đăng nhập hết hạn', text: 'Vui lòng đăng nhập lại.', confirmButtonColor: '#1a2744' })
+                        .then(() => { hideBooking(); showLogin(); });
+                    return null;
+                }
+                if (!response.ok) throw new Error(await response.text());
+                return response.json();
+            })
+            .then(data => {
+                if (!data) return;
+                // Lưu bookingId trả về từ backend (ApiResponse.data hoặc data trực tiếp)
+                _bookingResult.bookingId = data.data?.id || data.id || data.data || null;
+
+                // Đổ dữ liệu vào modal thanh toán
+                const fmtVnd = n => new Intl.NumberFormat('vi-VN').format(n) + ' ₫';
+                document.getElementById('pay-amount').textContent = fmtVnd(_bookingResult.depositAmount);
+                const randomCode = Math.floor(10000 + Math.random() * 90000);
+                document.getElementById('pay-content').textContent = 'STAYVIET ' + randomCode;
+
+                // Chuyển sang modal thanh toán
+                Swal.close();
+                hideBooking();
+                showPaymentModal();
+            })
+            .catch(err => {
+                Swal.fire({ icon: 'error', title: 'Đặt phòng thất bại', text: err.message, confirmButtonColor: '#dc2626' });
+            });
+    }
+
+    function showPaymentModal() {
+        document.getElementById('modal-payment-overlay').classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function hidePaymentModal() {
+        document.getElementById('modal-payment-overlay').classList.remove('show');
+        document.body.style.overflow = '';
+    }
+
+    function handlePaymentOverlayClick(e) {
+        if (e.target === document.getElementById('modal-payment-overlay')) {
+            hidePaymentModal();
+        }
+    }
+
+    // Tiện ích: Copy đoạn text
+    function copyText(elementId) {
+        const textToCopy = document.getElementById(elementId).innerText.replace(/₫/g, '').trim(); // Lọc bỏ ký hiệu ₫ nếu copy số tiền
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'Đã sao chép: ' + textToCopy,
+                showConfirmButton: false,
+                timer: 1500
+            });
+        });
+    }
+
+    // Xử lý khi khách hàng ấn "Tôi đã chuyển khoản"
+    function confirmPaymentPaid() {
+        if (!_bookingResult.bookingId) {
+            Swal.fire({ icon: 'error', title: 'Lỗi', text: 'Không tìm thấy thông tin đặt phòng. Vui lòng thử lại.', confirmButtonColor: '#dc2626' });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Đang xác nhận thanh toán...',
+            text: 'Vui lòng không đóng cửa sổ này',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+
+                // Gọi API POST /api/v1/payment/deposit
+                const params = new URLSearchParams();
+                params.append('booking_id', _bookingResult.bookingId);
+                params.append('amount',     _bookingResult.depositAmount);
+
+                const token = localStorage.getItem('accessToken');
+
+                fetch('/api/v1/payment/deposit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Authorization': token ? 'Bearer ' + token : ''
+                    },
+                    body: params
+                })
+                    .then(async response => {
+                        if (!response.ok) throw new Error(await response.text());
+                        return response.text(); // PaymentService trả về String
+                    })
+                    .then(msg => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Thanh toán thành công! 🎉',
+                            html: '<b>' + (msg || 'Thanh toán tiền cọc thành công') + '</b><br><span style="font-size:13px;color:#666;">Thông tin chi tiết đã được gửi qua Email của bạn.</span>',
+                            confirmButtonColor: '#1a2744',
+                            confirmButtonText: 'Hoàn tất'
+                        }).then(() => {
+                            hidePaymentModal();
+                            _bookingResult = { bookingId: null, depositAmount: 0 };
+                            // Load lại danh sách phòng để cập nhật trạng thái
+                            loadRooms();
+                        });
+                    })
+                    .catch(err => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Thanh toán thất bại',
+                            text: err.message || 'Có lỗi xảy ra, vui lòng liên hệ nhân viên hỗ trợ.',
+                            confirmButtonColor: '#dc2626'
+                        });
+                    });
+            }
+        });
+    }
+</script>
+<!--chuyển sang form employ-->
+<script>
+    function menuAction(action) {
+        closeAll();
+
+        const token = localStorage.getItem('accessToken');
+        const ROLE_ROUTES = {
+            'quan-ly-phong': '/rooms/form',
+            'lich-su':        '/booking/history',
+            'yeu-thich':      '/favorites',
+            'ho-tro':         '/support'
+        };
+
+        if (action === 'quan-ly-phong') {
+            // Kiểm tra đăng nhập trước khi chuyển trang
+            if (!token || !isTokenValid()) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Cần đăng nhập',
+                    text: 'Vui lòng đăng nhập để truy cập trang quản lý phòng.',
+                    confirmButtonText: 'Đăng nhập',
+                    confirmButtonColor: '#1a2744',
+                    showCancelButton: true,
+                    cancelButtonText: 'Hủy'
+                }).then(r => { if (r.isConfirmed) showLogin(); });
+                return;
+            }
+            window.location.href = '/rooms/form';
+            return;
+        }
+
+        // Các action chưa làm
+        Swal.fire({
+            icon: 'info',
+            title: 'Tính năng đang phát triển',
+            text: 'Tính năng này sẽ sớm được ra mắt.',
+            confirmButtonColor: '#1a2744',
+            timer: 2000,
+            showConfirmButton: false
+        });
     }
 </script>
 </body>

@@ -13,16 +13,21 @@ import re.quanlykhachsan.dto.request.CustomerRequest;
 import re.quanlykhachsan.dto.request.Login;
 import re.quanlykhachsan.dto.response.JwtRespone;
 import re.quanlykhachsan.entity.Customer;
+import re.quanlykhachsan.entity.Employee;
 import re.quanlykhachsan.exception.DataConfickException;
+import re.quanlykhachsan.exception.ResourceNotFoundException;
 import re.quanlykhachsan.repository.CustomerRespository;
+import re.quanlykhachsan.repository.EmployeeRepository;
 import re.quanlykhachsan.service.interfac.ICustomerService;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class CustomerService implements ICustomerService {
     private final CustomerRespository customerRespository;
+    private final EmployeeRepository employeeRepository;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
@@ -56,13 +61,30 @@ public class CustomerService implements ICustomerService {
             throw new RuntimeException("mk haoc tk sai ");
         }
         // trả vè jwtRespone
-        Customer user = customerRespository.findByUsername(login.getUsername()).orElseThrow(()->new RuntimeException("ko tìm thấy "));
+        Optional<Customer> userOpt = customerRespository.findByUsername(login.getUsername());
+
+// nếu không có trong bảng user thì lấy bảng employee
+        Customer user;
+        if (userOpt.isPresent()) {
+
+            user = userOpt.get();
+        } else {
+            Employee employee = employeeRepository.findByUserName(login.getUsername())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy"));
+
+            user = new Customer();
+            user.setId(employee.getId());
+            user.setFullname(employee.getName());
+            user.setUsername(employee.getUserName());
+            user.setRole(employee.getRole());
+        }
         JwtRespone res =  JwtRespone.builder()
                 .userId(user.getId())
                 .fullName(user.getFullname())
                 .accessToken(jwtService.generateAccessToken(user.getUsername()))
                 .expirationDate(new Date(new Date().getTime()+15*60*1000))
                 .refreshToken(null)
+                .role(user.getRole())
                 .build();
         return res;
     }

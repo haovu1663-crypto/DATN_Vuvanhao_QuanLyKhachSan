@@ -40,7 +40,7 @@ public class EmployeeController {
         );
         return  new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
-    @PostMapping
+    @PostMapping("register")
     public ResponseEntity<?> save(@Valid @ModelAttribute EmployeeRequest employeeRequest) throws DataConfickException {
         ApiResponse<EmployeeResponse> apiResponse = new ApiResponse<>(
                 "Add success","201.Created", employeeService.add(employeeRequest)
