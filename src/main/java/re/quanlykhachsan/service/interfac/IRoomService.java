@@ -15,4 +15,7 @@ public interface IRoomService {
     List<RoomRespone> getListRoom();
     List<RoomRespone> getListRoomByStatusAvailble();
     void upadteRoomCurrnetlyTenant(Long id) throws ResourceNotFoundException;
+    RoomRespone getRoomById(Long id) throws ResourceNotFoundException;
+    List<RoomRespone> getListRoomByStatusClear() ;
+    void updateClearToAvailble(Long id) throws ResourceNotFoundException;
 }

@@ -49,24 +49,43 @@ public class RoomService implements IRoomService {
 
     @Override
     public RoomRespone update(RoomRequest roomRequest, Long id) throws IOException, ResourceNotFoundException {
-       if(!roomRepository.existsById(id)){
-                     throw  new ResourceNotFoundException("Không tim thấy Room có id : "+id+" update thất bai");
-       }
-        Room room = modelMapper.map(roomRequest, Room.class);
-        List<MultipartFile> files = roomRequest.getImages();
-        List<String> imageUrls = new ArrayList<>();
-        for (MultipartFile file : files) {
-            if (!file.isEmpty()) {
-                String url = uploadService.uploadFile(file);
-                imageUrls.add(url);
-            }
+        // Load phòng hiện tại từ DB — tránh modelMapper ghi đè id và dữ liệu cũ thành null
+        Room room = roomRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Room có id: " + id));
+
+        // Cập nhật các field cơ bản
+        room.setName(roomRequest.getName());
+        room.setPrice(roomRequest.getPrice());
+        if (roomRequest.getStatus() != null) {
+            room.setStatus(roomRequest.getStatus());
         }
-        RoomType roomType = roomTypeRepository.findById(roomRequest.getType_room_id()).orElseThrow(()->new ResourceNotFoundException("không tim thấy roomType có id :"+roomRequest.getType_room_id()));
+
+        // Cập nhật RoomType
+        RoomType roomType = roomTypeRepository.findById(roomRequest.getType_room_id())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy RoomType có id: " + roomRequest.getType_room_id()));
         room.setRoomType(roomType);
-        room.setImages(imageUrls);
-        room.setId(id);
+
+        // Xử lý ảnh:
+        // - Có file mới (không rỗng) → upload và thay thế ảnh cũ
+        // - Không có file mới (null hoặc toàn file rỗng) → giữ nguyên ảnh cũ
+        List<MultipartFile> files = roomRequest.getImages();
+        boolean hasNewImages = files != null && files.stream().anyMatch(f -> f != null && !f.isEmpty());
+
+        if (hasNewImages) {
+            List<String> imageUrls = new ArrayList<>();
+            for (MultipartFile file : files) {
+                if (file != null && !file.isEmpty()) {
+                    imageUrls.add(uploadService.uploadFile(file));
+                }
+            }
+            room.setImages(imageUrls);
+        }
+        // Không có ảnh mới → giữ nguyên room.getImages() đang có
+
         roomRepository.save(room);
-        return modelMapper.map(room, RoomRespone.class);
+        RoomRespone respone = modelMapper.map(room, RoomRespone.class);
+        respone.setType_room_id(room.getRoomType().getId());
+        return respone;
     }
 
     @Override
@@ -107,6 +126,40 @@ public class RoomService implements IRoomService {
     public void upadteRoomCurrnetlyTenant(Long roomid) throws ResourceNotFoundException {
         Room room = roomRepository.findById(roomid).orElseThrow(()->new ResourceNotFoundException("không tìm thấy room"));
         room.setStatus(StatusRoom.CURRENTLY_TENANT);
+        roomRepository.save(room);
+    }
+
+    @Override
+    public RoomRespone getRoomById(Long id) throws ResourceNotFoundException {
+        Room room = roomRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("không tìm thấy phòng có id này"));
+       RoomRespone roomRespone= modelMapper.map(room, RoomRespone.class);
+       roomRespone.setType_room_id(room.getRoomType().getId());
+        return roomRespone;
+    }
+
+    @Override
+    public List<RoomRespone> getListRoomByStatusClear() {
+
+        // Lấy danh sách các phòng có trạng thái AVAILABLE[cite: 2]
+        List<Room> rooms = roomRepository.findByStatus(StatusRoom.CLEANING);
+
+        return rooms.stream().map(room -> {
+            // Map các field cơ bản (name, price, status)
+            RoomRespone response = modelMapper.map(room, RoomRespone.class);
+
+            // Trích xuất id từ RoomType của thực thể Room sang type_room_id của DTO[cite: 1, 2, 3]
+            if (room.getRoomType() != null) {
+                response.setType_room_id(room.getRoomType().getId());
+            }
+            response.setImages(room.getImages());
+            return response;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public void updateClearToAvailble(Long roomid) throws ResourceNotFoundException {
+        Room room = roomRepository.findById(roomid).orElseThrow(()->new ResourceNotFoundException("không tìm thấy room"));
+        room.setStatus(StatusRoom.AVAILABLE);
         roomRepository.save(room);
     }
 }

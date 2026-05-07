@@ -27,7 +27,7 @@ public class RoomController {
         );
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateRoom(@Valid @ModelAttribute RoomRequest roomRequest,@PathVariable Long id) throws IOException,ResourceNotFoundException {
         ApiResponse<RoomRespone> response = new ApiResponse<>(
                 "update cusscess ","201 CREATED",roomService.update(roomRequest,id)
@@ -54,5 +54,24 @@ public class RoomController {
                 "get rooms","400",roomService.getListRoomByStatusAvailble()
         );
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    @GetMapping("/id")
+    public ResponseEntity<?> getRoomById(@Valid @RequestParam Long id) throws ResourceNotFoundException {
+        ApiResponse<RoomRespone> response = new ApiResponse<>(
+                "get room by id","400",roomService.getRoomById(id)
+        );
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    @GetMapping("/status/clear")
+    public ResponseEntity<?> getRoomsStatusClear(){
+        ApiResponse<List<RoomRespone>> response = new ApiResponse<>(
+                "get rooms","400",roomService.getListRoomByStatusClear()
+        );
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    @PostMapping("/status/cleartoavilble/{id}")
+    public ResponseEntity<?> updateStatusClearToAvailable(@Valid @PathVariable Long id) throws ResourceNotFoundException {
+        roomService.updateClearToAvailble(id);
+        return new ResponseEntity<>("success", HttpStatus.OK);
     }
 }
