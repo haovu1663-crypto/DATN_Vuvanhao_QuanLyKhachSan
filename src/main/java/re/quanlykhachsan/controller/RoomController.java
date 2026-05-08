@@ -74,4 +74,20 @@ public class RoomController {
         roomService.updateClearToAvailble(id);
         return new ResponseEntity<>("success", HttpStatus.OK);
     }
+    @GetMapping("/status/curently")
+    public ResponseEntity<?> getRoomsStatusCurently(){
+        ApiResponse<List<RoomRespone>> response = new ApiResponse<>(
+                "get rooms","400",roomService.getListRoomByStatusCurrentltTennat()
+        );
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    @GetMapping("/customer/{email}")
+    public ResponseEntity<?> getRoomsByCustomerEmail(@Valid @PathVariable String email){
+        ApiResponse<List<RoomRespone>> response = new ApiResponse<>(
+                "get rooms","400",roomService.getListRoomByCustomerEmail(email)
+        );
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+
 }

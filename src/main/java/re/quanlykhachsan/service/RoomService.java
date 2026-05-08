@@ -162,4 +162,44 @@ public class RoomService implements IRoomService {
         room.setStatus(StatusRoom.AVAILABLE);
         roomRepository.save(room);
     }
+
+    @Override
+    public List<RoomRespone> getListRoomByStatusCurrentltTennat() {
+        // Lấy danh sách các phòng có trạng thái AVAILABLE[cite: 2]
+        List<Room> rooms = roomRepository.findByStatus(StatusRoom.CURRENTLY_TENANT);
+
+        return rooms.stream().map(room -> {
+            // Map các field cơ bản (name, price, status)
+            RoomRespone response = modelMapper.map(room, RoomRespone.class);
+
+            // Trích xuất id từ RoomType của thực thể Room sang type_room_id của DTO[cite: 1, 2, 3]
+            if (room.getRoomType() != null) {
+                response.setType_room_id(room.getRoomType().getId());
+            }
+            response.setImages(room.getImages());
+            return response;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<RoomRespone> getListRoomByCustomerEmail(String email) {
+        List<Room> rooms = roomRepository.findRoomsByCustomerEmail(email);
+
+        return rooms.stream().map(room -> {
+            // Map các field cơ bản (name, price, status)
+            RoomRespone response = modelMapper.map(room, RoomRespone.class);
+
+            // Trích xuất id từ RoomType của thực thể Room sang type_room_id của DTO[cite: 1, 2, 3]
+            if (room.getRoomType() != null) {
+                response.setType_room_id(room.getRoomType().getId());
+            }
+            response.setImages(room.getImages());
+            return response;
+        }).collect(Collectors.toList());
+    }
+     public void updateStatusCurrentToChecked(Long roomId) throws ResourceNotFoundException {
+        Room room = roomRepository.findById(roomId).orElseThrow(()->new ResourceNotFoundException("không c "));
+        room.setStatus(StatusRoom.CHECKED);
+        roomRepository.save(room);
+     }
 }

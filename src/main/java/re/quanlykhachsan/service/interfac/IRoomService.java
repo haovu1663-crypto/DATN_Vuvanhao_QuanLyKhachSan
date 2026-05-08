@@ -1,5 +1,6 @@
 package re.quanlykhachsan.service.interfac;
 
+import org.springframework.data.repository.query.Param;
 import re.quanlykhachsan.dto.request.RoomRequest;
 import re.quanlykhachsan.dto.response.RoomRespone;
 import re.quanlykhachsan.entity.StatusRoom;
@@ -18,4 +19,6 @@ public interface IRoomService {
     RoomRespone getRoomById(Long id) throws ResourceNotFoundException;
     List<RoomRespone> getListRoomByStatusClear() ;
     void updateClearToAvailble(Long id) throws ResourceNotFoundException;
+    List<RoomRespone> getListRoomByStatusCurrentltTennat();
+    List<RoomRespone> getListRoomByCustomerEmail( String email);
 }

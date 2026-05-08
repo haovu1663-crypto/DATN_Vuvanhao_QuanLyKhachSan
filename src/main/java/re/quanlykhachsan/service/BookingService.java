@@ -5,16 +5,16 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import re.quanlykhachsan.dto.request.BookingRequest;
 import re.quanlykhachsan.dto.response.BookingRespone;
-import re.quanlykhachsan.entity.Booking;
-import re.quanlykhachsan.entity.Customer;
-import re.quanlykhachsan.entity.Room;
-import re.quanlykhachsan.entity.StatusBooking;
+import re.quanlykhachsan.entity.*;
 import re.quanlykhachsan.exception.ResourceNotFoundException;
 import re.quanlykhachsan.repository.BookingRespository;
 import re.quanlykhachsan.repository.CustomerRespository;
 import re.quanlykhachsan.repository.EmployeeRepository;
 import re.quanlykhachsan.repository.RoomRepository;
 import re.quanlykhachsan.service.interfac.IBookingService;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -52,4 +52,25 @@ public class BookingService implements IBookingService {
     public BookingRespone EmployeeBooking(BookingRequest bookingRequest) {
         return null;
     }
+
+    @Override
+    public void bookingCheckIn(Long employeeId, String email, Long roomId) throws ResourceNotFoundException {
+       // lấy ra id boooking từ email khách đặt khòng
+        Booking booking = bookingRespository.findByCustomerEmailAndRoomIdAndToyalPriceIsNull(email, roomId);
+
+
+
+        booking.setStatusBooking(StatusBooking.CHECKED_IN);
+        LocalDate today = LocalDate.now();
+
+        if (today.isBefore(booking.getEnventCheckinDate())) {
+            // Xử lý khi khách đến nhận phòng TRƯỚC ngày sự kiện bắt đầu
+            throw  new RuntimeException("ngày nhận phòng của quý khác là "+booking.getEnventCheckinDate());
+        }
+        booking.setCheckInDate( LocalDateTime.now());
+        Employee employee = employeeRespository.findById(employeeId).orElseThrow(()-> new ResourceNotFoundException("không tim thấy mã nhận viên "));
+        booking.setEmployee(employee);
+        bookingRespository.save(booking);
+        roomService.updateStatusCurrentToChecked(roomId);
+   }
 }

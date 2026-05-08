@@ -7,5 +7,6 @@ import re.quanlykhachsan.exception.ResourceNotFoundException;
 public interface IBookingService {
     BookingRespone CustomerBooking(BookingRequest bookingRequest) throws ResourceNotFoundException;
     BookingRespone EmployeeBooking(BookingRequest bookingRequest);
+    void bookingCheckIn(Long employeeId,String email, Long roomId) throws ResourceNotFoundException;
 
 }

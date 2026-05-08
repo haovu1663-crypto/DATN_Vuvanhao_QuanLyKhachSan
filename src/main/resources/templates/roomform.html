@@ -62,6 +62,12 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
+        /* ===== VIEW CHECK IN ===== */
+        #view-checkin { display: none; }
+        #view-checkin.active { display: flex; flex-direction: column; }
+
+        .rs-badge.currently { background:#fee2e2; color:#991b1b; }
+
         /* ===== VIEW RESET STATUS ===== */
         #view-reset-status { display: none; }
         #view-reset-status.active { display: flex; flex-direction: column; }
@@ -177,6 +183,171 @@
             cursor: pointer; transition: opacity .15s, transform .15s;
         }
         .rs-confirm-ok:hover { opacity: .9; transform: translateY(-1px); }
+
+        /* ===== TOAST NOTIFICATION SYSTEM ===== */
+        #toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+        .toast {
+            pointer-events: all;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 18px 14px 14px;
+            border-radius: 16px;
+            min-width: 320px;
+            max-width: 420px;
+            background: #fff;
+            box-shadow: 0 8px 32px rgba(15,23,42,0.13), 0 1.5px 4px rgba(15,23,42,0.07);
+            border: 1.5px solid #e2e8f0;
+            animation: toastIn .35s cubic-bezier(.34,1.56,.64,1);
+            position: relative;
+            overflow: hidden;
+        }
+        .toast.toast-exit {
+            animation: toastOut .28s ease forwards;
+        }
+        @keyframes toastIn {
+            from { transform: translateX(110%); opacity: 0; }
+            to   { transform: translateX(0);    opacity: 1; }
+        }
+        @keyframes toastOut {
+            from { transform: translateX(0);    opacity: 1; max-height: 120px; margin-bottom: 0; }
+            to   { transform: translateX(110%); opacity: 0; max-height: 0;     margin-bottom: -10px; }
+        }
+        .toast-bar {
+            position: absolute;
+            bottom: 0; left: 0;
+            height: 3px;
+            border-radius: 0 0 0 16px;
+            animation: toastBar linear forwards;
+        }
+        @keyframes toastBar {
+            from { width: 100%; }
+            to   { width: 0%; }
+        }
+        .toast-icon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 17px;
+        }
+        .toast-content { flex: 1; min-width: 0; }
+        .toast-title {
+            font-size: 13px; font-weight: 700; color: #1e293b;
+            margin-bottom: 2px;
+        }
+        .toast-msg {
+            font-size: 12px; color: #64748b; line-height: 1.5;
+            word-break: break-word;
+        }
+        .toast-close {
+            flex-shrink: 0; width: 22px; height: 22px;
+            border-radius: 6px; border: none; background: #f1f5f9;
+            color: #94a3b8; cursor: pointer; font-size: 11px;
+            display: flex; align-items: center; justify-content: center;
+            transition: background .15s;
+            margin-top: 1px;
+        }
+        .toast-close:hover { background: #e2e8f0; color: #475569; }
+
+        /* success */
+        .toast-success .toast-icon { background: #dcfce7; color: #16a34a; }
+        .toast-success .toast-bar  { background: linear-gradient(90deg,#16a34a,#4ade80); }
+        /* error */
+        .toast-error .toast-icon { background: #fee2e2; color: #ef4444; }
+        .toast-error .toast-bar  { background: linear-gradient(90deg,#ef4444,#fca5a5); }
+        /* warning */
+        .toast-warning .toast-icon { background: #fef9c3; color: #ca8a04; }
+        .toast-warning .toast-bar  { background: linear-gradient(90deg,#ca8a04,#fde047); }
+        /* info */
+        .toast-info .toast-icon { background: #dbeafe; color: #2563eb; }
+        .toast-info .toast-bar  { background: linear-gradient(90deg,#2563eb,#93c5fd); }
+
+        /* ===== CUSTOM CONFIRM MODAL (dùng cho checkIn) ===== */
+        #ci-confirm-overlay {
+            display: none;
+            position: fixed; inset: 0; z-index: 99998;
+            background: rgba(15,23,42,0.5);
+            backdrop-filter: blur(6px);
+            align-items: center; justify-content: center;
+        }
+        #ci-confirm-overlay.active { display: flex; }
+        #ci-confirm-box {
+            background: #fff;
+            border-radius: 24px;
+            padding: 0;
+            max-width: 420px; width: 92%;
+            box-shadow: 0 32px 72px rgba(15,23,42,0.2);
+            overflow: hidden;
+            animation: rsPopIn .25s cubic-bezier(.34,1.56,.64,1);
+        }
+        .ci-confirm-header {
+            padding: 28px 28px 0;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+        }
+        .ci-confirm-icon-wrap {
+            width: 68px; height: 68px; border-radius: 20px;
+            background: linear-gradient(135deg,#eff6ff,#dbeafe);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 30px; margin-bottom: 16px;
+            box-shadow: 0 4px 16px rgba(37,99,235,0.13);
+        }
+        .ci-confirm-title {
+            font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 6px;
+        }
+        .ci-confirm-subtitle { font-size: 12px; color: #94a3b8; font-weight: 500; }
+        .ci-confirm-details {
+            margin: 20px 28px 0;
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 14px 16px;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .ci-confirm-row {
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+        }
+        .ci-confirm-label {
+            font-size: 11px; font-weight: 600; color: #94a3b8;
+            text-transform: uppercase; letter-spacing: .06em;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .ci-confirm-value {
+            font-size: 13px; font-weight: 700; color: #1e293b;
+            text-align: right; max-width: 220px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .ci-confirm-actions {
+            display: flex; gap: 10px;
+            padding: 20px 28px 24px;
+        }
+        .ci-confirm-cancel {
+            flex: 1; padding: 12px 0; border-radius: 14px;
+            border: 1.5px solid #e2e8f0; background: #f8fafc;
+            font-size: 13px; font-weight: 700; color: #64748b;
+            cursor: pointer; transition: all .15s; font-family: inherit;
+        }
+        .ci-confirm-cancel:hover { background: #f1f5f9; border-color: #cbd5e1; }
+        .ci-confirm-ok {
+            flex: 2; padding: 12px 0; border-radius: 14px;
+            border: none;
+            background: linear-gradient(135deg,#3b82f6,#1d4ed8);
+            font-size: 13px; font-weight: 700; color: #fff;
+            cursor: pointer; transition: all .15s;
+            box-shadow: 0 4px 14px rgba(37,99,235,0.25);
+            font-family: inherit;
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+        }
+        .ci-confirm-ok:hover { opacity: .92; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.3); }
     </style>
 </head>
 <body class="bg-[#f8fafc] flex h-screen overflow-hidden text-slate-900">
@@ -204,6 +375,9 @@
         </a>
         <a href="#" class="sidebar-item flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
             <i class="fas fa-calendar-check text-lg"></i> Booking Room
+        </a>
+        <a href="#" id="menuCheckIn" class="sidebar-item flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
+            <i class="fas fa-door-open text-lg"></i> Check In Room
         </a>
     </nav>
 
@@ -388,6 +562,296 @@
 
 </main>
 
+<!-- ===== CHECK IN VIEW ===== -->
+<main id="view-checkin" class="flex-1 flex flex-col overflow-y-auto relative">
+    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-20 border-b border-slate-200 flex items-center justify-between px-10">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Check In Room</h1>
+            <p class="text-xs text-slate-500 font-medium">Dashboard / Rooms / Check In</p>
+        </div>
+        <button onclick="ciReload()" class="flex items-center gap-2 px-5 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl font-semibold text-sm transition-all">
+            <i class="fas fa-sync-alt"></i> Tải lại
+        </button>
+    </header>
+
+    <div class="p-10 w-full flex flex-col gap-6">
+
+        <!-- ===== THANH TÌM KIẾM GMAIL ===== -->
+        <div class="glass-card rounded-2xl shadow-lg shadow-slate-200/50 px-6 py-5">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">
+                <i class="fas fa-search mr-1 text-blue-400"></i> Tìm kiếm theo Gmail khách đặt phòng
+            </p>
+            <div class="flex gap-3">
+                <div class="relative flex-1">
+                    <!-- icon mail -->
+                    <div class="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center pointer-events-none">
+                        <i class="fab fa-google text-red-400 text-sm"></i>
+                    </div>
+                    <input
+                            id="ci-search-input"
+                            type="email"
+                            placeholder="Nhập gmail khách đặt phòng..."
+                            autocomplete="off"
+                            oninput="ciOnSearchInput()"
+                            onkeydown="if(event.key==='Enter') ciSearch()"
+                            class="w-full pl-14 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 placeholder:text-slate-400 outline-none transition-all focus:border-blue-400 focus:bg-white focus:shadow-[0_0_0_4px_rgba(59,130,246,0.08)]"
+                    >
+                    <!-- nút xóa -->
+                    <button id="ci-search-clear" onclick="ciClearSearch()"
+                            class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-500 text-xs flex items-center justify-center transition-all">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <button onclick="ciSearch()"
+                        class="flex items-center gap-2 px-6 py-3.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-xl font-semibold text-sm transition-all shadow-md shadow-blue-200 whitespace-nowrap">
+                    <i class="fas fa-search"></i> Tìm kiếm
+                </button>
+            </div>
+            <!-- tag kết quả tìm kiếm -->
+            <div id="ci-search-hint" class="mt-3 hidden">
+                <span class="inline-flex items-center gap-2 text-xs bg-blue-50 text-blue-600 font-semibold px-3 py-1.5 rounded-full">
+                    <i class="fas fa-filter"></i>
+                    <span id="ci-search-hint-text"></span>
+                    <button onclick="ciClearSearch()" class="ml-1 text-blue-400 hover:text-blue-600">✕</button>
+                </span>
+            </div>
+        </div>
+
+        <!-- ===== DANH SÁCH PHÒNG ===== -->
+        <div class="glass-card rounded-[2rem] shadow-2xl shadow-slate-200/50 p-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-700">Danh sách phòng chờ Check In</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Các phòng hiện đang ở trạng thái <b>Currently Tenant</b></p>
+                </div>
+                <span class="text-xs bg-red-50 text-red-500 font-semibold px-3 py-1.5 rounded-full" id="ci-count"></span>
+            </div>
+            <div class="rs-grid" id="ci-grid">
+                <div class="rs-loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    Đang tải danh sách phòng...
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+
+<script>
+    // ===== CHECK IN LOGIC =====
+    let _ciAllRooms = []; // cache toàn bộ danh sách để filter client-side
+
+    function ciReload() {
+        ciClearSearch();
+        ciLoadRooms();
+    }
+
+    async function ciLoadRooms() {
+        const grid    = document.getElementById('ci-grid');
+        const countEl = document.getElementById('ci-count');
+        grid.innerHTML = '<div class="rs-loading"><i class="fas fa-spinner fa-spin"></i>Đang tải...</div>';
+        countEl.textContent = '';
+
+        try {
+            const token = localStorage.getItem('accessToken');
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 8000);
+
+            const res = await fetch('/api/v1/rooms/status/curently', {
+                signal: controller.signal,
+                headers: token ? { Authorization: 'Bearer ' + token } : {}
+            });
+            clearTimeout(timeout);
+
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(`HTTP ${res.status} - ${errText}`);
+            }
+
+            const json  = await res.json();
+            _ciAllRooms = Array.isArray(json) ? json : (json.data || []);
+
+            ciRenderGrid(_ciAllRooms);
+        } catch (err) {
+            const msg = err.name === 'AbortError' ? 'Request timeout — server không phản hồi sau 8 giây' : err.message;
+            document.getElementById('ci-grid').innerHTML =
+                `<div class="rs-empty" style="color:#ef4444;">⚠️ Lỗi: ${msg}</div>`;
+        }
+    }
+
+    function ciRenderGrid(rooms) {
+        const grid    = document.getElementById('ci-grid');
+        const countEl = document.getElementById('ci-count');
+
+        if (!rooms.length) {
+            const keyword = document.getElementById('ci-search-input').value.trim();
+            grid.innerHTML = keyword
+                ? `<div class="rs-empty">🔍 Không tìm thấy phòng nào với gmail <b>${keyword}</b>.</div>`
+                : '<div class="rs-empty">📭 Không có phòng nào chờ Check In.</div>';
+            countEl.textContent = '';
+            return;
+        }
+        countEl.textContent = rooms.length + ' phòng';
+        grid.innerHTML = rooms.map(r => ciRenderCard(r)).join('');
+    }
+
+    // ===== SEARCH THEO GMAIL — gọi API /api/v1/rooms/customer =====
+    function ciOnSearchInput() {
+        const val = document.getElementById('ci-search-input').value.trim();
+        document.getElementById('ci-search-clear').classList.toggle('hidden', !val);
+    }
+
+    async function ciSearch() {
+        const input   = document.getElementById('ci-search-input');
+        const email   = input.value.trim();
+        const hint    = document.getElementById('ci-search-hint');
+        const hintTxt = document.getElementById('ci-search-hint-text');
+        const grid    = document.getElementById('ci-grid');
+        const countEl = document.getElementById('ci-count');
+
+        if (!email) {
+            ciClearSearch();
+            return;
+        }
+
+        // Loading
+        grid.innerHTML  = '<div class="rs-loading"><i class="fas fa-spinner fa-spin"></i> Đang tìm kiếm...</div>';
+        countEl.textContent = '';
+
+        try {
+            const token = localStorage.getItem('accessToken');
+            const res = await fetch('/api/v1/rooms/customer/' + encodeURIComponent(email), {
+                headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+            });
+
+            if (res.status === 404) {
+                ciRenderGrid([]);
+                hint.classList.remove('hidden');
+                hintTxt.textContent = `Không tìm thấy phòng nào cho "${email}"`;
+                return;
+            }
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+
+            const json   = await res.json();
+            const rooms  = Array.isArray(json) ? json : (json.data || []);
+
+            hint.classList.remove('hidden');
+            hintTxt.textContent = `Kết quả cho "${email}" — ${rooms.length} phòng`;
+            ciRenderGrid(rooms);
+
+        } catch (err) {
+            grid.innerHTML = `<div class="rs-empty" style="color:#ef4444;">⚠️ Lỗi: ${err.message}</div>`;
+            countEl.textContent = '';
+        }
+    }
+
+    function ciClearSearch() {
+        document.getElementById('ci-search-input').value = '';
+        document.getElementById('ci-search-clear').classList.add('hidden');
+        document.getElementById('ci-search-hint').classList.add('hidden');
+        ciRenderGrid(_ciAllRooms);
+    }
+
+    function ciRenderCard(r) {
+        const imgHtml = (r.images && r.images.length > 0)
+            ? `<img class="rs-card-img" src="${r.images[0]}" alt="${r.name || ''}" loading="lazy">`
+            : `<div class="rs-card-img-ph">🏨</div>`;
+        const price = r.price ? new Intl.NumberFormat('vi-VN').format(r.price) + ' ₫' : '—';
+        const email = r.guestEmail || r.email || r.customerEmail || '';
+        const emailHtml = email
+            ? `<div style="font-size:11px;color:#64748b;margin-bottom:7px;display:flex;align-items:center;gap:5px;overflow:hidden;">
+                   <i class="fab fa-google" style="color:#ea4335;flex-shrink:0;"></i>
+                   <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${email}">${email}</span>
+               </div>`
+            : '';
+
+        return `<div class="rs-card">
+            ${imgHtml}
+            <div class="rs-card-body">
+                <div class="rs-card-name">${r.name || 'Phòng #' + r.id}</div>
+                <div class="rs-card-price">${price} / đêm</div>
+                ${emailHtml}
+                <span class="rs-badge currently">🕐 Chờ Check In</span>
+                <button class="rs-btn-save" style="background:linear-gradient(135deg,#ef4444,#dc2626);"
+                        onclick="ciCheckIn(${r.id}, this)">
+                    <i class="fas fa-door-open"></i> Check In
+                </button>
+            </div>
+        </div>`;
+    }
+
+    async function ciCheckIn(roomId, btn) {
+        const email      = document.getElementById('ci-search-input').value.trim();
+        const employeeId = localStorage.getItem('userId');
+        const token      = localStorage.getItem('accessToken');
+
+        if (!email) {
+            showToast('warning', 'Thiếu thông tin', 'Vui lòng nhập email khách hàng vào ô tìm kiếm trước khi Check In!');
+            document.getElementById('ci-search-input').focus();
+            return;
+        }
+        if (!employeeId) {
+            showToast('error', 'Chưa đăng nhập', 'Không tìm thấy thông tin nhân viên. Vui lòng đăng nhập lại!');
+            return;
+        }
+
+        // Mở confirm modal đẹp thay cho confirm()
+        ciConfirmOpen(roomId, email, employeeId, async () => {
+            btn.disabled  = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+
+            try {
+                const params = new URLSearchParams();
+                params.append('email',  email);
+                params.append('roomId', roomId);
+
+                const res = await fetch(`/api/v1/booking/checkin/${employeeId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        ...(token ? { 'Authorization': 'Bearer ' + token } : {})
+                    },
+                    body: params
+                });
+
+                if (!res.ok) {
+                    const contentType = res.headers.get('content-type') || '';
+                    let msg = `Lỗi ${res.status}`;
+                    if (contentType.includes('application/json')) {
+                        const errJson = await res.json();
+                        msg = errJson.message || errJson.data?.message || JSON.stringify(errJson);
+                    } else {
+                        msg = await res.text() || msg;
+                    }
+                    throw new Error(msg);
+                }
+
+                // Thành công
+                showToast('success', 'Check In thành công!', `Phòng #${roomId} — ${email}`);
+                btn.innerHTML    = '<i class="fas fa-check"></i> Đã Check In!';
+                btn.style.background = 'linear-gradient(135deg,#16a34a,#15803d)';
+
+                setTimeout(() => {
+                    btn.closest('.rs-card').remove();
+                    const remaining = document.querySelectorAll('#ci-grid .rs-card').length;
+                    const countEl   = document.getElementById('ci-count');
+                    if (countEl) countEl.textContent = remaining + ' phòng';
+                    if (remaining === 0) {
+                        document.getElementById('ci-grid').innerHTML =
+                            '<div class="rs-empty">✅ Không còn phòng nào cần Check In.</div>';
+                    }
+                }, 1500);
+
+            } catch (err) {
+                showToast('error', 'Check In thất bại', err.message);
+                btn.innerHTML    = '<i class="fas fa-door-open"></i> Check In';
+                btn.style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
+                btn.disabled     = false;
+            }
+        });
+    }
+</script>
 
 <script>
     // xửa lý price
@@ -849,9 +1313,10 @@
     ];
 
     function switchToView(view) {
-        // view: 'form' | 'reset'
-        document.getElementById('view-form').style.display          = view === 'form'  ? '' : 'none';
-        document.getElementById('view-reset-status').style.display  = view === 'reset' ? 'flex' : 'none';
+        // view: 'form' | 'reset' | 'checkin'
+        document.getElementById('view-form').style.display          = view === 'form'    ? '' : 'none';
+        document.getElementById('view-reset-status').style.display  = view === 'reset'   ? 'flex' : 'none';
+        document.getElementById('view-checkin').style.display       = view === 'checkin' ? 'flex' : 'none';
     }
 
     // Gắn sự kiện menu sidebar
@@ -859,6 +1324,12 @@
         e.preventDefault();
         switchToView('reset');
         rsLoadRooms();
+    });
+
+    document.getElementById('menuCheckIn').addEventListener('click', function(e) {
+        e.preventDefault();
+        switchToView('checkin');
+        ciLoadRooms();
     });
 
     // Khi click Add Room hoặc Update Room → quay lại form
@@ -963,6 +1434,7 @@
                 }
                 btn.innerHTML = '<i class="fas fa-check"></i> Đã chuyển AVAILABLE!';
                 btn.style.background = 'linear-gradient(135deg,#16a34a,#15803d)';
+                showToast('success', 'Cập nhật thành công', `Phòng đã được chuyển về trạng thái Available.`);
                 setTimeout(() => {
                     btn.closest('.rs-card').remove();
                     const remaining = document.querySelectorAll('#rs-grid .rs-card').length;
@@ -974,6 +1446,7 @@
                     }
                 }, 1500);
             } catch (err) {
+                showToast('error', 'Cập nhật thất bại', err.message);
                 btn.innerHTML = '⚠️ Lỗi';
                 btn.style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
                 setTimeout(() => {
@@ -984,6 +1457,104 @@
             }
         });
     }
+</script>
+<!-- ===== TOAST CONTAINER ===== -->
+<div id="toast-container"></div>
+
+<!-- ===== CI CONFIRM MODAL ===== -->
+<div id="ci-confirm-overlay">
+    <div id="ci-confirm-box">
+        <div class="ci-confirm-header">
+            <div class="ci-confirm-icon-wrap">🚪</div>
+            <div class="ci-confirm-title">Xác nhận Check In</div>
+            <div class="ci-confirm-subtitle">Vui lòng kiểm tra thông tin trước khi xác nhận</div>
+        </div>
+        <div class="ci-confirm-details">
+            <div class="ci-confirm-row">
+                <span class="ci-confirm-label"><i class="fas fa-door-open"></i> Phòng</span>
+                <span class="ci-confirm-value" id="ci-confirm-room">—</span>
+            </div>
+            <div style="height:1px;background:#e2e8f0;margin:2px 0;"></div>
+            <div class="ci-confirm-row">
+                <span class="ci-confirm-label"><i class="fab fa-google"></i> Email</span>
+                <span class="ci-confirm-value" id="ci-confirm-email">—</span>
+            </div>
+            <div style="height:1px;background:#e2e8f0;margin:2px 0;"></div>
+            <div class="ci-confirm-row">
+                <span class="ci-confirm-label"><i class="fas fa-user-tie"></i> Nhân viên</span>
+                <span class="ci-confirm-value" id="ci-confirm-employee">—</span>
+            </div>
+        </div>
+        <div class="ci-confirm-actions">
+            <button class="ci-confirm-cancel" onclick="ciConfirmClose()">Huỷ bỏ</button>
+            <button class="ci-confirm-ok" id="ci-confirm-ok-btn">
+                <i class="fas fa-check-circle"></i> Xác nhận Check In
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ===== TOAST SYSTEM =====
+    function showToast(type, title, message, duration = 4000) {
+        const icons = {
+            success: '<i class="fas fa-check-circle"></i>',
+            error:   '<i class="fas fa-times-circle"></i>',
+            warning: '<i class="fas fa-exclamation-triangle"></i>',
+            info:    '<i class="fas fa-info-circle"></i>',
+        };
+        const labels = { success: 'Thành công', error: 'Thất bại', warning: 'Cảnh báo', info: 'Thông tin' };
+
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.innerHTML = `
+        <div class="toast-icon">${icons[type]}</div>
+        <div class="toast-content">
+            <div class="toast-title">${title || labels[type]}</div>
+            ${message ? `<div class="toast-msg">${message}</div>` : ''}
+        </div>
+        <button class="toast-close" onclick="dismissToast(this.closest('.toast'))">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="toast-bar" style="animation-duration:${duration}ms;"></div>
+    `;
+        container.appendChild(toast);
+
+        const timer = setTimeout(() => dismissToast(toast), duration);
+        toast._timer = timer;
+    }
+
+    function dismissToast(toast) {
+        if (!toast || toast._dismissed) return;
+        toast._dismissed = true;
+        clearTimeout(toast._timer);
+        toast.classList.add('toast-exit');
+        toast.addEventListener('animationend', () => toast.remove(), { once: true });
+    }
+
+    // ===== CI CONFIRM MODAL =====
+    let _ciConfirmCallback = null;
+
+    function ciConfirmOpen(roomId, email, employeeId, callback) {
+        _ciConfirmCallback = callback;
+        document.getElementById('ci-confirm-room').textContent = 'Phòng #' + roomId;
+        document.getElementById('ci-confirm-email').textContent = email;
+        document.getElementById('ci-confirm-employee').textContent = 'ID: ' + employeeId;
+        document.getElementById('ci-confirm-overlay').classList.add('active');
+        document.getElementById('ci-confirm-ok-btn').onclick = function () {
+            const cb = _ciConfirmCallback; // ✅ lưu trước khi close null mất
+            ciConfirmClose();
+            if (cb) cb();
+        };
+    }
+    function ciConfirmClose() {
+        document.getElementById('ci-confirm-overlay').classList.remove('active');
+        _ciConfirmCallback = null;
+    }
+    document.getElementById('ci-confirm-overlay').addEventListener('click', function(e) {
+        if (e.target === this) ciConfirmClose();
+    });
 </script>
 </body>
 </html>

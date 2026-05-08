@@ -4,10 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import re.quanlykhachsan.dto.request.BookingRequest;
 import re.quanlykhachsan.exception.ResourceNotFoundException;
 import re.quanlykhachsan.service.BookingService;
@@ -20,5 +17,14 @@ public class BookingController {
     @PostMapping("/bookingonline")
     public ResponseEntity<?> bookingOnline(@Valid @ModelAttribute BookingRequest bookingRequest) throws ResourceNotFoundException {
         return new ResponseEntity<>(bookingService.CustomerBooking(bookingRequest), HttpStatus.OK);
+    }
+    @PostMapping("/checkin/{employeeId}")
+    public ResponseEntity<?> checkIn(
+            @PathVariable Long employeeId,
+            @RequestParam String email,
+            @RequestParam Long roomId
+    ) throws ResourceNotFoundException {
+        bookingService.bookingCheckIn(employeeId, email, roomId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

@@ -16,4 +16,10 @@ public interface RoomRepository extends JpaRepository<Room,Long> {
     @Query("SELECT COUNT(r) > 0 FROM Room r WHERE r.roomType.id = :key")
     boolean existsByRoomTypeId(@Param("key") Long id);
     List<Room> findByStatus(StatusRoom status);
+
+    ///
+    @Query("SELECT b.room FROM Booking b " +
+            "WHERE b.customer.email = :email " +
+            "AND b.room.status = 'CURRENTLY_TENANT'")
+    List<Room> findRoomsByCustomerEmail(@Param("email") String email);
 }

@@ -83,7 +83,9 @@ public class SecurityConfig {
                 // phân quyền cho các API theo đường dẫn
                 .authorizeHttpRequests(
                         req->
-                                req     .requestMatchers("/api/v1/rooms/status").permitAll()
+                                req   .requestMatchers("/api/v1/booking/checkin/").permitAll()
+                                        .requestMatchers("/api/v1/rooms/status/curently").permitAll()
+                                        .requestMatchers("/api/v1/rooms/status").permitAll()
                                         .requestMatchers("/api/v1/customer/login").permitAll()
                                         .requestMatchers("/api/v1/customer/register").permitAll()
                                         .requestMatchers("/api/v1/rooms").permitAll()
