@@ -74,6 +74,7 @@ public class RoomController {
         roomService.updateClearToAvailble(id);
         return new ResponseEntity<>("success", HttpStatus.OK);
     }
+    // lấy danh sách room chờ để check in
     @GetMapping("/status/curently")
     public ResponseEntity<?> getRoomsStatusCurently(){
         ApiResponse<List<RoomRespone>> response = new ApiResponse<>(
@@ -81,6 +82,7 @@ public class RoomController {
         );
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+    // lấy danh sách room theo email chờ check in
     @GetMapping("/customer/{email}")
     public ResponseEntity<?> getRoomsByCustomerEmail(@Valid @PathVariable String email){
         ApiResponse<List<RoomRespone>> response = new ApiResponse<>(
@@ -88,6 +90,20 @@ public class RoomController {
         );
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
-
+    // lấy day sách phòng đã checkin và chờ check out
+    @GetMapping("/status/checkin")
+    public ResponseEntity<?> getRoomsStatusCheckIn(){
+        ApiResponse<List<RoomRespone>> response = new ApiResponse<>(
+                "get rooms","400",roomService.getListRoomByStatusCheckIn()
+        );
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+    // lấy danh sách room theo email của khách đã chechIn và chờ checkOut
+    @GetMapping("/customer/checkedin/{email}")
+    public ResponseEntity<?> getRoomsByCustomerEmailChekedIn(@Valid @PathVariable String email){
+        ApiResponse<List<RoomRespone>> response = new ApiResponse<>(
+                "get rooms","400",roomService.getListRoomByCustomerEmailCheckedIn(email)
+        );
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

@@ -15,4 +15,8 @@ public class PaymentController {
     public String deposit(@ModelAttribute PaymentRequest paymentRequest)throws ResourceNotFoundException {
         return paymentService.bookingDeposit(paymentRequest);
     }
+    @PostMapping("/thanhtoan")
+    public String thanhtoan(@ModelAttribute PaymentRequest paymentRequest)throws ResourceNotFoundException {
+        return paymentService.bookingWithdrawal(paymentRequest);
+    }
 }

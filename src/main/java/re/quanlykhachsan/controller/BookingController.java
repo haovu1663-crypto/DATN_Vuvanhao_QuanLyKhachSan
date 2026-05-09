@@ -27,4 +27,14 @@ public class BookingController {
         bookingService.bookingCheckIn(employeeId, email, roomId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @PostMapping("/checkout/{employeeId}")
+    public ResponseEntity<?> checkInout(
+            @PathVariable Long employeeId,
+            @RequestParam String email,
+            @RequestParam Long roomId
+    ) throws ResourceNotFoundException {
+
+        return new ResponseEntity<>( bookingService.CheckOut(employeeId, email, roomId),HttpStatus.OK);
+    }
 }

@@ -17,9 +17,14 @@ public interface RoomRepository extends JpaRepository<Room,Long> {
     boolean existsByRoomTypeId(@Param("key") Long id);
     List<Room> findByStatus(StatusRoom status);
 
-    ///
+    // tìm kiếm phòng đã được đặt cọc theo email của khác
     @Query("SELECT b.room FROM Booking b " +
             "WHERE b.customer.email = :email " +
             "AND b.room.status = 'CURRENTLY_TENANT'")
     List<Room> findRoomsByCustomerEmail(@Param("email") String email);
+    // tìm kiếm phòng đã checIn theo email của khách
+    @Query("SELECT b.room FROM Booking b " +
+            "WHERE b.customer.email = :email " +
+            "AND b.room.status = 'CHECKED'")
+    List<Room> findRoomsByCustomerEmailchecIn(@Param("email") String email);
 }

@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 
 public class PaymentRequest {
-    private double amount;
     private Long booking_id;
+    private Double amount;
+    private MethodBooking method_booking;
 }

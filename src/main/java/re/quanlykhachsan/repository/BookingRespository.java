@@ -8,6 +8,7 @@ import re.quanlykhachsan.entity.Booking;
 
 @Repository
 public interface BookingRespository extends JpaRepository<Booking,Long> {
+  // truy vấn lấy ra booking đa được lập  dựa trên email và id phòng của khách
     @Query(value = """
     SELECT b.* FROM booking b
     JOIN customer c ON b.customer_id = c.id
@@ -19,4 +20,6 @@ public interface BookingRespository extends JpaRepository<Booking,Long> {
             @Param("email") String email,
             @Param("roomId") Long roomId
     );
+
+
 }

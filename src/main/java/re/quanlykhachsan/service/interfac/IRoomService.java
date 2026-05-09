@@ -21,4 +21,6 @@ public interface IRoomService {
     void updateClearToAvailble(Long id) throws ResourceNotFoundException;
     List<RoomRespone> getListRoomByStatusCurrentltTennat();
     List<RoomRespone> getListRoomByCustomerEmail( String email);
+    List<RoomRespone> getListRoomByStatusCheckIn();
+    List<RoomRespone> getListRoomByCustomerEmailCheckedIn( String email);
 }

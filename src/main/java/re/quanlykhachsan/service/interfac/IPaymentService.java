@@ -5,4 +5,5 @@ import re.quanlykhachsan.exception.ResourceNotFoundException;
 
 public interface IPaymentService {
     String bookingDeposit(PaymentRequest paymentRequest) throws ResourceNotFoundException;
+    String bookingWithdrawal(PaymentRequest paymentRequest) throws ResourceNotFoundException;
 }
