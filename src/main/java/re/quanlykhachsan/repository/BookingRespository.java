@@ -21,5 +21,10 @@ public interface BookingRespository extends JpaRepository<Booking,Long> {
             @Param("roomId") Long roomId
     );
 
+    @Query("SELECT b FROM Booking b WHERE b.phonenumber = :phonenumber AND b.room.id = :roomId AND b.toyalPrice IS NULL")
+    Booking findBookingsByRoomIdAndPhoneAndToyalPriceIsNull(
+            @Param("phonenumber") String phonenumber,
+            @Param("roomId") Long roomId
+    );
 
 }

@@ -223,8 +223,12 @@ public class RoomService implements IRoomService {
 
     @Override
     public List<RoomRespone> getListRoomByCustomerEmailCheckedIn(String email) {
-        List<Room> rooms = roomRepository.findRoomsByCustomerEmailchecIn(email);
-
+        List<Room> rooms;
+        if (email.contains("@")) {
+            rooms = roomRepository.findRoomsByCustomerEmailchecIn(email);
+        } else {
+            rooms = roomRepository.findCheckedRoomsByPhoneNumber(email);
+        }
         return rooms.stream().map(room -> {
             // Map các field cơ bản (name, price, status)
             RoomRespone response = modelMapper.map(room, RoomRespone.class);
@@ -237,4 +241,6 @@ public class RoomService implements IRoomService {
             return response;
         }).collect(Collectors.toList());
     }
+
+
 }

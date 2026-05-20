@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import re.quanlykhachsan.dto.request.BookingRequest;
+import re.quanlykhachsan.dto.request.EmployeeBooking;
 import re.quanlykhachsan.dto.response.BookingRespone;
 import re.quanlykhachsan.dto.response.CheckOutRespone;
 import re.quanlykhachsan.entity.*;
@@ -49,8 +50,26 @@ public class BookingService implements IBookingService {
     }
 
     @Override
-    public BookingRespone EmployeeBooking(BookingRequest bookingRequest) {
-        return null;
+    public BookingRespone EmployeeBooking(EmployeeBooking bookingRequest) throws ResourceNotFoundException {
+        Booking booking = new Booking();
+        booking.setStatusBooking(StatusBooking.PENDING);
+        booking.setCheckInDate(LocalDateTime.now());
+        booking.setCheckOutDate(null);
+        booking.setToyalPrice(null);
+        booking.setName(bookingRequest.getName());
+        booking.setPhonenumber(bookingRequest.getPhonenumber());
+
+        Room room = roomRespository.findById(bookingRequest.getRoomId()).orElseThrow(()->new ResourceNotFoundException("không tìm thấy phòng này"));
+        booking.setRoom(room);
+        // ngày nhận trả dự kến
+        booking.setEnventCheckinDate(bookingRequest.getEnventCheckinDate());
+        booking.setEnventCheckoutDate(bookingRequest.getEnventCheckoutDate());
+        // nhân viên sẽ là người ặt phòng
+        Employee employee = employeeRespository.findById(bookingRequest.getEmployeeId()).orElse(null);
+        booking.setEmployee(employee);
+        bookingRespository.save(booking);
+        roomService.updateStatusCurrentToChecked(bookingRequest.getRoomId());
+        return modelMapper.map(booking, BookingRespone.class);
     }
 
     @Override
@@ -76,8 +95,13 @@ public class BookingService implements IBookingService {
 
     @Override
     public CheckOutRespone CheckOut(Long employeeId, String email, Long roomId) throws ResourceNotFoundException {
-        Booking booking = bookingRespository.findByCustomerEmailAndRoomIdAndToyalPriceIsNull(email, roomId);
 
+        Booking booking;
+        if (email.contains("@")) {
+            booking = bookingRespository.findByCustomerEmailAndRoomIdAndToyalPriceIsNull(email, roomId);
+        } else {
+           booking=bookingRespository.findBookingsByRoomIdAndPhoneAndToyalPriceIsNull(email, roomId);
+        }
         Room room = roomRespository.findById(roomId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng"));
 

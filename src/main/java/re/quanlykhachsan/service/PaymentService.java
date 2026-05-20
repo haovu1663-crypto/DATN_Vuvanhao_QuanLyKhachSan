@@ -43,6 +43,20 @@ public class PaymentService implements IPaymentService {
         Booking booking = bookingRespository.findById(paymentRequest.getBooking_id()).orElseThrow(()->new ResourceNotFoundException("khồng tìm thấy Id booking"));
         payment.setBooking(booking);
         paymentRespository.save(payment);
+        return "Thanh toán thành công tiền phòng ";
+    }
+
+    @Override
+    public String bookingDepositEployee(PaymentRequest paymentRequest) throws ResourceNotFoundException {
+        Payment payment = new Payment();
+        payment.setPaymentDate(LocalDateTime.now());
+        payment.setAmount(paymentRequest.getAmount());
+        payment.setMethod(paymentRequest.getMethod_booking());
+        payment.setStatus("Success");
+        payment.setPaymentType("Đặt cọc ");
+        Booking booking = bookingRespository.findById(paymentRequest.getBooking_id()).orElseThrow(()->new ResourceNotFoundException("khồng tìm thấy Id booking"));
+        payment.setBooking(booking);
+        paymentRespository.save(payment);
         return "Thanh toán thành công tiền cọc ";
     }
 }

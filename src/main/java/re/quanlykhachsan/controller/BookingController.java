@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import re.quanlykhachsan.dto.request.BookingRequest;
+import re.quanlykhachsan.dto.request.EmployeeBooking;
 import re.quanlykhachsan.exception.ResourceNotFoundException;
 import re.quanlykhachsan.service.BookingService;
 
@@ -17,6 +18,10 @@ public class BookingController {
     @PostMapping("/bookingonline")
     public ResponseEntity<?> bookingOnline(@Valid @ModelAttribute BookingRequest bookingRequest) throws ResourceNotFoundException {
         return new ResponseEntity<>(bookingService.CustomerBooking(bookingRequest), HttpStatus.OK);
+    }
+    @PostMapping("/bookingoffline")
+    public ResponseEntity<?> bookingOffline(@Valid @ModelAttribute EmployeeBooking bookingRequest) throws ResourceNotFoundException {
+        return new ResponseEntity<>(bookingService.EmployeeBooking(bookingRequest), HttpStatus.OK);
     }
     @PostMapping("/checkin/{employeeId}")
     public ResponseEntity<?> checkIn(

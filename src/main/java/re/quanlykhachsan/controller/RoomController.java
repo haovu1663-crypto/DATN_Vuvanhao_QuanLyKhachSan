@@ -100,7 +100,7 @@ public class RoomController {
     }
     // lấy danh sách room theo email của khách đã chechIn và chờ checkOut
     @GetMapping("/customer/checkedin/{email}")
-    public ResponseEntity<?> getRoomsByCustomerEmailChekedIn(@Valid @PathVariable String email){
+    public ResponseEntity<?> getRoomsByCustomerEmailChekedIn( @PathVariable String email){
         ApiResponse<List<RoomRespone>> response = new ApiResponse<>(
                 "get rooms","400",roomService.getListRoomByCustomerEmailCheckedIn(email)
         );

@@ -27,4 +27,9 @@ public interface RoomRepository extends JpaRepository<Room,Long> {
             "WHERE b.customer.email = :email " +
             "AND b.room.status = 'CHECKED'")
     List<Room> findRoomsByCustomerEmailchecIn(@Param("email") String email);
+    // lấy room checked theo phonenumber
+    @Query("SELECT r FROM Booking b JOIN b.room r " +
+            "WHERE r.status = re.quanlykhachsan.entity.StatusRoom.CHECKED " +
+            "AND b.phonenumber = :phoneNumber")
+    List<Room> findCheckedRoomsByPhoneNumber(@Param("phoneNumber") String phoneNumber);
 }
