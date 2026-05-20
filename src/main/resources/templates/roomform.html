@@ -268,7 +268,120 @@
         .toast-info .toast-icon { background: #dbeafe; color: #2563eb; }
         .toast-info .toast-bar  { background: linear-gradient(90deg,#2563eb,#93c5fd); }
 
-        /* ===== CI / CO CONFIRM MODAL ===== */
+        /* ===== VIEW BOOKING ===== */
+        #view-booking { display: none; }
+        #view-booking.active { display: flex; flex-direction: column; }
+
+        .bk-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        @media (max-width: 768px) { .bk-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        .bk-card {
+            background: #fff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 16px;
+            overflow: hidden;
+            transition: box-shadow .18s, transform .18s;
+        }
+        .bk-card:hover { box-shadow: 0 8px 28px rgba(30,41,59,.12); transform: translateY(-3px); }
+
+        .bk-card-img { width: 100%; height: 130px; object-fit: cover; display: block; }
+        .bk-card-img-ph {
+            width: 100%; height: 130px;
+            background: linear-gradient(135deg,#eff6ff,#dbeafe);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 34px; color: #93c5fd;
+        }
+        .bk-card-body { padding: 13px 15px 15px; }
+        .bk-card-name { font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .bk-card-type { font-size: 11px; color: #94a3b8; margin-bottom: 6px; }
+        .bk-card-price { font-size: 15px; font-weight: 800; color: #2563eb; margin-bottom: 10px; }
+        .bk-badge-available { display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:600; padding:2px 9px; border-radius:20px; background:#dcfce7; color:#166534; margin-bottom:10px; }
+        .bk-btn-booking {
+            width: 100%; padding: 9px 0; border: none; border-radius: 10px;
+            font-size: 12px; font-weight: 700; cursor: pointer;
+            background: linear-gradient(135deg,#3b82f6,#1d4ed8);
+            color: #fff; transition: opacity .15s, transform .15s;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .bk-btn-booking:hover { opacity: .9; transform: translateY(-1px); }
+
+        /* ===== BOOKING MODAL ===== */
+        #bk-modal-overlay {
+            display: none;
+            position: fixed; inset: 0; z-index: 9999;
+            background: rgba(15,23,42,0.5);
+            backdrop-filter: blur(6px);
+            align-items: center; justify-content: center;
+        }
+        #bk-modal-overlay.active { display: flex; }
+        #bk-modal-box {
+            background: #fff;
+            border-radius: 24px;
+            max-width: 480px; width: 92%;
+            box-shadow: 0 32px 72px rgba(15,23,42,0.2);
+            overflow: hidden;
+            animation: rsPopIn .25s cubic-bezier(.34,1.56,.64,1);
+        }
+        .bk-modal-banner {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
+            padding: 24px 28px 20px;
+            position: relative; text-align: center;
+        }
+        .bk-modal-banner-title { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 3px; }
+        .bk-modal-banner-sub { font-size: 12px; color: rgba(255,255,255,.65); font-weight: 500; }
+        .bk-modal-close {
+            position: absolute; top: 14px; right: 16px;
+            width: 28px; height: 28px; border-radius: 50%;
+            background: rgba(255,255,255,0.15); border: none;
+            color: #fff; font-size: 13px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background .15s;
+        }
+        .bk-modal-close:hover { background: rgba(255,255,255,.28); }
+        .bk-modal-body { padding: 22px 28px 28px; }
+        .bk-modal-room-info {
+            background: #f0f7ff; border: 1.5px solid #bfdbfe;
+            border-radius: 14px; padding: 14px 16px; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .bk-modal-room-icon { font-size: 28px; }
+        .bk-modal-room-name { font-size: 15px; font-weight: 800; color: #1e293b; }
+        .bk-modal-room-price { font-size: 12px; color: #2563eb; font-weight: 600; margin-top: 2px; }
+        .bk-modal-label {
+            font-size: 11px; font-weight: 700; color: #64748b;
+            text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; display: block;
+        }
+        .bk-modal-input {
+            width: 100%; padding: 11px 14px; border: 1.5px solid #e2e8f0;
+            border-radius: 12px; font-size: 13px; font-family: inherit;
+            color: #1e293b; background: #f8fafc; outline: none;
+            transition: border-color .15s, box-shadow .15s; margin-bottom: 14px; box-sizing: border-box;
+        }
+        .bk-modal-input:focus { border-color: #3b82f6; background: #fff; box-shadow: 0 0 0 4px rgba(59,130,246,0.09); }
+        .bk-modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .bk-modal-actions { display: flex; gap: 10px; margin-top: 6px; }
+        .bk-modal-cancel {
+            flex: 1; padding: 12px 0; border-radius: 14px;
+            border: 1.5px solid #e2e8f0; background: #f8fafc;
+            font-size: 13px; font-weight: 700; color: #64748b;
+            cursor: pointer; font-family: inherit; transition: all .15s;
+        }
+        .bk-modal-cancel:hover { background: #f1f5f9; }
+        .bk-modal-confirm {
+            flex: 2; padding: 12px 0; border-radius: 14px; border: none;
+            background: linear-gradient(135deg,#3b82f6,#1d4ed8);
+            font-size: 13px; font-weight: 700; color: #fff;
+            cursor: pointer; font-family: inherit;
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+            transition: all .15s; box-shadow: 0 4px 14px rgba(37,99,235,0.25);
+        }
+        .bk-modal-confirm:hover:not(:disabled) { opacity: .92; transform: translateY(-1px); }
+        .bk-modal-confirm:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; box-shadow: none; }
+
         #ci-confirm-overlay, #co-confirm-overlay {
             display: none;
             position: fixed; inset: 0; z-index: 99998;
@@ -385,6 +498,73 @@
             box-shadow: 0 32px 80px rgba(15,23,42,0.22);
             animation: rsPopIn .28s cubic-bezier(.34,1.56,.64,1);
         }
+
+        /* Method selection step */
+        .co-pay-method-step { padding: 28px; }
+        .co-pay-method-title {
+            font-size: 15px; font-weight: 800; color: #1e293b;
+            margin-bottom: 6px; text-align: center;
+        }
+        .co-pay-method-sub {
+            font-size: 12px; color: #94a3b8; text-align: center; margin-bottom: 22px;
+        }
+        .co-pay-method-cards { display: flex; flex-direction: column; gap: 12px; }
+        .co-pay-method-card {
+            display: flex; align-items: center; gap: 16px;
+            padding: 16px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all .18s;
+            background: #f8fafc;
+        }
+        .co-pay-method-card:hover { border-color: #3b82f6; background: #eff6ff; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(59,130,246,0.12); }
+        .co-pay-method-icon {
+            width: 48px; height: 48px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; flex-shrink: 0;
+        }
+        .co-pay-method-icon.bank { background: linear-gradient(135deg,#dbeafe,#bfdbfe); }
+        .co-pay-method-icon.cash { background: linear-gradient(135deg,#dcfce7,#bbf7d0); }
+        .co-pay-method-name { font-size: 14px; font-weight: 700; color: #1e293b; }
+        .co-pay-method-desc { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+        .co-pay-method-arrow { margin-left: auto; color: #cbd5e1; font-size: 16px; transition: transform .18s; }
+        .co-pay-method-card:hover .co-pay-method-arrow { color: #3b82f6; transform: translateX(3px); }
+
+        /* Cash payment step */
+        .co-pay-cash-step { padding: 24px 28px 28px; display: none; }
+        .co-pay-cash-step.active { display: block; }
+        .co-pay-back-btn {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 12px; font-weight: 600; color: #64748b;
+            cursor: pointer; background: none; border: none;
+            margin-bottom: 18px; padding: 0; font-family: inherit;
+            transition: color .15s;
+        }
+        .co-pay-back-btn:hover { color: #3b82f6; }
+        .co-pay-cash-box {
+            background: linear-gradient(135deg,#f0fdf4,#dcfce7);
+            border: 2px solid #86efac;
+            border-radius: 18px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .co-pay-cash-icon { font-size: 40px; margin-bottom: 10px; }
+        .co-pay-cash-label { font-size: 12px; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+        .co-pay-cash-amount { font-size: 30px; font-weight: 900; color: #15803d; letter-spacing: -0.03em; }
+        .co-pay-cash-note { font-size: 11px; color: #16a34a; margin-top: 6px; font-weight: 500; }
+        .co-pay-cash-info {
+            background: #f8fafc; border: 1.5px solid #e2e8f0;
+            border-radius: 14px; padding: 14px 18px; margin-bottom: 20px;
+        }
+        .co-pay-cash-info-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px;
+        }
+        .co-pay-cash-info-row:last-child { border-bottom: none; }
+        .co-pay-cash-info-label { color: #94a3b8; font-weight: 600; font-size: 11px; text-transform: uppercase; }
+        .co-pay-cash-info-val { font-weight: 700; color: #1e293b; }
 
         .co-pay-banner {
             background: linear-gradient(135deg, #1a2744 0%, #172554 100%);
@@ -513,7 +693,7 @@
         <a href="#" id="menuResetStatus" class="sidebar-item flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
             <i class="fas fa-sync-alt text-lg"></i> Reset Status
         </a>
-        <a href="#" class="sidebar-item flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
+        <a href="#" id="menuBooking" class="sidebar-item flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
             <i class="fas fa-calendar-check text-lg"></i> Booking Room
         </a>
         <a href="#" id="menuCheckIn" class="sidebar-item flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
@@ -833,7 +1013,120 @@
 </main>
 
 
-<!-- ===== CONFIRM MODAL (Reset Status) ===== -->
+<!-- ===== BOOKING VIEW ===== -->
+<main id="view-booking" class="flex-1 flex-col overflow-y-auto relative">
+    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-20 border-b border-slate-200 flex items-center justify-between px-10">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Booking Room</h1>
+            <p class="text-xs text-slate-500 font-medium">Dashboard / Rooms / Booking</p>
+        </div>
+        <button onclick="bkReload()" class="flex items-center gap-2 px-5 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl font-semibold text-sm transition-all">
+            <i class="fas fa-sync-alt"></i> Tải lại
+        </button>
+    </header>
+
+    <div class="p-10 w-full flex flex-col gap-6">
+        <!-- Thanh tìm kiếm -->
+        <div class="glass-card rounded-2xl shadow-lg shadow-slate-200/50 px-6 py-5">
+            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">
+                <i class="fas fa-tag mr-1 text-blue-400"></i> Tìm kiếm theo giá phòng (±50.000 ₫)
+            </p>
+            <div class="flex gap-3 items-center">
+                <div class="relative flex-1">
+                    <div class="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center pointer-events-none">
+                        <span class="text-blue-500 font-bold text-sm">₫</span>
+                    </div>
+                    <input
+                            id="bk-search-input"
+                            type="text"
+                            inputmode="numeric"
+                            placeholder="Nhập giá mong muốn... vd: 500000"
+                            autocomplete="off"
+                            oninput="bkOnSearch()"
+                            class="w-full pl-14 pr-10 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 placeholder:text-slate-400 outline-none transition-all focus:border-blue-400 focus:bg-white focus:shadow-[0_0_0_4px_rgba(59,130,246,0.08)]"
+                    >
+                    <button id="bk-search-clear" onclick="bkClearSearch()"
+                            class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-500 text-xs flex items-center justify-center transition-all">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div id="bk-price-hint" class="hidden text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-2 rounded-xl whitespace-nowrap border border-blue-100"></div>
+            </div>
+        </div>
+
+        <!-- Danh sách phòng -->
+        <div class="glass-card rounded-[2rem] shadow-2xl shadow-slate-200/50 p-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-700">Danh sách phòng trống</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Các phòng đang ở trạng thái <b>Available</b> – sẵn sàng đặt</p>
+                </div>
+                <span class="text-xs bg-green-50 text-green-600 font-semibold px-3 py-1.5 rounded-full" id="bk-count"></span>
+            </div>
+            <div class="bk-grid" id="bk-grid">
+                <div class="rs-loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    Đang tải danh sách phòng...
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- ===== BOOKING MODAL ===== -->
+<div id="bk-modal-overlay">
+    <div id="bk-modal-box">
+        <div class="bk-modal-banner">
+            <button class="bk-modal-close" onclick="bkModalClose()">✕</button>
+            <div style="font-size:32px;margin-bottom:8px;">🛎️</div>
+            <div class="bk-modal-banner-title">Đặt phòng Online</div>
+            <div class="bk-modal-banner-sub">Điền thông tin để hoàn tất đặt phòng</div>
+        </div>
+        <div class="bk-modal-body">
+            <!-- Thông tin phòng -->
+            <div class="bk-modal-room-info">
+                <div class="bk-modal-room-icon">🏨</div>
+                <div>
+                    <div class="bk-modal-room-name" id="bk-modal-room-name">—</div>
+                    <div class="bk-modal-room-price" id="bk-modal-room-price">—</div>
+                </div>
+            </div>
+
+            <!-- Họ tên & Số điện thoại -->
+            <div class="bk-modal-row">
+                <div>
+                    <label class="bk-modal-label">Họ và tên khách hàng</label>
+                    <input type="text" id="bk-customer-name" class="bk-modal-input" placeholder="Nguyễn Văn A..." style="margin-bottom:0;">
+                </div>
+                <div>
+                    <label class="bk-modal-label">Số điện thoại</label>
+                    <input type="tel" id="bk-customer-phone" class="bk-modal-input" placeholder="0912 345 678..." style="margin-bottom:0;">
+                </div>
+            </div>
+            <div style="height:14px;"></div>
+            <!-- Ngày nhận & trả dự kiến -->
+            <div class="bk-modal-row">
+                <div>
+                    <label class="bk-modal-label">Ngày nhận phòng dự kiến</label>
+                    <input type="date" id="bk-checkin-date" class="bk-modal-input" style="margin-bottom:0;">
+                </div>
+                <div>
+                    <label class="bk-modal-label">Ngày trả phòng dự kiến</label>
+                    <input type="date" id="bk-checkout-date" class="bk-modal-input" style="margin-bottom:0;">
+                </div>
+            </div>
+
+            <div class="bk-modal-actions" style="margin-top:20px;">
+                <button class="bk-modal-cancel" onclick="bkModalClose()">Huỷ bỏ</button>
+                <button class="bk-modal-confirm" id="bk-modal-confirm-btn" onclick="bkSubmitBooking()">
+                    <i class="fas fa-calendar-check"></i> Xác nhận đặt phòng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <div id="rs-confirm-overlay">
     <div id="rs-confirm-box">
         <div class="rs-confirm-icon">✅</div>
@@ -923,19 +1216,60 @@
             <button class="co-pay-close" onclick="coPayClose()">✕</button>
             <div style="font-size:36px;margin-bottom:10px;">💳</div>
             <div class="co-pay-banner-title">Thanh toán Check Out</div>
-            <div class="co-pay-banner-sub">Vui lòng chuyển khoản để hoàn tất thủ tục trả phòng</div>
+            <div class="co-pay-banner-sub" id="co-pay-banner-sub">Chọn phương thức thanh toán phù hợp</div>
         </div>
 
-        <div class="co-pay-body">
-
-            <!-- Tổng tiền còn lại -->
-            <div class="co-pay-total-box">
+        <!-- ===== BƯỚC 1: CHỌN PHƯƠNG THỨC ===== -->
+        <div id="co-pay-step-method" class="co-pay-method-step">
+            <!-- Tổng tiền -->
+            <div class="co-pay-total-box" style="margin-bottom:20px;">
                 <div>
                     <div class="co-pay-total-label">Số tiền cần thanh toán</div>
                     <div style="font-size:11px;color:#b45309;margin-top:2px;font-weight:500;">Sau khi trừ tiền cọc</div>
                 </div>
                 <div class="co-pay-total-amount" id="co-pay-amount">—</div>
             </div>
+
+            <div class="co-pay-method-title">Chọn phương thức thanh toán</div>
+            <div class="co-pay-method-sub">Khách hàng muốn thanh toán bằng hình thức nào?</div>
+
+            <div class="co-pay-method-cards">
+                <div class="co-pay-method-card" onclick="coPaySelectMethod('BANK_TRANSFER')">
+                    <div class="co-pay-method-icon bank">🏦</div>
+                    <div>
+                        <div class="co-pay-method-name">Chuyển khoản ngân hàng</div>
+                        <div class="co-pay-method-desc">Hiển thị mã QR & thông tin tài khoản</div>
+                    </div>
+                    <i class="fas fa-chevron-right co-pay-method-arrow"></i>
+                </div>
+                <div class="co-pay-method-card" onclick="coPaySelectMethod('CASH')">
+                    <div class="co-pay-method-icon cash">💵</div>
+                    <div>
+                        <div class="co-pay-method-name">Tiền mặt</div>
+                        <div class="co-pay-method-desc">Thu tiền mặt trực tiếp tại quầy lễ tân</div>
+                    </div>
+                    <i class="fas fa-chevron-right co-pay-method-arrow"></i>
+                </div>
+                <div class="co-pay-method-card" onclick="coPaySelectMethod('CREDIT_CARD')">
+                    <div class="co-pay-method-icon" style="background:linear-gradient(135deg,#ede9fe,#ddd6fe);">💳</div>
+                    <div>
+                        <div class="co-pay-method-name">Thẻ tín dụng / Thẻ ATM</div>
+                        <div class="co-pay-method-desc">Quẹt thẻ qua máy POS tại quầy</div>
+                    </div>
+                    <i class="fas fa-chevron-right co-pay-method-arrow"></i>
+                </div>
+            </div>
+
+            <div style="margin-top:18px;">
+                <button class="co-pay-btn-cancel" style="width:100%;" onclick="coPayClose()">Huỷ bỏ</button>
+            </div>
+        </div>
+
+        <!-- ===== BƯỚC 2A: CHUYỂN KHOẢN (QR) ===== -->
+        <div id="co-pay-step-bank" class="co-pay-body" style="display:none;">
+            <button class="co-pay-back-btn" onclick="coPayGoBack()">
+                <i class="fas fa-arrow-left"></i> Quay lại chọn phương thức
+            </button>
 
             <!-- QR Code -->
             <div class="co-pay-qr-box">
@@ -991,6 +1325,44 @@
                 <button class="co-pay-btn-cancel" onclick="coPayClose()">Bỏ qua</button>
                 <button class="co-pay-btn-confirm" id="co-pay-confirm-btn" onclick="coPayConfirm()">
                     <i class="fas fa-check-circle"></i> Tôi đã chuyển khoản
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== BƯỚC 2B: TIỀN MẶT / THẺ ===== -->
+        <div id="co-pay-step-cash" style="padding:24px 28px 28px;display:none;">
+            <button class="co-pay-back-btn" onclick="coPayGoBack()">
+                <i class="fas fa-arrow-left"></i> Quay lại chọn phương thức
+            </button>
+
+            <!-- Số tiền nổi bật -->
+            <div class="co-pay-cash-box">
+                <div class="co-pay-cash-icon" id="co-cash-icon">💵</div>
+                <div class="co-pay-cash-label" id="co-cash-method-label">Thanh toán tiền mặt</div>
+                <div class="co-pay-cash-amount" id="co-cash-amount-display">—</div>
+                <div class="co-pay-cash-note">Số tiền nhân viên cần thu từ khách</div>
+            </div>
+
+            <!-- Thông tin giao dịch -->
+            <div class="co-pay-cash-info">
+                <div class="co-pay-cash-info-row">
+                    <span class="co-pay-cash-info-label">Phương thức</span>
+                    <span class="co-pay-cash-info-val" id="co-cash-method-val">—</span>
+                </div>
+                <div class="co-pay-cash-info-row">
+                    <span class="co-pay-cash-info-label">Trạng thái</span>
+                    <span class="co-pay-cash-info-val" style="color:#16a34a;">✅ Đã thu tiền tại quầy</span>
+                </div>
+                <div class="co-pay-cash-info-row">
+                    <span class="co-pay-cash-info-label">Ghi chú</span>
+                    <span class="co-pay-cash-info-val" style="color:#64748b;font-size:12px;">Nhấn xác nhận để lưu giao dịch</span>
+                </div>
+            </div>
+
+            <div class="co-pay-actions">
+                <button class="co-pay-btn-cancel" onclick="coPayClose()">Huỷ bỏ</button>
+                <button class="co-pay-btn-confirm" id="co-pay-cash-confirm-btn" onclick="coPayCashConfirm()" style="background:linear-gradient(135deg,#16a34a,#15803d);box-shadow:0 4px 14px rgba(22,163,74,0.25);">
+                    <i class="fas fa-check-circle"></i> Xác nhận đã thu tiền
                 </button>
             </div>
         </div>
@@ -1308,6 +1680,7 @@
         document.getElementById('view-reset-status').style.display  = view === 'reset'    ? 'flex' : 'none';
         document.getElementById('view-checkin').style.display       = view === 'checkin'  ? 'flex' : 'none';
         document.getElementById('view-checkout').style.display      = view === 'checkout' ? 'flex' : 'none';
+        document.getElementById('view-booking').style.display       = view === 'booking'  ? 'flex' : 'none';
     }
 
     document.getElementById('menuResetStatus').addEventListener('click', function(e) {
@@ -1319,6 +1692,9 @@
     // ===== MỚI: Check Out menu =====
     document.getElementById('menuCheckOut').addEventListener('click', function(e) {
         e.preventDefault(); switchToView('checkout'); coLoadRooms();
+    });
+    document.getElementById('menuBooking').addEventListener('click', function(e) {
+        e.preventDefault(); switchToView('booking'); bkLoadRooms();
     });
 
     document.getElementById('menuUpdate').addEventListener('click', function() { switchToView('form'); }, true);
@@ -1726,50 +2102,79 @@
     }
 
     // ===== CHECKOUT PAYMENT MODAL LOGIC =====
-    let _coPayState = { bookingId: null, amount: 0 };
+    let _coPayState = { bookingId: null, amount: 0, method: null };
 
     function coPayOpen(checkoutData, roomId) {
-        // Debug: in toàn bộ checkoutData để xác nhận field name từ backend
         console.log('[coPayOpen] checkoutData raw =', JSON.stringify(checkoutData));
 
-        // CheckOutRespone { id: Long, Price: Double }
-        // Lombok @Getter trên "Price" → getter là "getPrice()" → Jackson serialize thành "price"
-        // Nhưng nếu field name bắt đầu hoa (Price) thì một số config serialize thành "Price"
-        // → thử tất cả các key có thể
         _coPayState.bookingId = checkoutData.id ?? null;
-        const rawAmount = checkoutData.price       // Jackson chuẩn
-            ?? checkoutData.Price       // nếu field name hoa
-            ?? checkoutData['Price']    // bracket notation phòng thủ
-            ?? 0;
+        const rawAmount = checkoutData.price ?? checkoutData.Price ?? checkoutData['Price'] ?? 0;
         _coPayState.amount = rawAmount;
+        _coPayState.method = null;
 
         console.log('[coPayOpen] bookingId =', _coPayState.bookingId, '| amount =', _coPayState.amount);
 
         const fmtVnd = n => new Intl.NumberFormat('vi-VN').format(Math.max(0, Math.round(n))) + ' ₫';
         const amountStr = fmtVnd(rawAmount);
 
-        // Mã nội dung chuyển khoản ngẫu nhiên
-        const randomCode = Math.floor(10000 + Math.random() * 90000);
-        const content = `STAYVIET CO${randomCode}`;
-
-        // Điền thông tin vào modal
+        // Điền số tiền vào bước 1 (chọn phương thức)
         document.getElementById('co-pay-amount').textContent = amountStr;
-        document.getElementById('co-pay-amount-copy').textContent = amountStr;
-        document.getElementById('co-pay-content').textContent = content;
 
-        // Tạo QR động theo VietQR format (bank=VCB, acc=1234567890)
-        const qrData = encodeURIComponent(`00020101021238570010A000000727012700069704360113123456789002STAYVIET CO${randomCode}5303704540${Math.round(Math.max(0,rawAmount))}5802VN6304`);
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=VIETQR+STK+1234567890+VCB+${Math.round(Math.max(0,rawAmount))}+${content}&bgcolor=ffffff`;
-        document.getElementById('co-pay-qr-img').src = qrUrl;
-
-        // Reset nút
-        const confirmBtn = document.getElementById('co-pay-confirm-btn');
-        confirmBtn.disabled = false;
-        confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> Tôi đã chuyển khoản';
+        // Reset về bước 1
+        _coPayShowStep('method');
 
         // Hiện overlay
         document.getElementById('co-payment-overlay').classList.add('active');
         document.body.style.overflow = 'hidden';
+    }
+
+    function _coPayShowStep(step) {
+        document.getElementById('co-pay-step-method').style.display = step === 'method' ? 'block' : 'none';
+        document.getElementById('co-pay-step-bank').style.display   = step === 'bank'   ? 'block' : 'none';
+        document.getElementById('co-pay-step-cash').style.display   = step === 'cash'   ? 'block' : 'none';
+
+        const sub = document.getElementById('co-pay-banner-sub');
+        if (step === 'method') sub.textContent = 'Chọn phương thức thanh toán phù hợp';
+        else if (step === 'bank') sub.textContent = 'Thanh toán qua chuyển khoản ngân hàng';
+        else sub.textContent = 'Xác nhận thu tiền tại quầy lễ tân';
+    }
+
+    function coPaySelectMethod(method) {
+        _coPayState.method = method;
+        const fmtVnd = n => new Intl.NumberFormat('vi-VN').format(Math.max(0, Math.round(n))) + ' ₫';
+        const amountStr = fmtVnd(_coPayState.amount);
+
+        if (method === 'BANK_TRANSFER') {
+            // Sinh mã nội dung chuyển khoản ngẫu nhiên
+            const randomCode = Math.floor(10000 + Math.random() * 90000);
+            const content = `STAYVIET CO${randomCode}`;
+            document.getElementById('co-pay-amount-copy').textContent = amountStr;
+            document.getElementById('co-pay-content').textContent = content;
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=VIETQR+STK+1234567890+VCB+${Math.round(Math.max(0,_coPayState.amount))}+${content}&bgcolor=ffffff`;
+            document.getElementById('co-pay-qr-img').src = qrUrl;
+            // Reset nút
+            const confirmBtn = document.getElementById('co-pay-confirm-btn');
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> Tôi đã chuyển khoản';
+            _coPayShowStep('bank');
+        } else {
+            // Tiền mặt hoặc thẻ
+            const isCash = method === 'CASH';
+            document.getElementById('co-cash-icon').textContent      = isCash ? '💵' : '💳';
+            document.getElementById('co-cash-method-label').textContent = isCash ? 'Thanh toán tiền mặt' : 'Thanh toán thẻ (POS)';
+            document.getElementById('co-cash-method-val').textContent  = isCash ? '💵 Tiền mặt' : '💳 Thẻ tín dụng / ATM';
+            document.getElementById('co-cash-amount-display').textContent = amountStr;
+            // Reset nút
+            const cashBtn = document.getElementById('co-pay-cash-confirm-btn');
+            cashBtn.disabled = false;
+            cashBtn.innerHTML = '<i class="fas fa-check-circle"></i> Xác nhận đã thu tiền';
+            _coPayShowStep('cash');
+        }
+    }
+
+    function coPayGoBack() {
+        _coPayShowStep('method');
+        _coPayState.method = null;
     }
 
     function coPayClose() {
@@ -1786,6 +2191,7 @@
         });
     }
 
+    // Xác nhận chuyển khoản
     async function coPayConfirm() {
         if (!_coPayState.bookingId) {
             showToast('error', 'Lỗi', 'Không tìm thấy thông tin đặt phòng. Vui lòng thử lại.');
@@ -1796,16 +2202,12 @@
         confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xác nhận...';
 
         const token = localStorage.getItem('accessToken');
-        // Debug: kiểm tra giá trị trước khi gửi
         console.log('[coPayConfirm] bookingId =', _coPayState.bookingId, '| amount =', _coPayState.amount);
 
         const params = new URLSearchParams();
         params.append('booking_id', String(_coPayState.bookingId));
-        // Gửi amount dạng double (không round mất phần thập phân), Spring bind Double/double đều OK
         params.append('amount', String(_coPayState.amount));
         params.append('method_booking', 'BANK_TRANSFER');
-
-        console.log('[coPayConfirm] params =', params.toString());
 
         try {
             const res = await fetch('/api/v1/payment/thanhtoan', {
@@ -1823,11 +2225,53 @@
             const msg = await res.text();
             coPayClose();
             showToast('success', '🎉 Thanh toán thành công!', msg || 'Giao dịch đã được ghi nhận.');
-            _coPayState = { bookingId: null, amount: 0 };
+            _coPayState = { bookingId: null, amount: 0, method: null };
         } catch (err) {
             showToast('error', 'Thanh toán thất bại', err.message || 'Có lỗi xảy ra, vui lòng liên hệ quản lý.');
             confirmBtn.disabled = false;
             confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> Tôi đã chuyển khoản';
+        }
+    }
+
+    // Xác nhận tiền mặt / thẻ
+    async function coPayCashConfirm() {
+        if (!_coPayState.bookingId) {
+            showToast('error', 'Lỗi', 'Không tìm thấy thông tin đặt phòng. Vui lòng thử lại.');
+            return;
+        }
+        const cashBtn = document.getElementById('co-pay-cash-confirm-btn');
+        cashBtn.disabled = true;
+        cashBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+
+        const token = localStorage.getItem('accessToken');
+        console.log('[coPayCashConfirm] bookingId =', _coPayState.bookingId, '| amount =', _coPayState.amount, '| method =', _coPayState.method);
+
+        const params = new URLSearchParams();
+        params.append('booking_id', String(_coPayState.bookingId));
+        params.append('amount', String(_coPayState.amount));
+        params.append('method_booking', _coPayState.method); // CASH hoặc CREDIT_CARD
+
+        try {
+            const res = await fetch('/api/v1/payment/thanhtoan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    ...(token ? { 'Authorization': 'Bearer ' + token } : {})
+                },
+                body: params
+            });
+            if (!res.ok) {
+                const errText = await res.text().catch(() => '');
+                throw new Error(errText || `Lỗi ${res.status}`);
+            }
+            const msg = await res.text();
+            coPayClose();
+            showToast('success', '🎉 Thanh toán thành công!', msg || 'Giao dịch tiền mặt đã được ghi nhận.');
+            _coPayState = { bookingId: null, amount: 0, method: null };
+        } catch (err) {
+            showToast('error', 'Thanh toán thất bại', err.message || 'Có lỗi xảy ra, vui lòng liên hệ quản lý.');
+            cashBtn.disabled = false;
+            cashBtn.innerHTML = '<i class="fas fa-check-circle"></i> Xác nhận đã thu tiền';
         }
     }
 
@@ -1851,6 +2295,184 @@
         _coConfirmCallback = null;
     }
     document.getElementById('co-confirm-overlay').addEventListener('click', function(e) { if (e.target === this) coConfirmClose(); });
+</script>
+
+<script>
+    // ===== BOOKING ROOM LOGIC =====
+    let _bkAllRooms = [];
+    let _bkSelectedRoom = null;
+
+    function bkReload() { bkLoadRooms(); }
+
+    async function bkLoadRooms() {
+        const grid = document.getElementById('bk-grid');
+        const countEl = document.getElementById('bk-count');
+        document.getElementById('bk-search-input').value = '';
+        document.getElementById('bk-search-clear').classList.add('hidden');
+        document.getElementById('bk-price-hint').classList.add('hidden');
+        grid.innerHTML = '<div class="rs-loading"><i class="fas fa-spinner fa-spin"></i>Đang tải danh sách phòng...</div>';
+        countEl.textContent = '';
+        try {
+            const token = localStorage.getItem('accessToken');
+            const res = await fetch('/api/v1/rooms/status', {
+                headers: token ? { Authorization: 'Bearer ' + token } : {}
+            });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const json = await res.json();
+            _bkAllRooms = Array.isArray(json) ? json : (json.data || []);
+            bkRenderGrid(_bkAllRooms);
+        } catch (err) {
+            grid.innerHTML = '<div class="rs-empty" style="color:#ef4444;">⚠️ Lỗi tải phòng: ' + err.message + '</div>';
+        }
+    }
+
+    function bkRenderGrid(rooms) {
+        const grid = document.getElementById('bk-grid');
+        const countEl = document.getElementById('bk-count');
+        if (!rooms.length) {
+            grid.innerHTML = '<div class="rs-empty">📭 Không có phòng nào khả dụng.</div>';
+            countEl.textContent = '0 phòng';
+            return;
+        }
+        countEl.textContent = rooms.length + ' phòng';
+        grid.innerHTML = rooms.map(r => bkRenderCard(r)).join('');
+    }
+
+    function bkRenderCard(r) {
+        const fmtPrice = n => new Intl.NumberFormat('vi-VN').format(n) + ' ₫/đêm';
+        const imgHtml = (r.images && r.images.length > 0)
+            ? `<img class="bk-card-img" src="${r.images[0]}" alt="${r.name||''}" loading="lazy">`
+            : `<div class="bk-card-img-ph">🏨</div>`;
+        const roomType = r.roomType?.type || r.type || '';
+        return `
+        <div class="bk-card">
+            ${imgHtml}
+            <div class="bk-card-body">
+                <div class="bk-card-name" title="${r.name||''}">${r.name || 'Phòng #' + r.id}</div>
+                ${roomType ? `<div class="bk-card-type"><i class="fas fa-tag" style="font-size:10px;"></i> ${roomType}</div>` : ''}
+                <div class="bk-card-price">${fmtPrice(r.price || 0)}</div>
+                <span class="bk-badge-available"><i class="fas fa-circle" style="font-size:7px;"></i> Available</span>
+                <button class="bk-btn-booking" onclick="bkOpenModal(${JSON.stringify(r).replace(/"/g, '&quot;')})">
+                    <i class="fas fa-calendar-plus"></i> Booking
+                </button>
+            </div>
+        </div>`;
+    }
+
+    function bkOnSearch() {
+        const raw = document.getElementById('bk-search-input').value.replace(/\D/g, '').trim();
+        const clearBtn  = document.getElementById('bk-search-clear');
+        const hintEl    = document.getElementById('bk-price-hint');
+        clearBtn.classList.toggle('hidden', !raw);
+
+        if (!raw) {
+            hintEl.classList.add('hidden');
+            bkRenderGrid(_bkAllRooms);
+            return;
+        }
+
+        const target = Number(raw);
+        const DELTA  = 50000;
+        const lo = target - DELTA;
+        const hi = target + DELTA;
+
+        const filtered = _bkAllRooms.filter(r => {
+            const p = Number(r.price || 0);
+            return p >= lo && p <= hi;
+        });
+
+        const fmt = n => new Intl.NumberFormat('vi-VN').format(n);
+        hintEl.textContent = fmt(lo) + ' ₫ – ' + fmt(hi) + ' ₫';
+        hintEl.classList.remove('hidden');
+
+        bkRenderGrid(filtered);
+    }
+
+    function bkClearSearch() {
+        document.getElementById('bk-search-input').value = '';
+        document.getElementById('bk-search-clear').classList.add('hidden');
+        document.getElementById('bk-price-hint').classList.add('hidden');
+        document.getElementById('bk-price-hint').classList.add('hidden');
+        bkRenderGrid(_bkAllRooms);
+    }
+
+    function bkOpenModal(room) {
+        _bkSelectedRoom = room;
+        const fmtPrice = n => new Intl.NumberFormat('vi-VN').format(n) + ' ₫/đêm';
+        document.getElementById('bk-modal-room-name').textContent = room.name || 'Phòng #' + room.id;
+        document.getElementById('bk-modal-room-price').textContent = fmtPrice(room.price || 0);
+        document.getElementById('bk-customer-name').value = '';
+        document.getElementById('bk-customer-phone').value = '';
+        document.getElementById('bk-checkin-date').value = '';
+        document.getElementById('bk-checkout-date').value = '';
+        const btn = document.getElementById('bk-modal-confirm-btn');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-calendar-check"></i> Xác nhận đặt phòng';
+        document.getElementById('bk-modal-overlay').classList.add('active');
+        document.body.style.overflow = 'hidden';
+        // Set min date = today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('bk-checkin-date').min = today;
+        document.getElementById('bk-checkout-date').min = today;
+    }
+
+    function bkModalClose() {
+        document.getElementById('bk-modal-overlay').classList.remove('active');
+        document.body.style.overflow = '';
+        _bkSelectedRoom = null;
+    }
+
+    async function bkSubmitBooking() {
+        if (!_bkSelectedRoom) return;
+        const customerName  = document.getElementById('bk-customer-name').value.trim();
+        const customerPhone = document.getElementById('bk-customer-phone').value.trim();
+        const checkin    = document.getElementById('bk-checkin-date').value;
+        const checkout   = document.getElementById('bk-checkout-date').value;
+
+        if (!customerName)  { showToast('warning', 'Thiếu thông tin', 'Vui lòng nhập họ tên khách hàng.'); return; }
+        if (!customerPhone) { showToast('warning', 'Thiếu thông tin', 'Vui lòng nhập số điện thoại.'); return; }
+        if (!checkin)    { showToast('warning', 'Thiếu thông tin', 'Vui lòng chọn ngày nhận phòng.'); return; }
+        if (!checkout)   { showToast('warning', 'Thiếu thông tin', 'Vui lòng chọn ngày trả phòng.'); return; }
+        if (checkin >= checkout) { showToast('warning', 'Ngày không hợp lệ', 'Ngày trả phòng phải sau ngày nhận phòng.'); return; }
+
+        const btn = document.getElementById('bk-modal-confirm-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+
+        const token = localStorage.getItem('accessToken');
+        const params = new URLSearchParams();
+        params.append('customerName', customerName);
+        params.append('customerPhone', customerPhone);
+        params.append('roomId', String(_bkSelectedRoom.id));
+        params.append('enventCheckinDate', checkin);
+        params.append('enventCheckoutDate', checkout);
+
+        try {
+            const res = await fetch('/api/v1/booking/bookingonline', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    ...(token ? { Authorization: 'Bearer ' + token } : {})
+                },
+                body: params
+            });
+            if (!res.ok) {
+                const errText = await res.text().catch(() => '');
+                throw new Error(errText || 'Lỗi ' + res.status);
+            }
+            bkModalClose();
+            showToast('success', '🎉 Đặt phòng thành công!', `Phòng ${_bkSelectedRoom?.name || ''} đã được đặt.`);
+            bkLoadRooms();
+        } catch (err) {
+            showToast('error', 'Đặt phòng thất bại', err.message || 'Có lỗi xảy ra.');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-calendar-check"></i> Xác nhận đặt phòng';
+        }
+    }
+
+    document.getElementById('bk-modal-overlay').addEventListener('click', function(e) {
+        if (e.target === this) bkModalClose();
+    });
 </script>
 
 </body>

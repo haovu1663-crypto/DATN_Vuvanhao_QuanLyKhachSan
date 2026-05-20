@@ -19,6 +19,7 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private double amount;
+    @Enumerated(EnumType.STRING)
     private MethodBooking method;
     private String Status;
     private LocalDateTime paymentDate;

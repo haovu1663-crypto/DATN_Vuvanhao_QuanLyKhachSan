@@ -8,10 +8,7 @@ import re.quanlykhachsan.dto.response.BookingRespone;
 import re.quanlykhachsan.dto.response.CheckOutRespone;
 import re.quanlykhachsan.entity.*;
 import re.quanlykhachsan.exception.ResourceNotFoundException;
-import re.quanlykhachsan.repository.BookingRespository;
-import re.quanlykhachsan.repository.CustomerRespository;
-import re.quanlykhachsan.repository.EmployeeRepository;
-import re.quanlykhachsan.repository.RoomRepository;
+import re.quanlykhachsan.repository.*;
 import re.quanlykhachsan.service.interfac.IBookingService;
 
 import java.time.LocalDate;
@@ -27,6 +24,7 @@ public class BookingService implements IBookingService {
     private final RoomRepository roomRespository;
     private final RoomService roomService;
     private final ModelMapper modelMapper;
+    private final PaymentRespository paymentRepository;
     @Override
     public BookingRespone CustomerBooking(BookingRequest bookingRequest) throws ResourceNotFoundException {
         Booking booking = new Booking();
@@ -78,38 +76,46 @@ public class BookingService implements IBookingService {
 
     @Override
     public CheckOutRespone CheckOut(Long employeeId, String email, Long roomId) throws ResourceNotFoundException {
-        // lấy ra booking của khách hàng
         Booking booking = bookingRespository.findByCustomerEmailAndRoomIdAndToyalPriceIsNull(email, roomId);
-        booking.setStatusBooking(StatusBooking.CHECKED_OUT);
+
+        Room room = roomRespository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng"));
+
         LocalDate today = LocalDate.now();
-        booking.setCheckOutDate( LocalDateTime.now());
-        // lấy ra room để lấy giá của phòng
-        Room room = roomRespository.findById(roomId).orElseThrow(()->new RuntimeException("không tìm thấy "));
 
-            // tổng tiền
-            long daysBetween = ChronoUnit.DAYS.between(booking.getEnventCheckinDate(), today);
-            booking.setToyalPrice(room.getPrice()*daysBetween+(room.getPrice()*daysBetween*5/100));
-            // nếu khách hàng không muốn ở nữa  thì sẽ
-            if(today.isBefore(booking.getEnventCheckoutDate())){
-                 daysBetween = ChronoUnit.DAYS.between(booking.getEnventCheckinDate(), booking.getEnventCheckoutDate());
-                booking.setToyalPrice(room.getPrice()*daysBetween+(room.getPrice()*daysBetween*5/100));
-            }
+        // Tính số ngày thực tế ở: từ ngày check-in THỰC TẾ đến hôm nay
+        LocalDate actualCheckin = booking.getCheckInDate().toLocalDate();
 
-            // lưu ngày trả phòng và
-            bookingRespository.save(booking);
+        long daysBetween;
+        if (today.isBefore(booking.getEnventCheckoutDate())) {
+            // Trả sớm → tính đủ theo hợp đồng (ngày dự kiến)
+            daysBetween = ChronoUnit.DAYS.between(actualCheckin, booking.getEnventCheckoutDate());
+        } else {
+            // Đúng hạn hoặc quá hạn → tính theo thực tế
+            daysBetween = ChronoUnit.DAYS.between(actualCheckin, today);
+        }
 
-            room.setStatus(StatusRoom.CLEANING);
-            roomRespository.save(room);
-            // trả về Check out  respone để tạo hóa đơn
-            CheckOutRespone checkOutRespone = new CheckOutRespone();
-            checkOutRespone.setId(booking.getId());
-            // tính tiền tạo nên hóa đơn thứ thanh toán tiền cìn lại
-            Long days =ChronoUnit.DAYS.between(booking.getEnventCheckinDate(), booking.getEnventCheckoutDate());
-            // số tiền đã cọc
-            Double pricePaymented = room.getPrice()*daysBetween+(room.getPrice()*daysBetween*5/100);
-            // số tiền còn thiếu trên hóa đơn
-            Double privePayment = booking.getToyalPrice()-pricePaymented;
-            checkOutRespone.setPrice(privePayment);
-        return checkOutRespone;
+        // Tổng tiền = giá phòng * ngày + 5% phí dịch vụ
+        double totalPrice = room.getPrice() * daysBetween * 1.05;
+
+        booking.setStatusBooking(StatusBooking.CHECKED_OUT);
+        booking.setCheckOutDate(LocalDateTime.now());
+        booking.setToyalPrice(totalPrice);
+        bookingRespository.save(booking);
+
+        room.setStatus(StatusRoom.CLEANING);
+        roomRespository.save(room);
+
+        // ✅ Tiền còn lại = tổng tiền - tiền đã cọc
+        // Bạn cần query Payment để lấy tiền đã deposit
+        Double alreadyPaid = paymentRepository.findDepositAmountByBookingId(booking.getId());
+
+        // Tiền còn lại cần thanh toán
+        Double remaining = totalPrice - alreadyPaid;
+
+        CheckOutRespone response = new CheckOutRespone();
+        response.setId(booking.getId());
+        response.setPrice(remaining); // ← đúng rồi, không còn = 0 nữa
+        return response;
     }
 }

@@ -25,6 +25,8 @@ public class Booking {
     private Double toyalPrice;
     private LocalDate enventCheckinDate;
     private LocalDate enventCheckoutDate;
+    private String phonenumber;
+    private String name;
 
 
 
