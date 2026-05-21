@@ -35,6 +35,7 @@ public class EmployeeService implements IEmployeeSevice {
         Employee employee = modelMapper.map(employeeRequest, Employee.class);
         employee.setPassword(passwordEncoder.encode(employeeRequest.getPassword()));
         employee.setRole("ROLE_EMPLOYEE");
+        employee.setWorkBranch(employeeRequest.getWorkBranch());
         employeeRepository.save(employee);
         return modelMapper.map(employee, EmployeeResponse.class);
     }
@@ -84,5 +85,10 @@ public class EmployeeService implements IEmployeeSevice {
     public List<EmployeeResponse> getbyName(String name) {
         List<Employee> employees = employeeRepository.findByName(name);
         return employees.stream().map(en ->modelMapper.map(en,EmployeeResponse.class)).collect(Collectors.toList());
+    }
+    public void checkEmail(String email) throws DataConfickException {
+        if (employeeRepository.existsByEmail(email)) {
+            throw new DataConfickException("Email này đã được đăng ký rồi vui lòng nhập tài khoản khác ");
+        }
     }
 }

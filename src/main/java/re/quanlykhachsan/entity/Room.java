@@ -29,4 +29,5 @@ public class Room {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "roomType_id")
     private RoomType roomType;
+    private String workBranch;
 }

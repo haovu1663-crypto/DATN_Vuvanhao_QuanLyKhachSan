@@ -572,6 +572,50 @@
         .bk-otp-hint { font-size: 11px; color: var(--gray); margin-top: -14px; margin-bottom: 16px; }
         .bk-otp-hint.success { color: #16a34a; font-weight: 600; }
 
+        /* ===== OTP INPUT 4 SỐ (FORM ĐĂNG KÝ) ===== */
+        .reg-otp-section {
+            display: none; margin-top: 4px; margin-bottom: 16px;
+            background: #f0f7ff; border: 1.5px solid #bfdbfe;
+            border-radius: 14px; padding: 16px 18px;
+            animation: fadeDown 0.2s ease;
+        }
+        .reg-otp-section.show { display: block; }
+        .reg-otp-label {
+            font-size: 12px; font-weight: 600; color: var(--navy);
+            margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+        }
+        .reg-otp-inputs {
+            display: flex; gap: 10px; justify-content: center; margin-bottom: 12px;
+        }
+        .reg-otp-digit {
+            width: 52px; height: 56px; border-radius: 12px;
+            border: 2px solid #bfdbfe; background: white;
+            text-align: center; font-size: 24px; font-weight: 700;
+            color: var(--navy); outline: none;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s; caret-color: var(--blue);
+        }
+        .reg-otp-digit:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+        .reg-otp-digit.filled { border-color: var(--blue); background: #eff6ff; }
+        .reg-otp-digit.error  { border-color: #dc2626; background: #fff1f1; animation: shake 0.3s ease; }
+        .reg-otp-digit.success{ border-color: #16a34a; background: #f0fdf4; }
+        .reg-otp-status {
+            font-size: 12px; font-weight: 600; text-align: center;
+            min-height: 18px; transition: all 0.2s;
+        }
+        .reg-otp-status.success { color: #16a34a; }
+        .reg-otp-status.error   { color: #dc2626; }
+        .reg-otp-resend {
+            display: block; font-size: 11px; color: var(--gray);
+            text-align: center; margin-top: 6px;
+        }
+        .reg-otp-resend a { color: var(--blue); cursor: pointer; text-decoration: underline; }
+        @keyframes shake {
+            0%,100%{ transform:translateX(0) }
+            20%    { transform:translateX(-5px) }
+            60%    { transform:translateX(5px) }
+        }
+
 
         /* ===== MODAL THANH TOÁN ===== */
         #payment-section {
@@ -898,8 +942,20 @@
                             <input class="reg-input" id="reg-email" type="email" placeholder="example@email.com">
                         </div>
                         <div>
-                            <button class="btn-send-otp">Gửi mã<br>xác nhận</button>
+                            <button class="btn-send-otp" id="btn-reg-send-otp" onclick="regSendOtp()">Gửi mã<br>xác nhận</button>
                         </div>
+                    </div>
+                    <!-- OTP INPUT SECTION -->
+                    <div class="reg-otp-section" id="reg-otp-section">
+                        <div class="reg-otp-label">📩 Nhập mã 4 số vừa gửi đến email của bạn</div>
+                        <div class="reg-otp-inputs">
+                            <input class="reg-otp-digit" id="reg-otp-0" type="text" inputmode="numeric" maxlength="1" oninput="regOtpInput(0)" onkeydown="regOtpKey(event,0)">
+                            <input class="reg-otp-digit" id="reg-otp-1" type="text" inputmode="numeric" maxlength="1" oninput="regOtpInput(1)" onkeydown="regOtpKey(event,1)">
+                            <input class="reg-otp-digit" id="reg-otp-2" type="text" inputmode="numeric" maxlength="1" oninput="regOtpInput(2)" onkeydown="regOtpKey(event,2)">
+                            <input class="reg-otp-digit" id="reg-otp-3" type="text" inputmode="numeric" maxlength="1" oninput="regOtpInput(3)" onkeydown="regOtpKey(event,3)">
+                        </div>
+                        <div class="reg-otp-status" id="reg-otp-status"></div>
+                        <span class="reg-otp-resend" id="reg-otp-resend"></span>
                     </div>
                 </div>
 
@@ -934,7 +990,7 @@
 
                 <hr class="reg-divider">
                 <!-- Thêm onclick để gọi hàm gửi dữ liệu -->
-                <button class="btn-submit-reg" onclick="submitRegister()">🚀 &nbsp;Tạo tài khoản</button>
+                <button class="btn-submit-reg" id="btn-reg-submit" onclick="submitRegister()" disabled style="opacity:0.5;cursor:not-allowed;">🔒 &nbsp;Xác nhận email để tạo tài khoản</button>
                 <p class="reg-footer-note">Đã có tài khoản? <a href="#" onclick="hideRegister(); showLogin(); return false;">Đăng nhập ngay</a></p>
             </div>
         </div>
@@ -1191,32 +1247,195 @@
 
 <!-- nut đăng ký -->
 <script>
+    // ===== TRẠNG THÁI OTP ĐĂNG KÝ =====
+    let _regOtpCode    = null;   // Mã OTP từ server trả về
+    let _regOtpVerified = false; // Đã xác minh thành công chưa
+    let _regOtpTimer   = null;   // Interval đếm ngược
+
+    // ----- Gửi OTP -----
+    function regSendOtp() {
+        const email = document.getElementById('reg-email').value.trim();
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            Swal.fire({ icon: 'warning', title: 'Email không hợp lệ', text: 'Vui lòng nhập đúng địa chỉ email trước khi gửi mã.', confirmButtonColor: '#1a2744' });
+            return;
+        }
+
+        const btn = document.getElementById('btn-reg-send-otp');
+        btn.disabled = true;
+        btn.innerHTML = 'Đang gửi...';
+
+        fetch('/api/email/register?email=' + encodeURIComponent(email), { method: 'POST' })
+            .then(async res => {
+                const body = await res.text();
+                if (!res.ok) {
+                    // Gắn status code vào error để catch phân biệt loại lỗi
+                    const err = new Error(body);
+                    err.status = res.status;
+                    throw err;
+                }
+                // body lúc này là số OTP dạng string (server trả ResponseEntity<Integer>)
+                return body;
+            })
+            .then(otp => {
+                _regOtpCode     = otp.trim();
+                _regOtpVerified = false;
+
+                // Hiện khu vực nhập OTP
+                const section = document.getElementById('reg-otp-section');
+                section.classList.add('show');
+                // Reset các ô
+                [0,1,2,3].forEach(i => {
+                    const el = document.getElementById('reg-otp-' + i);
+                    el.value = '';
+                    el.className = 'reg-otp-digit';
+                });
+                document.getElementById('reg-otp-status').textContent = '';
+                document.getElementById('reg-otp-status').className = 'reg-otp-status';
+                document.getElementById('reg-otp-0').focus();
+
+                // Đếm ngược 120 giây cho phép gửi lại
+                regStartOtpCountdown(120);
+
+                Swal.fire({ icon: 'success', title: 'Đã gửi mã!', text: 'Kiểm tra hộp thư ' + email + ' và nhập mã 4 số.', confirmButtonColor: '#1a2744', timer: 2500, showConfirmButton: false });
+            })
+            .catch(err => {
+                btn.disabled = false;
+                btn.innerHTML = 'Gửi mã<br>xác nhận';
+
+                if (err.status === 409) {
+                    // Email đã tồn tại — DataConfickException trả plain text 409
+                    document.getElementById('reg-email').classList.add('error');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Email đã được đăng ký',
+                        text: err.message,
+                        confirmButtonColor: '#1a2744'
+                    });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Gửi mã thất bại', text: err.message || 'Vui lòng thử lại.', confirmButtonColor: '#dc2626' });
+                }
+            });
+    }
+
+    // ----- Đếm ngược & cho phép gửi lại -----
+    function regStartOtpCountdown(seconds) {
+        clearInterval(_regOtpTimer);
+        const btn      = document.getElementById('btn-reg-send-otp');
+        const resendEl = document.getElementById('reg-otp-resend');
+        let remaining  = seconds;
+
+        function tick() {
+            btn.disabled = true;
+            btn.innerHTML = `Gửi lại<br>(${remaining}s)`;
+            resendEl.innerHTML = `Chưa nhận được? <a onclick="regResendOtp()">Gửi lại sau ${remaining}s</a>`;
+        }
+        tick();
+        _regOtpTimer = setInterval(() => {
+            remaining--;
+            if (remaining <= 0) {
+                clearInterval(_regOtpTimer);
+                btn.disabled = false;
+                btn.innerHTML = 'Gửi lại<br>mã mới';
+                resendEl.innerHTML = `<a onclick="regResendOtp()">Gửi lại mã xác nhận</a>`;
+            } else {
+                tick();
+            }
+        }, 1000);
+    }
+
+    function regResendOtp() { regSendOtp(); }
+
+    // ----- Xử lý nhập từng ô OTP -----
+    function regOtpInput(idx) {
+        const el  = document.getElementById('reg-otp-' + idx);
+        const val = el.value.replace(/\D/g, '');
+        el.value  = val ? val[0] : '';
+        if (el.value) {
+            el.classList.add('filled');
+            if (idx < 3) document.getElementById('reg-otp-' + (idx+1)).focus();
+        } else {
+            el.classList.remove('filled');
+        }
+        // Kiểm tra ngay khi đủ 4 số
+        const full = [0,1,2,3].map(i => document.getElementById('reg-otp-'+i).value).join('');
+        if (full.length === 4) regVerifyOtp(full);
+    }
+
+    function regOtpKey(e, idx) {
+        if (e.key === 'Backspace' && !document.getElementById('reg-otp-'+idx).value && idx > 0) {
+            document.getElementById('reg-otp-'+(idx-1)).focus();
+        }
+    }
+
+    // ----- Xác minh OTP -----
+    function regVerifyOtp(entered) {
+        const statusEl = document.getElementById('reg-otp-status');
+        const submitBtn = document.getElementById('btn-reg-submit');
+
+        if (entered === _regOtpCode) {
+            // ĐÚNG
+            _regOtpVerified = true;
+            [0,1,2,3].forEach(i => {
+                const el = document.getElementById('reg-otp-'+i);
+                el.className = 'reg-otp-digit success';
+                el.disabled  = true;
+            });
+            statusEl.textContent = '✅ Xác minh thành công! Bạn có thể tạo tài khoản.';
+            statusEl.className   = 'reg-otp-status success';
+            // Mở khoá nút Tạo tài khoản
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '1';
+            submitBtn.style.cursor  = 'pointer';
+            submitBtn.innerHTML = '🚀 &nbsp;Tạo tài khoản';
+        } else {
+            // SAI — chỉ nếu đã nhập đủ 4 số
+            _regOtpVerified = false;
+            [0,1,2,3].forEach(i => {
+                document.getElementById('reg-otp-'+i).className = 'reg-otp-digit error';
+            });
+            statusEl.textContent = '❌ Mã xác nhận không đúng. Vui lòng thử lại.';
+            statusEl.className   = 'reg-otp-status error';
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.5';
+            submitBtn.style.cursor  = 'not-allowed';
+            submitBtn.innerHTML = '🔒 &nbsp;Xác nhận email để tạo tài khoản';
+            // Xóa ô và focus lại ô đầu sau 800ms
+            setTimeout(() => {
+                [0,1,2,3].forEach(i => {
+                    const el = document.getElementById('reg-otp-'+i);
+                    el.value = '';
+                    el.className = 'reg-otp-digit';
+                });
+                document.getElementById('reg-otp-0').focus();
+            }, 800);
+        }
+    }
+
+    // ----- Submit đăng ký -----
     function submitRegister() {
-        // 1. Thu thập dữ liệu từ các ID (giữ nguyên như bước trước)
+        if (!_regOtpVerified) {
+            Swal.fire({ icon: 'warning', title: 'Chưa xác minh email', text: 'Vui lòng gửi và nhập đúng mã OTP trước khi tạo tài khoản.', confirmButtonColor: '#1a2744' });
+            return;
+        }
+
         const fullname = document.getElementById('reg-fullname').value;
         const email    = document.getElementById('reg-email').value;
         const phone    = document.getElementById('reg-phone').value;
         const username = document.getElementById('reg-username').value;
         const password = document.getElementById('reg-password').value;
 
-        if(!fullname || !email || !phone || !username || !password) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Thiếu thông tin',
-                text: 'Vui lòng điền đầy đủ các trường bắt buộc!',
-                confirmButtonColor: '#1a2744' // Màu navy giống CSS của bạn
-            });
+        if (!fullname || !email || !phone || !username || !password) {
+            Swal.fire({ icon: 'warning', title: 'Thiếu thông tin', text: 'Vui lòng điền đầy đủ các trường bắt buộc!', confirmButtonColor: '#1a2744' });
             return;
         }
 
         const params = new URLSearchParams();
         params.append('fullname', fullname);
-        params.append('email', email);
-        params.append('phone', phone);
+        params.append('email',    email);
+        params.append('phone',    phone);
         params.append('username', username);
         params.append('password', password);
 
-        // Hiệu ứng Loading khi đang chờ Backend xử lý
         Swal.showLoading();
 
         fetch('/api/v1/customer/register', {
@@ -1225,33 +1444,24 @@
             body: params
         })
             .then(async response => {
-                if (!response.ok) {
-                    // Lấy nội dung lỗi từ DataConfickException bên Java
-                    const errorText = await response.text();
-                    throw new Error(errorText);
-                }
+                if (!response.ok) throw new Error(await response.text());
                 return response.json();
             })
-            .then(data => {
-                // Thông báo thành công đẹp mắt
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Chúc mừng!',
-                    text: 'Tài khoản của bạn đã được tạo thành công.',
-                    confirmButtonColor: '#c9a84c', // Màu gold giống CSS của bạn
-                    timer: 2500
-                });
+            .then(() => {
+                Swal.fire({ icon: 'success', title: 'Chúc mừng!', text: 'Tài khoản của bạn đã được tạo thành công.', confirmButtonColor: '#c9a84c', timer: 2500 });
                 hideRegister();
                 document.querySelectorAll('.reg-input').forEach(input => input.value = '');
+                // Reset OTP state
+                _regOtpCode = null; _regOtpVerified = false;
+                clearInterval(_regOtpTimer);
+                document.getElementById('reg-otp-section').classList.remove('show');
+                const submitBtn = document.getElementById('btn-reg-submit');
+                submitBtn.disabled = true; submitBtn.style.opacity = '0.5';
+                submitBtn.style.cursor = 'not-allowed';
+                submitBtn.innerHTML = '🔒 &nbsp;Xác nhận email để tạo tài khoản';
             })
             .catch(error => {
-                // Hiển thị lỗi cụ thể từ Java (ví dụ: "Emailnayfy đã được sử dụng")[cite: 4]
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Đăng ký thất bại',
-                    text: error.message,
-                    confirmButtonColor: '#dc2626'
-                });
+                Swal.fire({ icon: 'error', title: 'Đăng ký thất bại', text: error.message, confirmButtonColor: '#dc2626' });
             });
     }
 
@@ -1510,6 +1720,7 @@
             '<div class="rc-type">' + typeName + '</div>' +
             '<div class="rc-name">' + (r.name || 'Phòng #' + r.id) + '</div>' +
             '<div class="rc-id">ID: ' + (r.id || r.type_room_id || '—') + (capacity !== '—' ? ' &nbsp;·&nbsp; Tối đa ' + capacity : '') + '</div>' +
+            (r.workBranch ? '<div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--gray);margin-top:4px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + r.workBranch + '</span></div>' : '') +
             '<span class="rc-badge ' + statusCls + '">' + statusLabel + '</span>' +
             (amenityTags ? '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;">' + amenityTags + '</div>' : '') +
             (desc ? '<div style="font-size:13px;color:var(--gray);line-height:1.5;margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">' + desc + '</div>' : '') +
@@ -1538,11 +1749,18 @@
         btn.disabled = !valid || _bkOtpCountdown > 0;
     }
 
+    // OTP booking state
+    let _bkOtpCode      = null;   // mã OTP nhận từ server
+    let _bkOtpVerified  = false;  // đã xác thực thành công chưa
+
     function bkSendOtp() {
-        const emailEl = document.getElementById('bk-email');
-        const hintEl  = document.getElementById('bk-otp-hint');
-        const btn     = document.getElementById('btn-bk-send-otp');
-        const email   = emailEl.value.trim();
+        const emailEl  = document.getElementById('bk-email');
+        const hintEl   = document.getElementById('bk-otp-hint');
+        const btn      = document.getElementById('btn-bk-send-otp');
+        const otpSec   = document.getElementById('bk-otp-section');
+        const statusEl = document.getElementById('bk-otp-status');
+        const email    = emailEl.value.trim();
+        const userId   = localStorage.getItem('userId');
 
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             emailEl.classList.add('error');
@@ -1555,19 +1773,45 @@
         hintEl.textContent = '⏳ Đang gửi...';
         hintEl.className = 'bk-otp-hint';
 
-        fetch('/api/v1/otp/send', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email })
-        })
+        // Reset OTP state
+        _bkOtpCode     = null;
+        _bkOtpVerified = false;
+        bkUpdateBtn();
+
+        // Xóa các ô OTP cũ
+        [0,1,2,3].forEach(i => {
+            const el = document.getElementById('bk-otp-' + i);
+            el.value = '';
+            el.className = 'reg-otp-digit';
+        });
+        statusEl.textContent = '';
+        statusEl.className   = 'reg-otp-status';
+
+        // Gọi đúng endpoint /api/email/booking với email + id
+        const url = '/api/email/booking?email=' + encodeURIComponent(email) + '&id=' + encodeURIComponent(userId || 0);
+        fetch(url, { method: 'POST' })
             .then(async res => {
-                if (!res.ok) throw new Error(await res.text());
+                const body = await res.text();
+                if (!res.ok) {
+                    // Server trả về message lỗi (ví dụ: email không khớp 409)
+                    throw new Error(body);
+                }
+                // Server trả về số OTP (int)
+                _bkOtpCode = String(body).trim();
                 hintEl.textContent = '✅ Mã xác nhận đã gửi đến ' + email + '. Vui lòng kiểm tra hộp thư.';
                 hintEl.className = 'bk-otp-hint success';
+                otpSec.classList.add('show');
+                setTimeout(() => document.getElementById('bk-otp-0').focus(), 100);
                 bkStartOtpCountdown(60);
             })
             .catch(err => {
-                hintEl.textContent = '❌ Gửi thất bại: ' + (err.message || 'Lỗi kết nối');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gửi mã thất bại',
+                    text: err.message || 'Gửi thất bại. Vui lòng thử lại.',
+                    confirmButtonColor: '#dc2626'
+                });
+                hintEl.textContent = '';
                 hintEl.className = 'bk-otp-hint';
                 btn.disabled = false;
             });
@@ -1590,6 +1834,55 @@
                 btn.disabled  = true;
             }
         }, 1000);
+    }
+
+    // ---- Xử lý nhập OTP booking ----
+    function bkOtpInput(idx) {
+        const el  = document.getElementById('bk-otp-' + idx);
+        const val = el.value.replace(/\D/g, '');
+        el.value  = val ? val[0] : '';
+        if (val && idx < 3) document.getElementById('bk-otp-' + (idx + 1)).focus();
+        el.classList.toggle('filled', !!el.value);
+        el.classList.remove('error', 'success');
+        bkCheckOtp();
+    }
+
+    function bkOtpKey(e, idx) {
+        if (e.key === 'Backspace' && !document.getElementById('bk-otp-' + idx).value && idx > 0) {
+            document.getElementById('bk-otp-' + (idx - 1)).focus();
+        }
+    }
+
+    function bkCheckOtp() {
+        const entered = [0,1,2,3].map(i => document.getElementById('bk-otp-' + i).value).join('');
+        const statusEl = document.getElementById('bk-otp-status');
+
+        if (entered.length < 4) {
+            statusEl.textContent = '';
+            statusEl.className   = 'reg-otp-status';
+            _bkOtpVerified = false;
+            bkUpdateBtn();
+            return;
+        }
+
+        if (_bkOtpCode && entered === _bkOtpCode) {
+            // Đúng
+            [0,1,2,3].forEach(i => {
+                document.getElementById('bk-otp-' + i).className = 'reg-otp-digit success';
+            });
+            statusEl.textContent = '✅ Xác thực email thành công!';
+            statusEl.className   = 'reg-otp-status success';
+            _bkOtpVerified = true;
+        } else {
+            // Sai
+            [0,1,2,3].forEach(i => {
+                document.getElementById('bk-otp-' + i).className = 'reg-otp-digit error';
+            });
+            statusEl.textContent = '❌ Mã xác nhận không đúng. Vui lòng thử lại.';
+            statusEl.className   = 'reg-otp-status error';
+            _bkOtpVerified = false;
+        }
+        bkUpdateBtn();
     }
 
     // ---- Mở modal booking từ card ----
@@ -1713,6 +2006,19 @@
                 </div>
                 <div class="bk-otp-hint" id="bk-otp-hint"></div>
 
+                <!-- OTP 4 SỐ BOOKING -->
+                <div class="reg-otp-section" id="bk-otp-section">
+                    <div class="reg-otp-label">📩 Nhập mã 4 số vừa gửi đến email của bạn</div>
+                    <div class="reg-otp-inputs">
+                        <input class="reg-otp-digit" id="bk-otp-0" type="text" inputmode="numeric" maxlength="1" oninput="bkOtpInput(0)" onkeydown="bkOtpKey(event,0)">
+                        <input class="reg-otp-digit" id="bk-otp-1" type="text" inputmode="numeric" maxlength="1" oninput="bkOtpInput(1)" onkeydown="bkOtpKey(event,1)">
+                        <input class="reg-otp-digit" id="bk-otp-2" type="text" inputmode="numeric" maxlength="1" oninput="bkOtpInput(2)" onkeydown="bkOtpKey(event,2)">
+                        <input class="reg-otp-digit" id="bk-otp-3" type="text" inputmode="numeric" maxlength="1" oninput="bkOtpInput(3)" onkeydown="bkOtpKey(event,3)">
+                    </div>
+                    <div class="reg-otp-status" id="bk-otp-status"></div>
+                    <span class="reg-otp-resend" id="bk-otp-resend"></span>
+                </div>
+
                 <!-- Ghi chú -->
                 <label class="bk-label">📝 Yêu cầu đặc biệt (tùy chọn)</label>
                 <textarea class="bk-textarea" id="bk-notes" rows="3" placeholder="Ví dụ: phòng tầng cao, giường đôi, đến muộn..."></textarea>
@@ -1797,6 +2103,16 @@
         otpBtn.disabled = true;
         otpBtn.innerHTML = 'Gửi mã<br>xác nhận';
         clearInterval(window._bkOtpTimer);
+        // Reset OTP verified state
+        _bkOtpCode     = null;
+        _bkOtpVerified = false;
+        document.getElementById('bk-otp-section').classList.remove('show');
+        [0,1,2,3].forEach(function(i){
+            var el = document.getElementById('bk-otp-' + i);
+            if(el){ el.value=''; el.className='reg-otp-digit'; }
+        });
+        var st = document.getElementById('bk-otp-status');
+        if(st){ st.textContent=''; st.className='reg-otp-status'; }
         bkUpdateBtn();
     }
 
@@ -1930,10 +2246,13 @@
     }
 
     function bkUpdateBtn() {
-        const btn = document.getElementById('btn-submit-booking');
-        const ready = bkState.checkIn && bkState.checkOut;
-        btn.disabled = !ready;
-        btn.textContent = ready ? '✅ Xác nhận đặt phòng' : 'Chọn ngày để đặt phòng';
+        const btn      = document.getElementById('btn-submit-booking');
+        const hasDates = !!(bkState.checkIn && bkState.checkOut);
+        const ready    = hasDates && _bkOtpVerified;
+        btn.disabled   = !ready;
+        if (!hasDates)            btn.textContent = 'Chọn ngày để đặt phòng';
+        else if (!_bkOtpVerified) btn.textContent = '🔒 Xác thực email đặt phòng';
+        else                      btn.textContent = '✅ Xác nhận đặt phòng';
     }
 
     function submitBooking() {
@@ -1960,7 +2279,10 @@
             body: JSON.stringify(payload)
         })
             .then(async res => {
-                if (!res.ok) throw new Error(await res.text());
+                if (!res.ok) {
+                    // DataConfickException trả về plain text (409 Conflict)
+                    throw new Error(await res.text());
+                }
                 return res.json();
             })
             .then(() => {

@@ -27,4 +27,5 @@ public class Employee {
     private String userName;
     private String password;
     private String role;
+    private String workBranch;// chi nhanh làm việc
 }

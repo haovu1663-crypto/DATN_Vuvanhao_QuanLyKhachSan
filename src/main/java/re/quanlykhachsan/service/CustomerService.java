@@ -88,5 +88,17 @@ public class CustomerService implements ICustomerService {
                 .build();
         return res;
     }
+    public void checkEmailRegister(String email) throws DataConfickException {
+        if(customerRespository.existsByEmail(email)){
+            throw new DataConfickException("Tài Khoản Email này đã được đăng ký rồi ");
+        }
+    }
+    public void checkEmailBooking(String email,Long id) throws DataConfickException {
+     Customer customer = customerRespository.findByEmail(email);
+     if(customer==null || !customer.getId().equals(id)){
+         throw new DataConfickException("Tài khoàn Emai không khớp ");
+     }
+    }
+
 
 }

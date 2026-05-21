@@ -16,4 +16,5 @@ public class RoomRespone {
     private StatusRoom status;
     private Double price;
     private List<String> images;
+    private String workBranch;
 }

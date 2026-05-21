@@ -773,6 +773,26 @@
                                placeholder="e.g. Royal Suite 702">
                     </div>
 
+                    <div class="col-span-2">
+                        <label class="text-[13px] font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block">
+                            <i class="fas fa-map-marker-alt text-blue-400 mr-1"></i> Chi Nhánh Làm Việc
+                        </label>
+                        <div class="relative">
+                            <div class="absolute left-5 top-1/2 -translate-y-1/2 w-8 h-8 bg-blue-50 text-blue-500 rounded-lg flex items-center justify-center pointer-events-none">
+                                <i class="fas fa-building text-sm"></i>
+                            </div>
+                            <select id="workBranchSelect" name="workBranch" required
+                                    class="input-focus w-full pl-16 pr-12 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none text-slate-700 font-medium appearance-none cursor-pointer">
+                                <option value="">-- Chọn chi nhánh --</option>
+                                <option value="Số 1 đường Nguyễn Chí Thanh, Hà Nội">Số 1 đường Nguyễn Chí Thanh, Hà Nội</option>
+                                <option value="Số 2 Lê Đại Hành, Hà Nội">Số 2 Lê Đại Hành, Hà Nội</option>
+                                <option value="Số 3 đường Lê Lợi, Ninh Bình">Số 3 đường Lê Lợi, Ninh Bình</option>
+                                <option value="Số 4 Trần Quốc Nghiễn, Hạ Long">Số 4 Trần Quốc Nghiễn, Hạ Long</option>
+                            </select>
+                            <i class="fas fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
+                        </div>
+                    </div>
+
                     <div>
                         <label class="text-[13px] font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block">Current Status</label>
                         <div class="relative">
@@ -1671,6 +1691,8 @@
                     previewGrid.innerHTML = '<p class="text-slate-400 text-sm col-span-4">Phòng này chưa có ảnh</p>';
                 }
             }
+            const workBranchSelect = document.getElementById('workBranchSelect');
+            if (workBranchSelect && room.workBranch) { workBranchSelect.value = room.workBranch; }
             showToast('success', 'Tải thành công', 'Đã tải dữ liệu phòng #' + roomId);
         } catch (err) {
             showToast('error', 'Thất bại', err.message || 'Không thể tải dữ liệu phòng');
@@ -1688,6 +1710,14 @@
         const formData = new FormData(form);
         const roomId = document.getElementById('roomId')?.value?.trim();
         const isUpdate = !!roomId;
+
+        // Validate workBranch
+        const workBranchVal = document.getElementById('workBranchSelect')?.value;
+        if (!workBranchVal) {
+            showToast('warning', 'Thiếu thông tin', 'Vui lòng chọn chi nhánh làm việc!');
+            document.getElementById('workBranchSelect')?.focus();
+            return;
+        }
         const submitBtn = form.querySelector('button[type="submit"]');
         const originalBtnText = submitBtn.innerHTML;
         submitBtn.disabled = true;

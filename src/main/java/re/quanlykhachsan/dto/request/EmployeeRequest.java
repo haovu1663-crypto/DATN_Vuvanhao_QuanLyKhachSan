@@ -28,5 +28,7 @@ public class EmployeeRequest {
     @NotBlank(message = "Mật khẩu không được để trống")
     @Pattern(regexp = "^\\S{6,}$", message = "Mật khẩu phải từ 6 ký tự trở lên và không chứa khoảng trắng")
     private String password;
+    @NotNull
+    private String workBranch;
 
 }

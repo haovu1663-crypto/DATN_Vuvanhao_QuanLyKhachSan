@@ -83,7 +83,9 @@ public class SecurityConfig {
                 // phân quyền cho các API theo đường dẫn
                 .authorizeHttpRequests(
                         req->
-                                req   .requestMatchers("/api/v1/booking/checkin/").permitAll()
+                                req     .requestMatchers("/employee").permitAll()
+                                        .requestMatchers("/api/email/booking").permitAll()
+                                        .requestMatchers("/api/v1/booking/checkin/").permitAll()
                                         .requestMatchers("/api/v1/rooms/status/curently").permitAll()
                                         .requestMatchers("/api/v1/rooms/status").permitAll()
                                         .requestMatchers("/api/v1/customer/login").permitAll()
@@ -98,6 +100,8 @@ public class SecurityConfig {
                                         .requestMatchers("/demo").permitAll()
                                         .requestMatchers("/rooms/form").permitAll()
                                         .requestMatchers("/api/v1/employees/register").permitAll()
+                                        .requestMatchers("/api/email/register").permitAll()
+                                        .requestMatchers("/api/email/register/employee").permitAll()
                                         .anyRequest().authenticated() // các api khác thì phải xác thực thì ms vào đc(đăng nhập)
                 )
                 // ✅ đăng ký EntryPoint ở đây

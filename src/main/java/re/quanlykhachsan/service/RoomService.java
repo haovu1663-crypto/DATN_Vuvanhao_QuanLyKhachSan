@@ -43,6 +43,7 @@ public class RoomService implements IRoomService {
         RoomType roomType = roomTypeRepository.findById(roomRequest.getType_room_id()).orElseThrow(()->new ResourceNotFoundException("không tim thấy roomType có id :"+roomRequest.getType_room_id()));
         room.setRoomType(roomType);
         room.setImages(imageUrls);
+        room.setWorkBranch(roomRequest.getWorkBranch());
         roomRepository.save(room);
         return modelMapper.map(room, RoomRespone.class);
     }
@@ -59,7 +60,6 @@ public class RoomService implements IRoomService {
         if (roomRequest.getStatus() != null) {
             room.setStatus(roomRequest.getStatus());
         }
-
         // Cập nhật RoomType
         RoomType roomType = roomTypeRepository.findById(roomRequest.getType_room_id())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy RoomType có id: " + roomRequest.getType_room_id()));
@@ -82,9 +82,16 @@ public class RoomService implements IRoomService {
         }
         // Không có ảnh mới → giữ nguyên room.getImages() đang có
 
+        // ✅ Cập nhật workBranch — kiểm tra null/blank trước để tránh ghi đè dữ liệu cũ bằng rỗng
+        if (roomRequest.getWorkBranch() != null && !roomRequest.getWorkBranch().isBlank()) {
+            room.setWorkBranch(roomRequest.getWorkBranch());
+        }
+
         roomRepository.save(room);
         RoomRespone respone = modelMapper.map(room, RoomRespone.class);
         respone.setType_room_id(room.getRoomType().getId());
+        // ✅ Đảm bảo workBranch có trong response trả về
+        respone.setWorkBranch(room.getWorkBranch());
         return respone;
     }
 
