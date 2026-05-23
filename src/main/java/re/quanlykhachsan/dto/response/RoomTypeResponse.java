@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 public class RoomTypeResponse {
@@ -15,4 +17,6 @@ public class RoomTypeResponse {
     private int capacity;
     private String amenities;// nội thất
     private String description;
+    private Double price;
+    private List<String> images;
 }

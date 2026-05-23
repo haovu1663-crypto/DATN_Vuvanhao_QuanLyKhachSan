@@ -119,12 +119,12 @@ public class BookingService implements IBookingService {
             daysBetween = ChronoUnit.DAYS.between(actualCheckin, today);
         }
 
-        // Tổng tiền = giá phòng * ngày + 5% phí dịch vụ
-        double totalPrice = room.getPrice() * daysBetween * 1.05;
+//        // Tổng tiền = giá phòng * ngày + 5% phí dịch vụ
+//        double totalPrice = room.getPrice() * daysBetween * 1.05;
 
         booking.setStatusBooking(StatusBooking.CHECKED_OUT);
         booking.setCheckOutDate(LocalDateTime.now());
-        booking.setToyalPrice(totalPrice);
+//        booking.setToyalPrice(totalPrice);
         bookingRespository.save(booking);
 
         room.setStatus(StatusRoom.CLEANING);
@@ -135,11 +135,11 @@ public class BookingService implements IBookingService {
         Double alreadyPaid = paymentRepository.findDepositAmountByBookingId(booking.getId());
 
         // Tiền còn lại cần thanh toán
-        Double remaining = totalPrice - alreadyPaid;
+//        Double remaining = totalPrice - alreadyPaid;
 
         CheckOutRespone response = new CheckOutRespone();
         response.setId(booking.getId());
-        response.setPrice(remaining); // ← đúng rồi, không còn = 0 nữa
+//        response.setPrice(remaining); // ← đúng rồi, không còn = 0 nữa
         return response;
     }
 }

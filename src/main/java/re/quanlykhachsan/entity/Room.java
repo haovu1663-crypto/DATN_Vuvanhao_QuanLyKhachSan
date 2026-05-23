@@ -23,11 +23,8 @@ public class Room {
     private String name;
     @Enumerated(EnumType.STRING)
     private StatusRoom status;
-    @ElementCollection(fetch = FetchType.EAGER)
-    private List<String> images;
-    private Double price;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "roomType_id")
     private RoomType roomType;
-    private String workBranch;
+    private String workBranch; // chi nhánh
 }

@@ -1,5 +1,6 @@
 package re.quanlykhachsan.Config;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -75,6 +76,9 @@ public class SecurityConfig {
         // đây là phương thưc đăng nhập
     }
 
+    // bean để thư muc static có th truy câp mf không cần xác thưực
+
+
     // Tầng xác thực và phân quyền
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -91,9 +95,6 @@ public class SecurityConfig {
                                         .requestMatchers("/api/v1/customer/login").permitAll()
                                         .requestMatchers("/api/v1/customer/register").permitAll()
                                         .requestMatchers("/api/v1/rooms").permitAll()
-                                        .requestMatchers("/api/v1/admin/**").hasAuthority("ADMIN") // admin ms đc truy cập api này
-                                        .requestMatchers("/api/v1/user/**").hasAuthority("USER")//requestMatcher để so khớp kêt quả
-                                        .requestMatchers("/api/v1/manager/**").hasAuthority("ROLE_MANAGER")
                                         .requestMatchers("/rooms/form").permitAll()
                                         .requestMatchers("/api/v1/roomtypes").permitAll()// the dùng hasAuthority("ROLE_MANAGER")
                                         .requestMatchers("/home").permitAll()
@@ -102,6 +103,14 @@ public class SecurityConfig {
                                         .requestMatchers("/api/v1/employees/register").permitAll()
                                         .requestMatchers("/api/email/register").permitAll()
                                         .requestMatchers("/api/email/register/employee").permitAll()
+                                        .requestMatchers("/home").permitAll()
+                                        // roomtype
+                                        .requestMatchers("/api/v1/roomtypes/add").permitAll()
+                                        .requestMatchers("/api/v1/roomtypes/id/").permitAll()
+                                        // room
+                                        .requestMatchers("/api/v1/rooms").permitAll()
+                                        .requestMatchers("/api/v1/rooms/**").permitAll()
+                                        .requestMatchers("/**.css", "/**.js", "/js/**", "/images/**", "/static/**").permitAll()
                                         .anyRequest().authenticated() // các api khác thì phải xác thực thì ms vào đc(đăng nhập)
                 )
                 // ✅ đăng ký EntryPoint ở đây

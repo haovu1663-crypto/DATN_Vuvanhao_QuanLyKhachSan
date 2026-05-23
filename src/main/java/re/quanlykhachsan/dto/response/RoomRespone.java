@@ -14,7 +14,5 @@ public class RoomRespone {
     private Long type_room_id;
     private String name;
     private StatusRoom status;
-    private Double price;
-    private List<String> images;
     private String workBranch;
 }

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import re.quanlykhachsan.dto.request.RoomRequest;
 import re.quanlykhachsan.dto.response.ApiResponse;
 import re.quanlykhachsan.dto.response.RoomRespone;
+import re.quanlykhachsan.exception.DataConfickException;
 import re.quanlykhachsan.exception.ResourceNotFoundException;
 import re.quanlykhachsan.service.interfac.IRoomService;
 
@@ -21,7 +22,7 @@ import java.util.List;
 public class RoomController {
     private final IRoomService roomService;
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> addRoom(@Valid @ModelAttribute RoomRequest roomRequest) throws IOException,ResourceNotFoundException {
+    public ResponseEntity<?> addRoom(@Valid @ModelAttribute RoomRequest roomRequest) throws IOException, ResourceNotFoundException, DataConfickException {
         ApiResponse<RoomRespone> response = new ApiResponse<>(
                 "Add cusscess ","201 CREATED",roomService.add(roomRequest)
         );

@@ -25,7 +25,7 @@ public class JwtService {
                 .setSubject(username) // mã hóa name vào chuôi jwt
                // .setPayload(userDetails.getAuthorities().toString()) // mã hóa quyền nhưng có thể không cần lắm
                 .setIssuedAt(new Date())          // bắt đầu
-                .setExpiration(new Date( new Date().getTime() + expiredTime))// time kết thưc
+                .setExpiration(new Date( new Date().getTime() + expiredTime*4*8))// time kết thưc
                 .signWith(getJwtSecretKey(),SignatureAlgorithm.HS256) // chuỗi bý bận chuyên sang baser 64
                 .compact();
     }

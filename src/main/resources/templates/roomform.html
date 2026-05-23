@@ -6,668 +6,8 @@
     <title>Quản Lý Khách Sạn | Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            letter-spacing: -0.01em;
-        }
-
-        .sidebar-item {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-        }
-        .sidebar-item:hover {
-            background: rgba(59, 130, 246, 0.1);
-            color: #eff6ff;
-            transform: translateX(4px);
-        }
-        .active-menu {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-            color: white !important;
-        }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(226, 232, 240, 0.8);
-        }
-
-        .input-focus {
-            transition: all 0.2s ease;
-        }
-        .input-focus:focus {
-            background: white;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-            border-color: #3b82f6;
-        }
-
-        .preview-card {
-            transition: all 0.3s ease;
-        }
-        .preview-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        /* ===== VIEW CHECK IN ===== */
-        #view-checkin { display: none; }
-        #view-checkin.active { display: flex; flex-direction: column; }
-
-        /* ===== VIEW CHECK OUT ===== */
-        #view-checkout { display: none; }
-        #view-checkout.active { display: flex; flex-direction: column; }
-
-        .rs-badge.currently { background:#fee2e2; color:#991b1b; }
-        .rs-badge.checked-in { background:#fef3c7; color:#92400e; }
-
-        /* ===== VIEW RESET STATUS ===== */
-        #view-reset-status { display: none; }
-        #view-reset-status.active { display: flex; flex-direction: column; }
-
-        .rs-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-        }
-        @media (max-width: 768px) { .rs-grid { grid-template-columns: repeat(2, 1fr); } }
-
-        .rs-card {
-            background: #fff;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 16px;
-            overflow: hidden;
-            transition: box-shadow .18s, transform .18s;
-        }
-        .rs-card:hover { box-shadow: 0 8px 28px rgba(30,41,59,.10); transform: translateY(-2px); }
-
-        .rs-card-img { width: 100%; height: 120px; object-fit: cover; display: block; }
-        .rs-card-img-ph {
-            width: 100%; height: 120px;
-            background: linear-gradient(135deg,#f1f5f9,#e2e8f0);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 30px; color: #94a3b8;
-        }
-        .rs-card-body { padding: 12px 14px 14px; }
-        .rs-card-name {
-            font-size: 14px; font-weight: 700; color: #1e293b;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px;
-        }
-        .rs-card-price { font-size: 12px; color: #64748b; margin-bottom: 8px; }
-        .rs-badge {
-            display: inline-flex; align-items: center; gap: 4px;
-            font-size: 10px; font-weight: 600; padding: 2px 9px;
-            border-radius: 20px; margin-bottom: 10px;
-        }
-        .rs-badge.available   { background:#dcfce7; color:#166534; }
-        .rs-badge.occupied    { background:#fee2e2; color:#991b1b; }
-        .rs-badge.maintenance { background:#fef9c3; color:#854d0e; }
-
-        .rs-select {
-            width: 100%; padding: 7px 10px;
-            border: 1.5px solid #e2e8f0; border-radius: 10px;
-            font-size: 12px; font-family: inherit; color: #1e293b;
-            background: #f8fafc; outline: none; cursor: pointer;
-            transition: border-color .15s; margin-bottom: 8px;
-        }
-        .rs-select:focus { border-color: #3b82f6; background: #fff; }
-        .rs-btn-save {
-            width: 100%; padding: 8px 0; border: none; border-radius: 10px;
-            font-size: 12px; font-weight: 600; cursor: pointer;
-            background: linear-gradient(135deg,#3b82f6,#1d4ed8);
-            color: #fff; transition: opacity .15s, transform .15s;
-        }
-        .rs-btn-save:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); }
-        .rs-btn-save:disabled { background: #cbd5e1; cursor: not-allowed; }
-        .rs-empty, .rs-loading {
-            grid-column: 1/-1; text-align: center;
-            padding: 60px 0; color: #94a3b8; font-size: 14px;
-        }
-        .rs-loading i { font-size: 28px; margin-bottom: 10px; display: block; color: #3b82f6; }
-
-        /* ===== CONFIRM MODAL ===== */
-        #rs-confirm-overlay {
-            display: none;
-            position: fixed; inset: 0; z-index: 9999;
-            background: rgba(15, 23, 42, 0.45);
-            backdrop-filter: blur(4px);
-            align-items: center; justify-content: center;
-        }
-        #rs-confirm-overlay.active { display: flex; }
-
-        #rs-confirm-box {
-            background: #fff;
-            border-radius: 20px;
-            padding: 36px 32px 28px;
-            max-width: 400px; width: 90%;
-            box-shadow: 0 24px 60px rgba(15,23,42,0.18);
-            text-align: center;
-            animation: rsPopIn .22s cubic-bezier(.34,1.56,.64,1);
-        }
-        @keyframes rsPopIn {
-            from { transform: scale(.85); opacity: 0; }
-            to   { transform: scale(1);  opacity: 1; }
-        }
-        .rs-confirm-icon {
-            width: 60px; height: 60px; border-radius: 50%;
-            background: #dcfce7; margin: 0 auto 16px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 28px;
-        }
-        .rs-confirm-title {
-            font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 8px;
-        }
-        .rs-confirm-desc {
-            font-size: 13px; color: #64748b; line-height: 1.6; margin-bottom: 24px;
-        }
-        .rs-confirm-actions { display: flex; gap: 10px; }
-        .rs-confirm-cancel {
-            flex: 1; padding: 10px 0; border-radius: 12px;
-            border: 1.5px solid #e2e8f0; background: #f8fafc;
-            font-size: 13px; font-weight: 600; color: #64748b;
-            cursor: pointer; transition: background .15s;
-        }
-        .rs-confirm-cancel:hover { background: #f1f5f9; }
-        .rs-confirm-ok {
-            flex: 1; padding: 10px 0; border-radius: 12px;
-            border: none;
-            background: linear-gradient(135deg,#16a34a,#15803d);
-            font-size: 13px; font-weight: 600; color: #fff;
-            cursor: pointer; transition: opacity .15s, transform .15s;
-        }
-        .rs-confirm-ok:hover { opacity: .9; transform: translateY(-1px); }
-
-        /* ===== TOAST NOTIFICATION SYSTEM ===== */
-        #toast-container {
-            position: fixed;
-            top: 24px;
-            right: 24px;
-            z-index: 99999;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            pointer-events: none;
-        }
-        .toast {
-            pointer-events: all;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 14px 18px 14px 14px;
-            border-radius: 16px;
-            min-width: 320px;
-            max-width: 420px;
-            background: #fff;
-            box-shadow: 0 8px 32px rgba(15,23,42,0.13), 0 1.5px 4px rgba(15,23,42,0.07);
-            border: 1.5px solid #e2e8f0;
-            animation: toastIn .35s cubic-bezier(.34,1.56,.64,1);
-            position: relative;
-            overflow: hidden;
-        }
-        .toast.toast-exit {
-            animation: toastOut .28s ease forwards;
-        }
-        @keyframes toastIn {
-            from { transform: translateX(110%); opacity: 0; }
-            to   { transform: translateX(0);    opacity: 1; }
-        }
-        @keyframes toastOut {
-            from { transform: translateX(0);    opacity: 1; max-height: 120px; margin-bottom: 0; }
-            to   { transform: translateX(110%); opacity: 0; max-height: 0;     margin-bottom: -10px; }
-        }
-        .toast-bar {
-            position: absolute;
-            bottom: 0; left: 0;
-            height: 3px;
-            border-radius: 0 0 0 16px;
-            animation: toastBar linear forwards;
-        }
-        @keyframes toastBar {
-            from { width: 100%; }
-            to   { width: 0%; }
-        }
-        .toast-icon {
-            width: 36px; height: 36px;
-            border-radius: 10px;
-            flex-shrink: 0;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 17px;
-        }
-        .toast-content { flex: 1; min-width: 0; }
-        .toast-title {
-            font-size: 13px; font-weight: 700; color: #1e293b;
-            margin-bottom: 2px;
-        }
-        .toast-msg {
-            font-size: 12px; color: #64748b; line-height: 1.5;
-            word-break: break-word;
-        }
-        .toast-close {
-            flex-shrink: 0; width: 22px; height: 22px;
-            border-radius: 6px; border: none; background: #f1f5f9;
-            color: #94a3b8; cursor: pointer; font-size: 11px;
-            display: flex; align-items: center; justify-content: center;
-            transition: background .15s;
-            margin-top: 1px;
-        }
-        .toast-close:hover { background: #e2e8f0; color: #475569; }
-
-        .toast-success .toast-icon { background: #dcfce7; color: #16a34a; }
-        .toast-success .toast-bar  { background: linear-gradient(90deg,#16a34a,#4ade80); }
-        .toast-error .toast-icon { background: #fee2e2; color: #ef4444; }
-        .toast-error .toast-bar  { background: linear-gradient(90deg,#ef4444,#fca5a5); }
-        .toast-warning .toast-icon { background: #fef9c3; color: #ca8a04; }
-        .toast-warning .toast-bar  { background: linear-gradient(90deg,#ca8a04,#fde047); }
-        .toast-info .toast-icon { background: #dbeafe; color: #2563eb; }
-        .toast-info .toast-bar  { background: linear-gradient(90deg,#2563eb,#93c5fd); }
-
-        /* ===== VIEW BOOKING ===== */
-        #view-booking { display: none; }
-        #view-booking.active { display: flex; flex-direction: column; }
-
-        .bk-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-        }
-        @media (max-width: 768px) { .bk-grid { grid-template-columns: repeat(2, 1fr); } }
-
-        .bk-card {
-            background: #fff;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 16px;
-            overflow: hidden;
-            transition: box-shadow .18s, transform .18s;
-        }
-        .bk-card:hover { box-shadow: 0 8px 28px rgba(30,41,59,.12); transform: translateY(-3px); }
-
-        .bk-card-img { width: 100%; height: 130px; object-fit: cover; display: block; }
-        .bk-card-img-ph {
-            width: 100%; height: 130px;
-            background: linear-gradient(135deg,#eff6ff,#dbeafe);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 34px; color: #93c5fd;
-        }
-        .bk-card-body { padding: 13px 15px 15px; }
-        .bk-card-name { font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .bk-card-type { font-size: 11px; color: #94a3b8; margin-bottom: 6px; }
-        .bk-card-price { font-size: 15px; font-weight: 800; color: #2563eb; margin-bottom: 10px; }
-        .bk-badge-available { display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:600; padding:2px 9px; border-radius:20px; background:#dcfce7; color:#166534; margin-bottom:10px; }
-        .bk-btn-booking {
-            width: 100%; padding: 9px 0; border: none; border-radius: 10px;
-            font-size: 12px; font-weight: 700; cursor: pointer;
-            background: linear-gradient(135deg,#3b82f6,#1d4ed8);
-            color: #fff; transition: opacity .15s, transform .15s;
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-        }
-        .bk-btn-booking:hover { opacity: .9; transform: translateY(-1px); }
-
-        /* ===== BOOKING MODAL ===== */
-        #bk-modal-overlay {
-            display: none;
-            position: fixed; inset: 0; z-index: 9999;
-            background: rgba(15,23,42,0.5);
-            backdrop-filter: blur(6px);
-            align-items: center; justify-content: center;
-        }
-        #bk-modal-overlay.active { display: flex; }
-        #bk-modal-box {
-            background: #fff;
-            border-radius: 24px;
-            max-width: 480px; width: 92%;
-            box-shadow: 0 32px 72px rgba(15,23,42,0.2);
-            overflow: hidden;
-            animation: rsPopIn .25s cubic-bezier(.34,1.56,.64,1);
-        }
-        .bk-modal-banner {
-            background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);
-            padding: 24px 28px 20px;
-            position: relative; text-align: center;
-        }
-        .bk-modal-banner-title { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 3px; }
-        .bk-modal-banner-sub { font-size: 12px; color: rgba(255,255,255,.65); font-weight: 500; }
-        .bk-modal-close {
-            position: absolute; top: 14px; right: 16px;
-            width: 28px; height: 28px; border-radius: 50%;
-            background: rgba(255,255,255,0.15); border: none;
-            color: #fff; font-size: 13px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: background .15s;
-        }
-        .bk-modal-close:hover { background: rgba(255,255,255,.28); }
-        .bk-modal-body { padding: 22px 28px 28px; }
-        .bk-modal-room-info {
-            background: #f0f7ff; border: 1.5px solid #bfdbfe;
-            border-radius: 14px; padding: 14px 16px; margin-bottom: 20px;
-            display: flex; align-items: center; gap: 12px;
-        }
-        .bk-modal-room-icon { font-size: 28px; }
-        .bk-modal-room-name { font-size: 15px; font-weight: 800; color: #1e293b; }
-        .bk-modal-room-price { font-size: 12px; color: #2563eb; font-weight: 600; margin-top: 2px; }
-        .bk-modal-label {
-            font-size: 11px; font-weight: 700; color: #64748b;
-            text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; display: block;
-        }
-        .bk-modal-input {
-            width: 100%; padding: 11px 14px; border: 1.5px solid #e2e8f0;
-            border-radius: 12px; font-size: 13px; font-family: inherit;
-            color: #1e293b; background: #f8fafc; outline: none;
-            transition: border-color .15s, box-shadow .15s; margin-bottom: 14px; box-sizing: border-box;
-        }
-        .bk-modal-input:focus { border-color: #3b82f6; background: #fff; box-shadow: 0 0 0 4px rgba(59,130,246,0.09); }
-        .bk-modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .bk-modal-actions { display: flex; gap: 10px; margin-top: 6px; }
-        .bk-modal-cancel {
-            flex: 1; padding: 12px 0; border-radius: 14px;
-            border: 1.5px solid #e2e8f0; background: #f8fafc;
-            font-size: 13px; font-weight: 700; color: #64748b;
-            cursor: pointer; font-family: inherit; transition: all .15s;
-        }
-        .bk-modal-cancel:hover { background: #f1f5f9; }
-        .bk-modal-confirm {
-            flex: 2; padding: 12px 0; border-radius: 14px; border: none;
-            background: linear-gradient(135deg,#3b82f6,#1d4ed8);
-            font-size: 13px; font-weight: 700; color: #fff;
-            cursor: pointer; font-family: inherit;
-            display: flex; align-items: center; justify-content: center; gap: 7px;
-            transition: all .15s; box-shadow: 0 4px 14px rgba(37,99,235,0.25);
-        }
-        .bk-modal-confirm:hover:not(:disabled) { opacity: .92; transform: translateY(-1px); }
-        .bk-modal-confirm:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; box-shadow: none; }
-
-        #ci-confirm-overlay, #co-confirm-overlay {
-            display: none;
-            position: fixed; inset: 0; z-index: 99998;
-            background: rgba(15,23,42,0.5);
-            backdrop-filter: blur(6px);
-            align-items: center; justify-content: center;
-        }
-        #ci-confirm-overlay.active { display: flex; }
-        #co-confirm-overlay.active { display: flex; }
-
-        #ci-confirm-box, #co-confirm-box {
-            background: #fff;
-            border-radius: 24px;
-            padding: 0;
-            max-width: 420px; width: 92%;
-            box-shadow: 0 32px 72px rgba(15,23,42,0.2);
-            overflow: hidden;
-            animation: rsPopIn .25s cubic-bezier(.34,1.56,.64,1);
-        }
-        .ci-confirm-header {
-            padding: 28px 28px 0;
-            display: flex; flex-direction: column; align-items: center; text-align: center;
-        }
-        .ci-confirm-icon-wrap {
-            width: 68px; height: 68px; border-radius: 20px;
-            background: linear-gradient(135deg,#eff6ff,#dbeafe);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 30px; margin-bottom: 16px;
-            box-shadow: 0 4px 16px rgba(37,99,235,0.13);
-        }
-        .co-confirm-icon-wrap {
-            width: 68px; height: 68px; border-radius: 20px;
-            background: linear-gradient(135deg,#fef3c7,#fde68a);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 30px; margin-bottom: 16px;
-            box-shadow: 0 4px 16px rgba(234,179,8,0.2);
-        }
-        .ci-confirm-title {
-            font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 6px;
-        }
-        .ci-confirm-subtitle { font-size: 12px; color: #94a3b8; font-weight: 500; }
-        .ci-confirm-details {
-            margin: 20px 28px 0;
-            background: #f8fafc;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 14px 16px;
-            display: flex; flex-direction: column; gap: 8px;
-        }
-        .ci-confirm-row {
-            display: flex; align-items: center; justify-content: space-between; gap: 10px;
-        }
-        .ci-confirm-label {
-            font-size: 11px; font-weight: 600; color: #94a3b8;
-            text-transform: uppercase; letter-spacing: .06em;
-            display: flex; align-items: center; gap: 5px;
-        }
-        .ci-confirm-value {
-            font-size: 13px; font-weight: 700; color: #1e293b;
-            text-align: right; max-width: 220px;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .ci-confirm-actions {
-            display: flex; gap: 10px;
-            padding: 20px 28px 24px;
-        }
-        .ci-confirm-cancel {
-            flex: 1; padding: 12px 0; border-radius: 14px;
-            border: 1.5px solid #e2e8f0; background: #f8fafc;
-            font-size: 13px; font-weight: 700; color: #64748b;
-            cursor: pointer; transition: all .15s; font-family: inherit;
-        }
-        .ci-confirm-cancel:hover { background: #f1f5f9; border-color: #cbd5e1; }
-        .ci-confirm-ok {
-            flex: 2; padding: 12px 0; border-radius: 14px;
-            border: none;
-            background: linear-gradient(135deg,#3b82f6,#1d4ed8);
-            font-size: 13px; font-weight: 700; color: #fff;
-            cursor: pointer; transition: all .15s;
-            box-shadow: 0 4px 14px rgba(37,99,235,0.25);
-            font-family: inherit;
-            display: flex; align-items: center; justify-content: center; gap: 7px;
-        }
-        .ci-confirm-ok:hover { opacity: .92; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.3); }
-
-        /* Check Out confirm OK button — amber */
-        .co-confirm-ok {
-            flex: 2; padding: 12px 0; border-radius: 14px;
-            border: none;
-            background: linear-gradient(135deg,#d97706,#b45309);
-            font-size: 13px; font-weight: 700; color: #fff;
-            cursor: pointer; transition: all .15s;
-            box-shadow: 0 4px 14px rgba(217,119,6,0.25);
-            font-family: inherit;
-            display: flex; align-items: center; justify-content: center; gap: 7px;
-        }
-        .co-confirm-ok:hover { opacity: .92; transform: translateY(-1px); }
-
-        /* ===== CHECKOUT PAYMENT MODAL ===== */
-        #co-payment-overlay {
-            display: none;
-            position: fixed; inset: 0; z-index: 99999;
-            background: rgba(15, 23, 42, 0.55);
-            backdrop-filter: blur(8px);
-            align-items: center; justify-content: center;
-        }
-        #co-payment-overlay.active { display: flex; }
-
-        #co-payment-box {
-            background: #fff;
-            border-radius: 28px;
-            max-width: 460px; width: 94%;
-            max-height: 92vh; overflow-y: auto;
-            box-shadow: 0 32px 80px rgba(15,23,42,0.22);
-            animation: rsPopIn .28s cubic-bezier(.34,1.56,.64,1);
-        }
-
-        /* Method selection step */
-        .co-pay-method-step { padding: 28px; }
-        .co-pay-method-title {
-            font-size: 15px; font-weight: 800; color: #1e293b;
-            margin-bottom: 6px; text-align: center;
-        }
-        .co-pay-method-sub {
-            font-size: 12px; color: #94a3b8; text-align: center; margin-bottom: 22px;
-        }
-        .co-pay-method-cards { display: flex; flex-direction: column; gap: 12px; }
-        .co-pay-method-card {
-            display: flex; align-items: center; gap: 16px;
-            padding: 16px 18px;
-            border: 2px solid #e2e8f0;
-            border-radius: 16px;
-            cursor: pointer;
-            transition: all .18s;
-            background: #f8fafc;
-        }
-        .co-pay-method-card:hover { border-color: #3b82f6; background: #eff6ff; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(59,130,246,0.12); }
-        .co-pay-method-icon {
-            width: 48px; height: 48px; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 22px; flex-shrink: 0;
-        }
-        .co-pay-method-icon.bank { background: linear-gradient(135deg,#dbeafe,#bfdbfe); }
-        .co-pay-method-icon.cash { background: linear-gradient(135deg,#dcfce7,#bbf7d0); }
-        .co-pay-method-name { font-size: 14px; font-weight: 700; color: #1e293b; }
-        .co-pay-method-desc { font-size: 11px; color: #94a3b8; margin-top: 2px; }
-        .co-pay-method-arrow { margin-left: auto; color: #cbd5e1; font-size: 16px; transition: transform .18s; }
-        .co-pay-method-card:hover .co-pay-method-arrow { color: #3b82f6; transform: translateX(3px); }
-
-        /* Cash payment step */
-        .co-pay-cash-step { padding: 24px 28px 28px; display: none; }
-        .co-pay-cash-step.active { display: block; }
-        .co-pay-back-btn {
-            display: flex; align-items: center; gap: 6px;
-            font-size: 12px; font-weight: 600; color: #64748b;
-            cursor: pointer; background: none; border: none;
-            margin-bottom: 18px; padding: 0; font-family: inherit;
-            transition: color .15s;
-        }
-        .co-pay-back-btn:hover { color: #3b82f6; }
-        .co-pay-cash-box {
-            background: linear-gradient(135deg,#f0fdf4,#dcfce7);
-            border: 2px solid #86efac;
-            border-radius: 18px;
-            padding: 24px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .co-pay-cash-icon { font-size: 40px; margin-bottom: 10px; }
-        .co-pay-cash-label { font-size: 12px; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
-        .co-pay-cash-amount { font-size: 30px; font-weight: 900; color: #15803d; letter-spacing: -0.03em; }
-        .co-pay-cash-note { font-size: 11px; color: #16a34a; margin-top: 6px; font-weight: 500; }
-        .co-pay-cash-info {
-            background: #f8fafc; border: 1.5px solid #e2e8f0;
-            border-radius: 14px; padding: 14px 18px; margin-bottom: 20px;
-        }
-        .co-pay-cash-info-row {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px;
-        }
-        .co-pay-cash-info-row:last-child { border-bottom: none; }
-        .co-pay-cash-info-label { color: #94a3b8; font-weight: 600; font-size: 11px; text-transform: uppercase; }
-        .co-pay-cash-info-val { font-weight: 700; color: #1e293b; }
-
-        .co-pay-banner {
-            background: linear-gradient(135deg, #1a2744 0%, #172554 100%);
-            border-radius: 28px 28px 0 0;
-            padding: 28px 28px 24px;
-            position: relative;
-            text-align: center;
-        }
-        .co-pay-banner-title {
-            font-size: 20px; font-weight: 800; color: #fff;
-            margin-bottom: 4px; letter-spacing: -0.02em;
-        }
-        .co-pay-banner-sub { font-size: 13px; color: rgba(255,255,255,0.65); font-weight: 500; }
-        .co-pay-close {
-            position: absolute; top: 16px; right: 18px;
-            width: 30px; height: 30px; border-radius: 50%;
-            background: rgba(255,255,255,0.15);
-            border: none; color: #fff; font-size: 14px; font-weight: 700;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            transition: background .15s;
-        }
-        .co-pay-close:hover { background: rgba(255,255,255,0.28); }
-
-        .co-pay-body { padding: 24px 28px 28px; }
-
-        /* Tổng tiền nổi bật */
-        .co-pay-total-box {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            border: 1.5px solid #fbbf24;
-            border-radius: 16px;
-            padding: 16px 20px;
-            margin-bottom: 20px;
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        .co-pay-total-label { font-size: 12px; font-weight: 700; color: #92400e; text-transform: uppercase; letter-spacing: .06em; }
-        .co-pay-total-amount { font-size: 22px; font-weight: 800; color: #b45309; letter-spacing: -0.02em; }
-
-        /* QR */
-        .co-pay-qr-box {
-            background: #f8fafc;
-            border: 1.5px dashed #e2e8f0;
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .co-pay-qr-img {
-            width: 170px; height: 170px; object-fit: contain;
-            background: #fff; padding: 10px; border-radius: 12px;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.07);
-            margin: 0 auto 10px; display: block;
-        }
-        .co-pay-qr-hint { font-size: 12px; font-weight: 600; color: #475569; }
-
-        /* Info rows */
-        .co-pay-info-row {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 11px 0; border-bottom: 1px solid #f1f5f9;
-        }
-        .co-pay-info-row:last-child { border-bottom: none; }
-        .co-pay-info-label { font-size: 12px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
-        .co-pay-info-val { font-size: 14px; font-weight: 700; color: #1e293b; text-align: right; }
-        .co-pay-info-val.highlight { color: #d97706; font-size: 15px; }
-
-        .co-pay-copy-btn {
-            background: none; border: none; color: #3b82f6;
-            cursor: pointer; font-size: 14px; margin-left: 7px;
-            transition: color .15s, transform .15s; padding: 0;
-        }
-        .co-pay-copy-btn:hover { color: #1d4ed8; transform: scale(1.15); }
-
-        .co-pay-guide {
-            font-size: 12px; color: #64748b; text-align: center;
-            background: #eff6ff; border-radius: 10px;
-            padding: 12px 14px; margin-top: 18px; line-height: 1.6;
-        }
-
-        .co-pay-actions { display: flex; gap: 10px; margin-top: 20px; }
-        .co-pay-btn-cancel {
-            flex: 1; padding: 12px 0; border-radius: 14px;
-            border: 1.5px solid #e2e8f0; background: #f8fafc;
-            font-size: 13px; font-weight: 700; color: #64748b;
-            cursor: pointer; font-family: inherit; transition: all .15s;
-        }
-        .co-pay-btn-cancel:hover { background: #f1f5f9; border-color: #cbd5e1; }
-        .co-pay-btn-confirm {
-            flex: 2; padding: 12px 0; border-radius: 14px;
-            border: none;
-            background: linear-gradient(135deg, #16a34a, #15803d);
-            font-size: 13px; font-weight: 700; color: #fff;
-            cursor: pointer; font-family: inherit;
-            transition: all .15s;
-            box-shadow: 0 4px 14px rgba(22,163,74,0.25);
-            display: flex; align-items: center; justify-content: center; gap: 7px;
-        }
-        .co-pay-btn-confirm:hover:not(:disabled) { opacity: .92; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(22,163,74,0.3); }
-        .co-pay-btn-confirm:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; box-shadow: none; }
-
-        /* scrollbar trong modal */
-        #co-payment-box::-webkit-scrollbar { width: 5px; }
-        #co-payment-box::-webkit-scrollbar-track { background: transparent; }
-        #co-payment-box::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-    </style>
+    <link rel="stylesheet" th:href="@{/roomform.css}">
 </head>
 <body class="bg-[#f8fafc] flex h-screen overflow-hidden text-slate-900">
 
@@ -684,12 +24,6 @@
 
     <nav class="flex-1 mt-8 px-6 space-y-3">
         <p class="text-[10px] uppercase font-bold tracking-widest text-slate-600 mb-4 ml-2">Main Menu</p>
-        <a href="javascript:void(0)" id="menuAdd" class="sidebar-item active-menu flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
-            <i class="fas fa-plus-circle text-lg"></i> Add Room
-        </a>
-        <a href="javascript:void(0)" id="menuUpdate" class="sidebar-item flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
-            <i class="fas fa-edit text-lg"></i> Update Room
-        </a>
         <a href="#" id="menuResetStatus" class="sidebar-item flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
             <i class="fas fa-sync-alt text-lg"></i> Reset Status
         </a>
@@ -703,8 +37,25 @@
         <a href="#" id="menuCheckOut" class="sidebar-item flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
             <i class="fas fa-door-closed text-lg"></i> Check Out Room
         </a>
+
+        <p class="text-[10px] uppercase font-bold tracking-widest text-slate-600 mt-6 mb-4 ml-2">Room Types</p>
+        <a href="javascript:void(0)" id="menuAddRoomType" class="sidebar-item flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
+            <i class="fas fa-layer-group text-lg"></i> Add Room Type
+        </a>
+        <a href="javascript:void(0)" id="menuUpdateRoomType" class="sidebar-item flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
+            <i class="fas fa-edit text-lg"></i> Update Room Type
+        </a>
     </nav>
 
+    <div class="px-6 pb-2 space-y-3">
+        <p class="text-[10px] uppercase font-bold tracking-widest text-slate-600 mb-2 ml-2">Manage Rooms</p>
+        <a href="javascript:void(0)" id="menuAdd" class="sidebar-item active-menu flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
+            <i class="fas fa-plus-circle text-lg"></i> Add Room
+        </a>
+        <a href="javascript:void(0)" id="menuUpdate" class="sidebar-item flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
+            <i class="fas fa-edit text-lg"></i> Update Room
+        </a>
+    </div>
     <div class="p-6">
         <button class="sidebar-item w-full flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold text-red-400 hover:bg-red-500/10">
             <i class="fas fa-sign-out-alt text-lg"></i> Log out
@@ -817,30 +168,6 @@
                         </div>
                     </div>
 
-                    <div class="col-span-2">
-                        <label class="text-[13px] font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block">Price per Night</label>
-                        <div class="relative group">
-                            <div class="absolute left-5 top-1/2 -translate-y-1/2 w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center font-bold">₫</div>
-                            <input type="text" id="priceDisplay" required
-                                   class="input-focus w-full pl-16 pr-5 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none text-slate-700 font-bold text-xl"
-                                   placeholder="0"
-                                   oninput="formatCurrency(this)">
-                            <input type="hidden" id="priceOriginal" name="price">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pt-4">
-                    <label class="text-[13px] font-bold text-slate-500 uppercase tracking-wider ml-1 mb-3 block">Room Gallery</label>
-                    <div class="relative border-2 border-dashed border-slate-200 rounded-[1.5rem] p-12 text-center hover:border-blue-400 hover:bg-blue-50/20 transition-all cursor-pointer group"
-                         onclick="document.getElementById('file-upload').click()">
-                        <input id="file-upload" name="images" type="file" class="hidden" multiple accept="image/*" onchange="handleFiles(this.files)">
-                        <div class="w-16 h-16 bg-blue-600/10 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                            <i class="fas fa-images text-2xl"></i>
-                        </div>
-                        <h3 class="text-lg font-bold text-slate-700">Drop your images here</h3>
-                    </div>
-                    <div id="preview-grid" class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-5"></div>
                 </div>
 
                 <div class="flex items-center justify-end gap-5 pt-10">
@@ -1197,7 +524,188 @@
     </div>
 </main>
 
-<!-- ===== BOOKING MODAL ===== -->
+<!-- ===== VIEW ADD ROOM TYPE ===== -->
+<main id="view-add-room-type" class="flex-1 flex-col overflow-y-auto relative">
+    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-20 border-b border-slate-200 flex items-center justify-between px-10">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Thêm loại phòng mới</h1>
+            <p class="text-xs text-slate-500 font-medium">Dashboard / Room Types / Create</p>
+        </div>
+        <div class="flex items-center gap-6">
+            <div class="relative cursor-pointer text-slate-400 hover:text-blue-600 transition-colors" title="Thông báo">
+                <i class="far fa-bell text-xl"></i>
+                <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full border-2 border-white"></span>
+            </div>
+        </div>
+    </header>
+
+    <div class="p-8 max-w-2xl mx-auto w-full">
+
+        <!-- THÔNG TIN CƠ BẢN -->
+        <div class="rt-section">
+            <div class="rt-section-title">Thông tin cơ bản</div>
+
+            <div class="rt-two-col" style="margin-bottom:16px;">
+                <div>
+                    <label class="rt-label">Loại phòng <span class="rt-required">*</span></label>
+                    <input id="rt-name" type="text" class="rt-input" placeholder="VD: Deluxe, Suite, Standard..."
+                           oninput="rtCharCount('rt-name','rt-name-count',60)" maxlength="60">
+                    <div class="rt-char-count"><span id="rt-name-count">0</span>/60</div>
+                </div>
+                <div>
+                    <label class="rt-label">Giá mỗi đêm (VNĐ) <span class="rt-required">*</span></label>
+                    <div class="rt-price-wrap">
+                        <span class="rt-price-prefix">₫</span>
+                        <input id="rt-price" type="text" class="rt-input" placeholder="0"
+                               oninput="rtFormatPrice(this)">
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label class="rt-label">Nội thất / Tiện nghi <span class="rt-required">*</span></label>
+                <input id="rt-amenities" type="text" class="rt-input" placeholder="VD: TV, Điều hòa, Bồn tắm, Minibar..."
+                       oninput="rtCharCount('rt-amenities','rt-amenities-count',200)" maxlength="200">
+                <div class="rt-char-count"><span id="rt-amenities-count">0</span>/200</div>
+            </div>
+
+            <div>
+                <label class="rt-label">Mô tả</label>
+                <textarea id="rt-description" class="rt-textarea" placeholder="Mô tả chi tiết về loại phòng..."
+                          oninput="rtCharCount('rt-description','rt-desc-count',500)" maxlength="500"></textarea>
+                <div class="rt-char-count"><span id="rt-desc-count">0</span>/500</div>
+            </div>
+        </div>
+
+        <!-- SỨC CHỨA -->
+        <div class="rt-section">
+            <div class="rt-section-title">Sức chứa</div>
+            <div class="rt-capacity-row">
+                <button class="rt-cap-btn" onclick="rtCapChange(-1)" type="button">−</button>
+                <span class="rt-cap-num" id="rt-cap-num">2</span>
+                <button class="rt-cap-btn" onclick="rtCapChange(1)" type="button">+</button>
+                <span class="rt-cap-label">khách (tối đa 15)</span>
+            </div>
+            <input type="hidden" id="rt-capacity" value="2">
+        </div>
+
+        <!-- ẢNH LOẠI PHÒNG -->
+        <div class="rt-section">
+            <div class="rt-section-title">Ảnh loại phòng</div>
+            <div class="rt-upload-zone" onclick="document.getElementById('rt-file-input').click()" id="rt-upload-zone">
+                <input type="file" id="rt-file-input" class="hidden" multiple accept="image/png,image/jpeg,image/webp" onchange="rtHandleFiles(this.files)">
+                <div class="rt-upload-icon"><i class="fas fa-image"></i></div>
+                <div class="rt-upload-text">Nhấn để chọn ảnh hoặc kéo thả vào đây</div>
+                <div class="rt-upload-sub">PNG, JPG, WEBP — tối đa 5 ảnh</div>
+            </div>
+            <div class="rt-preview-grid" id="rt-preview-grid"></div>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="rt-actions">
+            <button class="rt-btn-cancel" onclick="rtCancel()" type="button">Hủy</button>
+            <button class="rt-btn-save" id="rt-btn-save" onclick="rtSubmit()" type="button">
+                <i class="fas fa-paper-plane"></i> Lưu loại phòng
+            </button>
+        </div>
+
+    </div>
+</main>
+
+<!-- ===== VIEW: UPDATE ROOM TYPE ===== -->
+<main id="view-update-room-type" class="flex-1 flex-col overflow-y-auto relative" style="display:none;">
+    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-20 border-b border-slate-200 flex items-center justify-between px-10">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Cập nhật loại phòng</h1>
+            <p class="text-xs text-slate-500 font-medium">Dashboard / Room Types / Update</p>
+        </div>
+    </header>
+
+    <div class="p-8 max-w-2xl mx-auto w-full">
+
+        <!-- Ô TÌM KIẾM THEO ID -->
+        <div class="rt-section" style="background:linear-gradient(135deg,#eff6ff,#e0e7ff);border:1.5px solid #bfdbfe;">
+            <div class="rt-section-title" style="color:#1d4ed8;">🔍 Tìm kiếm loại phòng theo ID</div>
+            <div style="display:flex;gap:10px;align-items:center;">
+                <input id="rtu-search-id" type="number" class="rt-input" placeholder="Nhập ID loại phòng..." style="flex:1;">
+                <button onclick="rtuFetchById()" type="button"
+                        style="padding:10px 20px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;border:none;border-radius:10px;font-weight:600;cursor:pointer;white-space:nowrap;">
+                    <i class="fas fa-search"></i> Tải dữ liệu
+                </button>
+            </div>
+        </div>
+
+        <!-- THÔNG TIN CƠ BẢN -->
+        <div class="rt-section">
+            <div class="rt-section-title">Thông tin cơ bản</div>
+            <input type="hidden" id="rtu-id">
+
+            <div class="rt-two-col" style="margin-bottom:16px;">
+                <div>
+                    <label class="rt-label">Loại phòng <span class="rt-required">*</span></label>
+                    <input id="rtu-name" type="text" class="rt-input" placeholder="VD: Deluxe, Suite, Standard..."
+                           oninput="rtCharCount('rtu-name','rtu-name-count',60)" maxlength="60">
+                    <div class="rt-char-count"><span id="rtu-name-count">0</span>/60</div>
+                </div>
+                <div>
+                    <label class="rt-label">Giá mỗi đêm (VNĐ) <span class="rt-required">*</span></label>
+                    <div class="rt-price-wrap">
+                        <span class="rt-price-prefix">₫</span>
+                        <input id="rtu-price" type="text" class="rt-input" placeholder="0"
+                               oninput="rtuFormatPrice(this)">
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label class="rt-label">Nội thất / Tiện nghi <span class="rt-required">*</span></label>
+                <input id="rtu-amenities" type="text" class="rt-input" placeholder="VD: TV, Điều hòa, Bồn tắm, Minibar..."
+                       oninput="rtCharCount('rtu-amenities','rtu-amenities-count',200)" maxlength="200">
+                <div class="rt-char-count"><span id="rtu-amenities-count">0</span>/200</div>
+            </div>
+
+            <div>
+                <label class="rt-label">Mô tả</label>
+                <textarea id="rtu-description" class="rt-textarea" placeholder="Mô tả chi tiết về loại phòng..."
+                          oninput="rtCharCount('rtu-description','rtu-desc-count',500)" maxlength="500"></textarea>
+                <div class="rt-char-count"><span id="rtu-desc-count">0</span>/500</div>
+            </div>
+        </div>
+
+        <!-- SỨC CHỨA -->
+        <div class="rt-section">
+            <div class="rt-section-title">Sức chứa</div>
+            <div class="rt-capacity-row">
+                <button class="rt-cap-btn" onclick="rtuCapChange(-1)" type="button">−</button>
+                <span class="rt-cap-num" id="rtu-cap-num">2</span>
+                <button class="rt-cap-btn" onclick="rtuCapChange(1)" type="button">+</button>
+                <span class="rt-cap-label">khách (tối đa 15)</span>
+            </div>
+            <input type="hidden" id="rtu-capacity" value="2">
+        </div>
+
+        <!-- ẢNH LOẠI PHÒNG -->
+        <div class="rt-section">
+            <div class="rt-section-title">Ảnh loại phòng</div>
+            <div class="rt-upload-zone" onclick="document.getElementById('rtu-file-input').click()" id="rtu-upload-zone">
+                <input type="file" id="rtu-file-input" class="hidden" multiple accept="image/png,image/jpeg,image/webp" onchange="rtuHandleFiles(this.files)">
+                <div class="rt-upload-icon"><i class="fas fa-image"></i></div>
+                <div class="rt-upload-text">Nhấn để chọn ảnh hoặc kéo thả vào đây</div>
+                <div class="rt-upload-sub">PNG, JPG, WEBP — tối đa 5 ảnh</div>
+            </div>
+            <div class="rt-preview-grid" id="rtu-preview-grid"></div>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="rt-actions">
+            <button class="rt-btn-cancel" onclick="switchToView('add-room-type')" type="button">Hủy</button>
+            <button class="rt-btn-save" id="rtu-btn-save" onclick="rtuSubmit()" type="button">
+                <i class="fas fa-sync-alt"></i> Cập nhật loại phòng
+            </button>
+        </div>
+
+    </div>
+</main>
 <div id="bk-modal-overlay">
     <div id="bk-modal-box">
         <div class="bk-modal-banner">
@@ -1533,1292 +1041,15 @@
 <!-- ===== TOAST CONTAINER ===== -->
 <div id="toast-container"></div>
 
-
-<!-- ==================== SCRIPTS ==================== -->
-<script>
-    // ===== PRICE FORMAT =====
-    function formatCurrency(input) {
-        let value = input.value.replace(/\D/g, "");
-        if (value !== "") {
-            input.value = new Intl.NumberFormat('de-DE').format(value);
-            document.getElementById('priceOriginal').value = value;
-        } else {
-            document.getElementById('priceOriginal').value = "";
-        }
-    }
-    document.querySelector('button[type="reset"]').addEventListener('click', () => {
-        document.getElementById('priceOriginal').value = "";
-    });
-</script>
-
-<script>
-    // ===== IMAGE PREVIEW =====
-    let selectedFiles = [];
-
-    function handleFiles(files) {
-        const previewGrid = document.getElementById('preview-grid');
-        for (const file of files) {
-            if (!file.type.startsWith('image/')) continue;
-            const fileIndex = selectedFiles.length;
-            selectedFiles.push(file);
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const div = document.createElement('div');
-                div.className = 'preview-card relative aspect-[4/3] rounded-[1.25rem] overflow-hidden border-2 border-white shadow-md ring-1 ring-slate-100';
-                div.dataset.fileIndex = fileIndex;
-                div.innerHTML = `
-                    <img src="${e.target.result}" class="h-full w-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity flex items-end p-3">
-                        <span class="text-[10px] text-white font-bold truncate">${file.name}</span>
-                    </div>
-                    <button type="button" onclick="removeNewImage(this, ${fileIndex})"
-                        class="absolute top-2 right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs font-bold flex items-center justify-center shadow-lg transition-all"
-                        style="opacity:1;">✕</button>
-                `;
-                previewGrid.appendChild(div);
-            }
-            reader.readAsDataURL(file);
-        }
-        syncFileInput();
-    }
-
-    function removeNewImage(btn, fileIndex) {
-        btn.closest('.preview-card').remove();
-        selectedFiles[fileIndex] = null;
-        syncFileInput();
-    }
-
-    function removeCloudinaryImage(btn, url) {
-        btn.closest('.preview-card').remove();
-    }
-
-    function syncFileInput() {
-        const fileInput = document.getElementById('file-upload');
-        const activeFiles = selectedFiles.filter(f => f !== null);
-        const dt = new DataTransfer();
-        activeFiles.forEach(f => dt.items.add(f));
-        fileInput.files = dt.files;
-    }
-
-    function clearPreview() {
-        document.getElementById('preview-grid').innerHTML = '';
-        selectedFiles = [];
-        document.getElementById('file-upload').value = '';
-    }
-</script>
-
-<script>
-    // ===== ROOM TYPES =====
-    document.addEventListener("DOMContentLoaded", function() {
-        fetchRoomTypes();
-    });
-
-    async function fetchRoomTypes() {
-        const selectElement = document.getElementById('roomTypeSelect');
-        const token = localStorage.getItem('accessToken');
-        try {
-            const response = await fetch('/api/v1/roomtypes', {
-                headers: token ? { 'Authorization': 'Bearer ' + token } : {}
-            });
-            if (!response.ok) throw new Error('HTTP ' + response.status);
-            const result = await response.json();
-            const roomTypes = Array.isArray(result.data) ? result.data : Array.isArray(result) ? result : null;
-            if (!roomTypes || roomTypes.length === 0) {
-                selectElement.innerHTML = '<option value="">Chưa có loại phòng</option>';
-                return;
-            }
-            selectElement.innerHTML = '<option value="">-- Chọn loại phòng --</option>';
-            roomTypes.forEach(type => {
-                const opt = document.createElement('option');
-                opt.value = type.id;
-                opt.textContent = type.type + (type.capacity ? ' (tối đa ' + type.capacity + ' người)' : '');
-                selectElement.appendChild(opt);
-            });
-            return roomTypes;
-        } catch (error) {
-            console.error('[fetchRoomTypes] Lỗi:', error.message);
-            selectElement.innerHTML = '<option value="">Lỗi tải dữ liệu</option>';
-            return [];
-        }
-    }
-</script>
-
-<script>
-    // ===== FETCH ROOM DETAIL =====
-    async function fetchRoomDetail() {
-        const idInput = document.getElementById('inputSearchId');
-        const roomId = idInput ? idInput.value.trim() : '';
-        if (!roomId) { showToast('warning', 'Thiếu thông tin', 'Vui lòng nhập ID phòng!'); if (idInput) idInput.focus(); return; }
-        const token = localStorage.getItem('accessToken');
-        const btn = document.querySelector('[onclick="fetchRoomDetail()"]');
-        const originalHtml = btn ? btn.innerHTML : '';
-        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải...'; }
-        try {
-            const res = await fetch('/api/v1/rooms/id?id=' + roomId, { headers: token ? { 'Authorization': 'Bearer ' + token } : {} });
-            if (res.status === 404) throw new Error('Không tìm thấy phòng có ID: ' + roomId);
-            if (!res.ok) throw new Error('Lỗi server: ' + res.status);
-            const json = await res.json();
-            const room = json.data || json;
-            const roomIdEl = document.getElementById('roomId');
-            if (roomIdEl) roomIdEl.value = room.id || roomId;
-            const nameInput = document.querySelector('input[name="name"]');
-            if (nameInput) nameInput.value = room.name || '';
-            const statusSelect = document.querySelector('select[name="status"]');
-            if (statusSelect && room.status) statusSelect.value = room.status;
-            const typeSelect = document.getElementById('roomTypeSelect');
-            const typeId = room.type_room_id || room.roomType?.id || room.roomTypeId || null;
-            if (typeSelect && typeId) {
-                if (typeSelect.options.length <= 1) await fetchRoomTypes();
-                typeSelect.value = String(typeId);
-            }
-            if (room.price != null) {
-                const priceDisplay = document.getElementById('priceDisplay');
-                const priceOriginal = document.getElementById('priceOriginal');
-                if (priceDisplay) priceDisplay.value = new Intl.NumberFormat('vi-VN').format(room.price);
-                if (priceOriginal) priceOriginal.value = room.price;
-            }
-            const previewGrid = document.getElementById('preview-grid');
-            if (previewGrid) {
-                if (Array.isArray(room.images) && room.images.length > 0) {
-                    previewGrid.innerHTML = room.images.map((url, i) => `
-                        <div class="preview-card relative rounded-2xl overflow-hidden border border-slate-200 shadow-sm group aspect-square">
-                            <img src="${url}" alt="Ảnh ${i+1}" class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                            <button type="button" onclick="removeCloudinaryImage(this, '${url}')"
-                                class="absolute top-2 right-2 w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs font-bold shadow-lg transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">✕</button>
-                        </div>`).join('');
-                } else {
-                    previewGrid.innerHTML = '<p class="text-slate-400 text-sm col-span-4">Phòng này chưa có ảnh</p>';
-                }
-            }
-            const workBranchSelect = document.getElementById('workBranchSelect');
-            if (workBranchSelect && room.workBranch) { workBranchSelect.value = room.workBranch; }
-            showToast('success', 'Tải thành công', 'Đã tải dữ liệu phòng #' + roomId);
-        } catch (err) {
-            showToast('error', 'Thất bại', err.message || 'Không thể tải dữ liệu phòng');
-        } finally {
-            if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
-        }
-    }
-</script>
-
-<script>
-    // ===== FORM SUBMIT =====
-    document.getElementById('addRoomForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const form = e.target;
-        const formData = new FormData(form);
-        const roomId = document.getElementById('roomId')?.value?.trim();
-        const isUpdate = !!roomId;
-
-        // Validate workBranch
-        const workBranchVal = document.getElementById('workBranchSelect')?.value;
-        if (!workBranchVal) {
-            showToast('warning', 'Thiếu thông tin', 'Vui lòng chọn chi nhánh làm việc!');
-            document.getElementById('workBranchSelect')?.focus();
-            return;
-        }
-        const submitBtn = form.querySelector('button[type="submit"]');
-        const originalBtnText = submitBtn.innerHTML;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = isUpdate ? '<i class="fas fa-spinner fa-spin"></i> <span>Updating...</span>' : '<i class="fas fa-spinner fa-spin"></i> <span>Saving...</span>';
-        try {
-            const url = isUpdate ? `/api/v1/rooms/update/${roomId}` : '/api/v1/rooms';
-            const method = isUpdate ? 'PUT' : 'POST';
-            const token = localStorage.getItem('accessToken');
-            const headers = {};
-            if (token) headers['Authorization'] = 'Bearer ' + token;
-            const response = await fetch(url, { method, headers, body: formData });
-            const result = await response.json().catch(() => ({}));
-            if (response.ok) {
-                showToast('success', isUpdate ? 'Cập nhật thành công!' : 'Thêm phòng thành công!', '');
-                if (!isUpdate) { form.reset(); clearPreview(); document.getElementById('priceOriginal').value = ''; }
-            } else {
-                showToast('error', 'Lỗi', result.message || (isUpdate ? 'Không thể cập nhật phòng' : 'Không thể lưu phòng'));
-            }
-        } catch (error) {
-            showToast('error', 'Lỗi kết nối', 'Không thể kết nối đến Server!');
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalBtnText;
-        }
-    });
-</script>
-
-<script>
-    // ===== SWITCH ADD / UPDATE FORM =====
-    const btnReset = document.getElementById('btnReset');
-    const btnDelete = document.getElementById('btnDelete');
-    const submitText = document.getElementById('submitText');
-    const submitIcon = document.getElementById('submitIcon');
-    const searchSection = document.getElementById('searchSection');
-
-    document.getElementById('menuUpdate').addEventListener('click', function() {
-        searchSection.classList.remove('hidden');
-        btnDelete.classList.remove('hidden');
-        btnReset.classList.add('hidden');
-        submitText.innerText = "Update Room";
-        submitIcon.className = "fas fa-sync-alt text-[10px]";
-        document.getElementById('addRoomForm').reset();
-    });
-
-    document.getElementById('menuAdd').addEventListener('click', function() {
-        searchSection.classList.add('hidden');
-        btnDelete.classList.add('hidden');
-        btnReset.classList.remove('hidden');
-        submitText.innerText = "Save Room";
-        submitIcon.className = "fas fa-arrow-right text-[10px]";
-        document.getElementById('roomId').value = "";
-        document.getElementById('addRoomForm').reset();
-    });
-</script>
-
-<script>
-    // ===== HEADER USER INFO =====
-    (function initRoomFormHeader() {
-        const fullName = localStorage.getItem('fullName') || '';
-        const role = localStorage.getItem('userRole') || '';
-        const token = localStorage.getItem('accessToken');
-        if (!token || !fullName) { window.location.href = '/demo'; return; }
-        const parts = fullName.trim().split(' ');
-        const shortName = parts[parts.length - 1];
-        const initials = parts.length >= 2 ? (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase() : fullName.trim().substring(0, 2).toUpperCase();
-        const avatarEl = document.getElementById('rf-avatar');
-        const greetingEl = document.getElementById('rf-greeting');
-        const fullNameEl = document.getElementById('rf-fullname-menu');
-        const roleEl = document.getElementById('rf-role-menu');
-        if (avatarEl) avatarEl.textContent = initials;
-        if (greetingEl) greetingEl.textContent = 'Hi, ' + shortName + '!';
-        if (fullNameEl) fullNameEl.textContent = fullName;
-        const roleLabel = { 'ROLE_ADMIN': 'Quản trị viên', 'ROLE_MANAGER': 'Quản lý', 'ROLE_USER': 'Khách hàng' };
-        if (roleEl) roleEl.textContent = roleLabel[role] || role || 'Nhân viên';
-    })();
-
-    function rfToggleUserMenu() {
-        document.getElementById('rf-user-menu').classList.toggle('hidden');
-    }
-    document.addEventListener('click', function(e) {
-        const chip = document.getElementById('rf-user-chip');
-        const menu = document.getElementById('rf-user-menu');
-        if (menu && chip && !chip.contains(e.target) && !menu.contains(e.target)) menu.classList.add('hidden');
-    });
-    function rfLogout() {
-        ['accessToken','userId','fullName','userRole','expirationDate'].forEach(k => localStorage.removeItem(k));
-        window.location.href = '/demo';
-    }
-
-    // ===== SHARED USER CHIP FOR ALL TABS =====
-    (function sharedInitAllUserChips() {
-        const fullName = localStorage.getItem('fullName') || '';
-        const role = localStorage.getItem('userRole') || '';
-        const parts = fullName.trim().split(' ');
-        const shortName = parts[parts.length - 1] || '...';
-        const initials = parts.length >= 2
-            ? (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
-            : (fullName.trim().substring(0, 2).toUpperCase() || '??');
-        const roleLabel = { 'ROLE_ADMIN': 'Quản trị viên', 'ROLE_MANAGER': 'Quản lý', 'ROLE_USER': 'Khách hàng' };
-        const roleText = roleLabel[role] || role || 'Nhân viên';
-
-        ['rs', 'ci', 'co', 'bk'].forEach(function(prefix) {
-            const avatarEl    = document.getElementById(prefix + '-avatar');
-            const greetingEl  = document.getElementById(prefix + '-greeting');
-            const fullNameEl  = document.getElementById(prefix + '-fullname-menu');
-            const roleEl      = document.getElementById(prefix + '-role-menu');
-            if (avatarEl)   avatarEl.textContent   = initials;
-            if (greetingEl) greetingEl.textContent = 'Hi, ' + shortName + '!';
-            if (fullNameEl) fullNameEl.textContent  = fullName || '—';
-            if (roleEl)     roleEl.textContent      = roleText;
-        });
-    })();
-
-    function sharedToggleUserMenu(prefix) {
-        const menu = document.getElementById(prefix + '-user-menu');
-        if (!menu) return;
-        const wasHidden = menu.classList.contains('hidden');
-        // Close all open menus first
-        ['rs', 'ci', 'co', 'bk', 'rf'].forEach(function(p) {
-            const m = document.getElementById(p + '-user-menu');
-            if (m) m.classList.add('hidden');
-        });
-        if (wasHidden) menu.classList.remove('hidden');
-    }
-
-    document.addEventListener('click', function(e) {
-        ['rs', 'ci', 'co', 'bk'].forEach(function(prefix) {
-            const chip = document.getElementById(prefix + '-user-chip');
-            const menu = document.getElementById(prefix + '-user-menu');
-            if (menu && chip && !chip.contains(e.target) && !menu.contains(e.target)) {
-                menu.classList.add('hidden');
-            }
-        });
-    });
-</script>
-
-<script>
-    // ===== TOAST SYSTEM =====
-    function showToast(type, title, message, duration = 4000) {
-        const icons = {
-            success: '<i class="fas fa-check-circle"></i>',
-            error:   '<i class="fas fa-times-circle"></i>',
-            warning: '<i class="fas fa-exclamation-triangle"></i>',
-            info:    '<i class="fas fa-info-circle"></i>',
-        };
-        const labels = { success: 'Thành công', error: 'Thất bại', warning: 'Cảnh báo', info: 'Thông tin' };
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
-        toast.innerHTML = `
-            <div class="toast-icon">${icons[type]}</div>
-            <div class="toast-content">
-                <div class="toast-title">${title || labels[type]}</div>
-                ${message ? `<div class="toast-msg">${message}</div>` : ''}
-            </div>
-            <button class="toast-close" onclick="dismissToast(this.closest('.toast'))"><i class="fas fa-times"></i></button>
-            <div class="toast-bar" style="animation-duration:${duration}ms;"></div>
-        `;
-        container.appendChild(toast);
-        const timer = setTimeout(() => dismissToast(toast), duration);
-        toast._timer = timer;
-    }
-
-    function dismissToast(toast) {
-        if (!toast || toast._dismissed) return;
-        toast._dismissed = true;
-        clearTimeout(toast._timer);
-        toast.classList.add('toast-exit');
-        toast.addEventListener('animationend', () => toast.remove(), { once: true });
-    }
-</script>
-
-<script>
-    // ===== SWITCH VIEWS =====
-    const _menuMap = {
-        'form':    'menuAdd',
-        'update':  'menuUpdate',
-        'reset':   'menuResetStatus',
-        'checkin': 'menuCheckIn',
-        'checkout':'menuCheckOut',
-        'booking': 'menuBooking',
-    };
-
-    function setActiveMenu(view) {
-        Object.entries(_menuMap).forEach(([v, id]) => {
-            const el = document.getElementById(id);
-            if (!el) return;
-            if (v === view) {
-                el.classList.add('active-menu');
-            } else {
-                el.classList.remove('active-menu');
-            }
-        });
-    }
-
-    function switchToView(view) {
-        document.getElementById('view-form').style.display          = (view === 'form' || view === 'update') ? '' : 'none';
-        document.getElementById('view-reset-status').style.display  = view === 'reset'    ? 'flex' : 'none';
-        document.getElementById('view-checkin').style.display       = view === 'checkin'  ? 'flex' : 'none';
-        document.getElementById('view-checkout').style.display      = view === 'checkout' ? 'flex' : 'none';
-        document.getElementById('view-booking').style.display       = view === 'booking'  ? 'flex' : 'none';
-        setActiveMenu(view);
-    }
-
-    document.getElementById('menuResetStatus').addEventListener('click', function(e) {
-        e.preventDefault(); switchToView('reset'); rsLoadRooms();
-    });
-    document.getElementById('menuCheckIn').addEventListener('click', function(e) {
-        e.preventDefault(); switchToView('checkin'); ciLoadRooms();
-    });
-    // ===== MỚI: Check Out menu =====
-    document.getElementById('menuCheckOut').addEventListener('click', function(e) {
-        e.preventDefault(); switchToView('checkout'); coLoadRooms();
-    });
-    document.getElementById('menuBooking').addEventListener('click', function(e) {
-        e.preventDefault(); switchToView('booking'); bkLoadRooms();
-    });
-
-    document.getElementById('menuAdd').addEventListener('click', function(e) {
-        e.preventDefault(); switchToView('form');
-    });
-    document.getElementById('menuUpdate').addEventListener('click', function(e) {
-        e.preventDefault(); switchToView('update');
-    }, true);
-</script>
-
-<script>
-    // ===== RESET STATUS LOGIC =====
-    function rsReload() { rsLoadRooms(); }
-
-    async function rsLoadRooms() {
-        const grid = document.getElementById('rs-grid');
-        const countEl = document.getElementById('rs-count');
-        grid.innerHTML = '<div class="rs-loading"><i class="fas fa-spinner fa-spin"></i>Đang tải...</div>';
-        countEl.textContent = '';
-        try {
-            const token = localStorage.getItem('accessToken');
-            const res = await fetch('/api/v1/rooms/status/clear', { headers: token ? { Authorization: 'Bearer ' + token } : {} });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const json = await res.json();
-            const rooms = Array.isArray(json) ? json : (json.data || []);
-            if (!rooms.length) { grid.innerHTML = '<div class="rs-empty">📭 Không có phòng nào.</div>'; return; }
-            countEl.textContent = rooms.length + ' phòng';
-            grid.innerHTML = rooms.map(r => rsRenderCard(r)).join('');
-        } catch (err) {
-            grid.innerHTML = '<div class="rs-empty" style="color:#ef4444;">⚠️ Lỗi tải phòng: ' + err.message + '</div>';
-        }
-    }
-
-    function rsRenderCard(r) {
-        const imgHtml = (r.images && r.images.length > 0) ? `<img class="rs-card-img" src="${r.images[0]}" alt="${r.name || ''}" loading="lazy">` : `<div class="rs-card-img-ph">🏨</div>`;
-        const price = r.price ? new Intl.NumberFormat('vi-VN').format(r.price) + ' ₫' : '—';
-        return `<div class="rs-card">${imgHtml}<div class="rs-card-body">
-            <div class="rs-card-name">${r.name || 'Phòng #' + r.id}</div>
-            <div class="rs-card-price">${price} / đêm</div>
-            <span class="rs-badge maintenance">🧹 Đang dọn dẹp</span>
-            <button class="rs-btn-save" onclick="rsSave(${r.id},this)"><i class="fas fa-check-circle"></i> Chuyển về Available</button>
-        </div></div>`;
-    }
-
-    let _rsConfirmCallback = null;
-    function rsConfirmOpen(callback) {
-        _rsConfirmCallback = callback;
-        document.getElementById('rs-confirm-overlay').classList.add('active');
-        document.getElementById('rs-confirm-ok-btn').onclick = function () { const cb = _rsConfirmCallback; rsConfirmClose(); if (cb) cb(); };
-    }
-    function rsConfirmClose() {
-        document.getElementById('rs-confirm-overlay').classList.remove('active');
-        _rsConfirmCallback = null;
-    }
-    document.getElementById('rs-confirm-overlay').addEventListener('click', function(e) { if (e.target === this) rsConfirmClose(); });
-
-    async function rsSave(roomId, btn) {
-        rsConfirmOpen(async () => {
-            const token = localStorage.getItem('accessToken');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
-            try {
-                const res = await fetch(`/api/v1/rooms/status/cleartoavilble/${roomId}`, { method: 'POST', headers: token ? { Authorization: 'Bearer ' + token } : {} });
-                if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || 'Thất bại'); }
-                btn.innerHTML = '<i class="fas fa-check"></i> Đã chuyển AVAILABLE!';
-                btn.style.background = 'linear-gradient(135deg,#16a34a,#15803d)';
-                showToast('success', 'Cập nhật thành công', 'Phòng đã chuyển về trạng thái Available.');
-                setTimeout(() => {
-                    btn.closest('.rs-card').remove();
-                    const remaining = document.querySelectorAll('#rs-grid .rs-card').length;
-                    const countEl = document.getElementById('rs-count');
-                    if (countEl) countEl.textContent = remaining + ' phòng';
-                    if (remaining === 0) document.getElementById('rs-grid').innerHTML = '<div class="rs-empty">✅ Không còn phòng nào cần dọn dẹp.</div>';
-                }, 1500);
-            } catch (err) {
-                showToast('error', 'Cập nhật thất bại', err.message);
-                btn.innerHTML = '<i class="fas fa-check-circle"></i> Chuyển về Available';
-                btn.style.background = '';
-                btn.disabled = false;
-            }
-        });
-    }
-</script>
-
-<script>
-    // ===== CHECK IN LOGIC =====
-    let _ciAllRooms = [];
-
-    function ciReload() { ciClearSearch(); ciLoadRooms(); }
-
-    async function ciLoadRooms() {
-        const grid = document.getElementById('ci-grid');
-        const countEl = document.getElementById('ci-count');
-        grid.innerHTML = '<div class="rs-loading"><i class="fas fa-spinner fa-spin"></i>Đang tải...</div>';
-        countEl.textContent = '';
-        try {
-            const token = localStorage.getItem('accessToken');
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 8000);
-            const res = await fetch('/api/v1/rooms/status/curently', { signal: controller.signal, headers: token ? { Authorization: 'Bearer ' + token } : {} });
-            clearTimeout(timeout);
-            if (!res.ok) { const errText = await res.text(); throw new Error(`HTTP ${res.status} - ${errText}`); }
-            const json = await res.json();
-            _ciAllRooms = Array.isArray(json) ? json : (json.data || []);
-            ciRenderGrid(_ciAllRooms);
-        } catch (err) {
-            const msg = err.name === 'AbortError' ? 'Request timeout — server không phản hồi sau 8 giây' : err.message;
-            document.getElementById('ci-grid').innerHTML = `<div class="rs-empty" style="color:#ef4444;">⚠️ Lỗi: ${msg}</div>`;
-        }
-    }
-
-    function ciRenderGrid(rooms) {
-        const grid = document.getElementById('ci-grid');
-        const countEl = document.getElementById('ci-count');
-        if (!rooms.length) {
-            const keyword = document.getElementById('ci-search-input').value.trim();
-            grid.innerHTML = keyword ? `<div class="rs-empty">🔍 Không tìm thấy phòng nào với gmail <b>${keyword}</b>.</div>` : '<div class="rs-empty">📭 Không có phòng nào chờ Check In.</div>';
-            countEl.textContent = ''; return;
-        }
-        countEl.textContent = rooms.length + ' phòng';
-        grid.innerHTML = rooms.map(r => ciRenderCard(r)).join('');
-    }
-
-    function ciOnSearchInput() {
-        const val = document.getElementById('ci-search-input').value.trim();
-        document.getElementById('ci-search-clear').classList.toggle('hidden', !val);
-    }
-
-    async function ciSearch() {
-        const input = document.getElementById('ci-search-input');
-        const email = input.value.trim();
-        const hint = document.getElementById('ci-search-hint');
-        const hintTxt = document.getElementById('ci-search-hint-text');
-        const grid = document.getElementById('ci-grid');
-        const countEl = document.getElementById('ci-count');
-        if (!email) { ciClearSearch(); return; }
-        grid.innerHTML = '<div class="rs-loading"><i class="fas fa-spinner fa-spin"></i> Đang tìm kiếm...</div>';
-        countEl.textContent = '';
-        try {
-            const token = localStorage.getItem('accessToken');
-            const res = await fetch('/api/v1/rooms/customer/' + encodeURIComponent(email), { headers: token ? { 'Authorization': 'Bearer ' + token } : {} });
-            if (res.status === 404) { ciRenderGrid([]); hint.classList.remove('hidden'); hintTxt.textContent = `Không tìm thấy phòng nào cho "${email}"`; return; }
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const json = await res.json();
-            const rooms = Array.isArray(json) ? json : (json.data || []);
-            hint.classList.remove('hidden');
-            hintTxt.textContent = `Kết quả cho "${email}" — ${rooms.length} phòng`;
-            ciRenderGrid(rooms);
-        } catch (err) {
-            grid.innerHTML = `<div class="rs-empty" style="color:#ef4444;">⚠️ Lỗi: ${err.message}</div>`;
-            countEl.textContent = '';
-        }
-    }
-
-    function ciClearSearch() {
-        document.getElementById('ci-search-input').value = '';
-        document.getElementById('ci-search-clear').classList.add('hidden');
-        document.getElementById('ci-search-hint').classList.add('hidden');
-        ciRenderGrid(_ciAllRooms);
-    }
-
-    function ciRenderCard(r) {
-        const imgHtml = (r.images && r.images.length > 0) ? `<img class="rs-card-img" src="${r.images[0]}" alt="${r.name || ''}" loading="lazy">` : `<div class="rs-card-img-ph">🏨</div>`;
-        const price = r.price ? new Intl.NumberFormat('vi-VN').format(r.price) + ' ₫' : '—';
-        const email = r.guestEmail || r.email || r.customerEmail || '';
-        const emailHtml = email ? `<div style="font-size:11px;color:#64748b;margin-bottom:7px;display:flex;align-items:center;gap:5px;overflow:hidden;"><i class="fab fa-google" style="color:#ea4335;flex-shrink:0;"></i><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${email}">${email}</span></div>` : '';
-        return `<div class="rs-card">${imgHtml}<div class="rs-card-body">
-            <div class="rs-card-name">${r.name || 'Phòng #' + r.id}</div>
-            <div class="rs-card-price">${price} / đêm</div>
-            ${emailHtml}
-            <span class="rs-badge currently">🕐 Chờ Check In</span>
-            <button class="rs-btn-save" style="background:linear-gradient(135deg,#ef4444,#dc2626);" onclick="ciCheckIn(${r.id}, this)">
-                <i class="fas fa-door-open"></i> Check In
-            </button>
-        </div></div>`;
-    }
-
-    async function ciCheckIn(roomId, btn) {
-        const email = document.getElementById('ci-search-input').value.trim();
-        const employeeId = localStorage.getItem('userId');
-        const token = localStorage.getItem('accessToken');
-        if (!email) { showToast('warning', 'Thiếu thông tin', 'Vui lòng nhập email khách hàng vào ô tìm kiếm trước khi Check In!'); document.getElementById('ci-search-input').focus(); return; }
-        if (!employeeId) { showToast('error', 'Chưa đăng nhập', 'Không tìm thấy thông tin nhân viên. Vui lòng đăng nhập lại!'); return; }
-        ciConfirmOpen(roomId, email, employeeId, async () => {
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
-            try {
-                const params = new URLSearchParams();
-                params.append('email', email);
-                params.append('roomId', roomId);
-                const res = await fetch(`/api/v1/booking/checkin/${employeeId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', ...(token ? { 'Authorization': 'Bearer ' + token } : {}) },
-                    body: params
-                });
-                if (!res.ok) {
-                    const contentType = res.headers.get('content-type') || '';
-                    let msg = `Lỗi ${res.status}`;
-                    if (contentType.includes('application/json')) { const errJson = await res.json(); msg = errJson.message || errJson.data?.message || JSON.stringify(errJson); }
-                    else { msg = await res.text() || msg; }
-                    throw new Error(msg);
-                }
-                showToast('success', 'Check In thành công!', `Phòng #${roomId} — ${email}`);
-                btn.innerHTML = '<i class="fas fa-check"></i> Đã Check In!';
-                btn.style.background = 'linear-gradient(135deg,#16a34a,#15803d)';
-                setTimeout(() => {
-                    btn.closest('.rs-card').remove();
-                    const remaining = document.querySelectorAll('#ci-grid .rs-card').length;
-                    const countEl = document.getElementById('ci-count');
-                    if (countEl) countEl.textContent = remaining + ' phòng';
-                    if (remaining === 0) document.getElementById('ci-grid').innerHTML = '<div class="rs-empty">✅ Không còn phòng nào cần Check In.</div>';
-                }, 1500);
-            } catch (err) {
-                showToast('error', 'Check In thất bại', err.message);
-                btn.innerHTML = '<i class="fas fa-door-open"></i> Check In';
-                btn.style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
-                btn.disabled = false;
-            }
-        });
-    }
-
-    // CI Confirm modal
-    let _ciConfirmCallback = null;
-    function ciConfirmOpen(roomId, email, employeeId, callback) {
-        _ciConfirmCallback = callback;
-        document.getElementById('ci-confirm-room').textContent = 'Phòng #' + roomId;
-        document.getElementById('ci-confirm-email').textContent = email;
-        document.getElementById('ci-confirm-employee').textContent = 'ID: ' + employeeId;
-        document.getElementById('ci-confirm-overlay').classList.add('active');
-        document.getElementById('ci-confirm-ok-btn').onclick = function () { const cb = _ciConfirmCallback; ciConfirmClose(); if (cb) cb(); };
-    }
-    function ciConfirmClose() {
-        document.getElementById('ci-confirm-overlay').classList.remove('active');
-        _ciConfirmCallback = null;
-    }
-    document.getElementById('ci-confirm-overlay').addEventListener('click', function(e) { if (e.target === this) ciConfirmClose(); });
-</script>
-
-<script>
-    // ===== CHECK OUT LOGIC (MỚI) =====
-    let _coAllRooms = [];
-
-    function coReload() { coClearSearch(); coLoadRooms(); }
-
-    async function coLoadRooms() {
-        const grid = document.getElementById('co-grid');
-        const countEl = document.getElementById('co-count');
-        grid.innerHTML = '<div class="rs-loading"><i class="fas fa-spinner fa-spin"></i>Đang tải...</div>';
-        countEl.textContent = '';
-        try {
-            const token = localStorage.getItem('accessToken');
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 8000);
-            // API lấy danh sách phòng đã check in chờ check out
-            const res = await fetch('/api/v1/rooms/status/checkin', {
-                signal: controller.signal,
-                headers: token ? { Authorization: 'Bearer ' + token } : {}
-            });
-            clearTimeout(timeout);
-            if (!res.ok) { const errText = await res.text(); throw new Error(`HTTP ${res.status} - ${errText}`); }
-            const json = await res.json();
-            _coAllRooms = Array.isArray(json) ? json : (json.data || []);
-            coRenderGrid(_coAllRooms);
-        } catch (err) {
-            const msg = err.name === 'AbortError' ? 'Request timeout — server không phản hồi sau 8 giây' : err.message;
-            document.getElementById('co-grid').innerHTML = `<div class="rs-empty" style="color:#ef4444;">⚠️ Lỗi: ${msg}</div>`;
-        }
-    }
-
-    function coRenderGrid(rooms) {
-        const grid = document.getElementById('co-grid');
-        const countEl = document.getElementById('co-count');
-        if (!rooms.length) {
-            const keyword = document.getElementById('co-search-input').value.trim();
-            grid.innerHTML = keyword ? `<div class="rs-empty">🔍 Không tìm thấy phòng nào với gmail <b>${keyword}</b>.</div>` : '<div class="rs-empty">📭 Không có phòng nào chờ Check Out.</div>';
-            countEl.textContent = ''; return;
-        }
-        countEl.textContent = rooms.length + ' phòng';
-        grid.innerHTML = rooms.map(r => coRenderCard(r)).join('');
-    }
-
-    function coOnSearchInput() {
-        const val = document.getElementById('co-search-input').value.trim();
-        document.getElementById('co-search-clear').classList.toggle('hidden', !val);
-    }
-
-    async function coSearch() {
-        const input = document.getElementById('co-search-input');
-        const email = input.value.trim();
-        const hint = document.getElementById('co-search-hint');
-        const hintTxt = document.getElementById('co-search-hint-text');
-        const grid = document.getElementById('co-grid');
-        const countEl = document.getElementById('co-count');
-        if (!email) { coClearSearch(); return; }
-        grid.innerHTML = '<div class="rs-loading"><i class="fas fa-spinner fa-spin"></i> Đang tìm kiếm...</div>';
-        countEl.textContent = '';
-        try {
-            const token = localStorage.getItem('accessToken');
-            // API tìm phòng theo email khách đã check in chờ check out
-            const res = await fetch('/api/v1/rooms/customer/checkedin/' + encodeURIComponent(email), {
-                headers: token ? { 'Authorization': 'Bearer ' + token } : {}
-            });
-            if (res.status === 404) { coRenderGrid([]); hint.classList.remove('hidden'); hintTxt.textContent = `Không tìm thấy phòng nào cho "${email}"`; return; }
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const json = await res.json();
-            const rooms = Array.isArray(json) ? json : (json.data || []);
-            hint.classList.remove('hidden');
-            hintTxt.textContent = `Kết quả cho "${email}" — ${rooms.length} phòng`;
-            coRenderGrid(rooms);
-        } catch (err) {
-            grid.innerHTML = `<div class="rs-empty" style="color:#ef4444;">⚠️ Lỗi: ${err.message}</div>`;
-            countEl.textContent = '';
-        }
-    }
-
-    function coClearSearch() {
-        document.getElementById('co-search-input').value = '';
-        document.getElementById('co-search-clear').classList.add('hidden');
-        document.getElementById('co-search-hint').classList.add('hidden');
-        coRenderGrid(_coAllRooms);
-    }
-
-    function coRenderCard(r) {
-        const imgHtml = (r.images && r.images.length > 0) ? `<img class="rs-card-img" src="${r.images[0]}" alt="${r.name || ''}" loading="lazy">` : `<div class="rs-card-img-ph">🏨</div>`;
-        const price = r.price ? new Intl.NumberFormat('vi-VN').format(r.price) + ' ₫' : '—';
-        const email = r.guestEmail || r.email || r.customerEmail || '';
-        const emailHtml = email ? `<div style="font-size:11px;color:#64748b;margin-bottom:7px;display:flex;align-items:center;gap:5px;overflow:hidden;"><i class="fab fa-google" style="color:#ea4335;flex-shrink:0;"></i><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${email}">${email}</span></div>` : '';
-        return `<div class="rs-card">${imgHtml}<div class="rs-card-body">
-            <div class="rs-card-name">${r.name || 'Phòng #' + r.id}</div>
-            <div class="rs-card-price">${price} / đêm</div>
-            ${emailHtml}
-            <span class="rs-badge checked-in">✅ Đang ở</span>
-            <button class="rs-btn-save" style="background:linear-gradient(135deg,#d97706,#b45309);" onclick="coCheckOut(${r.id}, this)">
-                <i class="fas fa-door-closed"></i> Check Out
-            </button>
-        </div></div>`;
-    }
-
-    async function coCheckOut(roomId, btn) {
-        const email = document.getElementById('co-search-input').value.trim();
-        const employeeId = localStorage.getItem('userId');
-        const token = localStorage.getItem('accessToken');
-        if (!email) {
-            showToast('warning', 'Thiếu thông tin', 'Vui lòng nhập email khách hàng vào ô tìm kiếm trước khi Check Out!');
-            document.getElementById('co-search-input').focus();
-            return;
-        }
-        if (!employeeId) {
-            showToast('error', 'Chưa đăng nhập', 'Không tìm thấy thông tin nhân viên. Vui lòng đăng nhập lại!');
-            return;
-        }
-        coConfirmOpen(roomId, email, employeeId, async () => {
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
-            try {
-                const params = new URLSearchParams();
-                params.append('email', email);
-                params.append('roomId', roomId);
-                const res = await fetch(`/api/v1/booking/checkout/${employeeId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', ...(token ? { 'Authorization': 'Bearer ' + token } : {}) },
-                    body: params
-                });
-
-                // Doc body MOT LAN DUY NHAT — response stream chi doc duoc 1 lan
-                const contentType = res.headers.get('content-type') || '';
-                let checkoutData = { id: null, price: 0 };
-                if (contentType.includes('application/json')) {
-                    const rawBody = await res.json();
-                    if (!res.ok) {
-                        throw new Error(rawBody.message || rawBody.data?.message || JSON.stringify(rawBody));
-                    }
-                    // CheckOutRespone: { id: Long, Price: Double }
-                    // Lombok @Getter tren field "Price" co the serialize thanh "price" hoac "Price"
-                    // -> xu ly ca 2 truong hop
-                    const payload = rawBody.data ?? rawBody;
-                    checkoutData = {
-                        id:    payload.id    ?? null,
-                        price: payload.price ?? payload.Price ?? 0
-                    };
-                } else {
-                    const rawText = await res.text();
-                    if (!res.ok) throw new Error(rawText || `Loi ${res.status}`);
-                }
-
-                btn.innerHTML = '<i class="fas fa-check"></i> Da Check Out!';
-                btn.style.background = 'linear-gradient(135deg,#16a34a,#15803d)';
-                showToast('success', 'Check Out thanh cong!', `Phong #${roomId} — ${email}`);
-
-                // Hien thi modal thanh toan voi du lieu tu CheckOutRespone
-                coPayOpen(checkoutData, roomId);
-
-                setTimeout(() => {
-                    btn.closest('.rs-card').remove();
-                    const remaining = document.querySelectorAll('#co-grid .rs-card').length;
-                    const countEl = document.getElementById('co-count');
-                    if (countEl) countEl.textContent = remaining + ' phong';
-                    if (remaining === 0) document.getElementById('co-grid').innerHTML = '<div class="rs-empty">Khong con phong nao can Check Out.</div>';
-                }, 1500);
-            } catch (err) {
-                showToast('error', 'Check Out that bai', err.message);
-                btn.innerHTML = '<i class="fas fa-door-closed"></i> Check Out';
-                btn.style.background = 'linear-gradient(135deg,#d97706,#b45309)';
-                btn.disabled = false;
-            }
-        });
-    }
-
-    // ===== CHECKOUT PAYMENT MODAL LOGIC =====
-    let _coPayState     = { bookingId: null, amount: 0, method: null };
-    let _bkDepositState = { bookingId: null, roomName: '', amount: 0, method: null };
-    window._bkDepositMode = false;
-
-    function coPayOpen(checkoutData, roomId) {
-        console.log('[coPayOpen] checkoutData raw =', JSON.stringify(checkoutData));
-        window._bkDepositMode = false;
-
-        _coPayState.bookingId = checkoutData.id ?? null;
-        const rawAmount = checkoutData.price ?? checkoutData.Price ?? checkoutData['Price'] ?? 0;
-        _coPayState.amount = rawAmount;
-        _coPayState.method = null;
-
-        console.log('[coPayOpen] bookingId =', _coPayState.bookingId, '| amount =', _coPayState.amount);
-
-        const fmtVnd = n => new Intl.NumberFormat('vi-VN').format(Math.max(0, Math.round(n))) + ' ₫';
-        const amountStr = fmtVnd(rawAmount);
-
-        // Reset banner về checkout
-        document.getElementById('co-pay-banner-icon').textContent = '💳';
-        document.getElementById('co-pay-banner-title-txt').textContent = 'Thanh toán Check Out';
-        document.getElementById('co-pay-amount-label-sub').textContent = 'Sau khi trừ tiền cọc';
-        // Ẩn ô nhập cọc
-        document.getElementById('bk-deposit-amount-row').style.display = 'none';
-
-        // Điền số tiền vào bước 1 (chọn phương thức)
-        document.getElementById('co-pay-amount').textContent = amountStr;
-
-        // Reset về bước 1
-        _coPayShowStep('method');
-
-        // Hiện overlay
-        document.getElementById('co-payment-overlay').classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function _coPayShowStep(step) {
-        document.getElementById('co-pay-step-method').style.display = step === 'method' ? 'block' : 'none';
-        document.getElementById('co-pay-step-bank').style.display   = step === 'bank'   ? 'block' : 'none';
-        document.getElementById('co-pay-step-cash').style.display   = step === 'cash'   ? 'block' : 'none';
-
-        // Chỉ cập nhật banner-sub khi KHÔNG ở chế độ deposit (deposit tự set banner-sub riêng)
-        if (!window._bkDepositMode) {
-            const sub = document.getElementById('co-pay-banner-sub');
-            if (step === 'method') sub.textContent = 'Chọn phương thức thanh toán phù hợp';
-            else if (step === 'bank') sub.textContent = 'Thanh toán qua chuyển khoản ngân hàng';
-            else sub.textContent = 'Xác nhận thu tiền tại quầy lễ tân';
-        }
-    }
-
-    function coPaySelectMethod(method) {
-        const isDeposit = window._bkDepositMode;
-        const state     = isDeposit ? _bkDepositState : _coPayState;
-        state.method    = method;
-
-        const fmtVnd   = n => new Intl.NumberFormat('vi-VN').format(Math.max(0, Math.round(n))) + ' ₫';
-        const amount   = state.amount;
-        const amountStr = fmtVnd(amount);
-        const prefix   = isDeposit ? 'DC' : 'CO';
-
-        if (method === 'BANK_TRANSFER') {
-            const randomCode = Math.floor(10000 + Math.random() * 90000);
-            const content = `STAYVIET ${prefix}${randomCode}`;
-            document.getElementById('co-pay-amount-copy').textContent = amountStr;
-            document.getElementById('co-pay-content').textContent = content;
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=VIETQR+STK+1234567890+VCB+${Math.round(Math.max(0,amount))}+${content}&bgcolor=ffffff`;
-            document.getElementById('co-pay-qr-img').src = qrUrl;
-            const confirmBtn = document.getElementById('co-pay-confirm-btn');
-            confirmBtn.disabled = false;
-            confirmBtn.innerHTML = isDeposit
-                ? '<i class="fas fa-check-circle"></i> Đã nhận cọc qua chuyển khoản'
-                : '<i class="fas fa-check-circle"></i> Tôi đã chuyển khoản';
-            _coPayShowStep('bank');
-        } else {
-            const isCash = method === 'CASH';
-            document.getElementById('co-cash-icon').textContent         = isCash ? '💵' : '💳';
-            document.getElementById('co-cash-method-label').textContent = isDeposit
-                ? (isCash ? 'Thu tiền cọc tiền mặt' : 'Thu tiền cọc qua thẻ (POS)')
-                : (isCash ? 'Thanh toán tiền mặt'   : 'Thanh toán thẻ (POS)');
-            document.getElementById('co-cash-method-val').textContent   = isCash ? '💵 Tiền mặt' : '💳 Thẻ tín dụng / ATM';
-            document.getElementById('co-cash-amount-display').textContent = amountStr;
-            const cashBtn = document.getElementById('co-pay-cash-confirm-btn');
-            cashBtn.disabled = false;
-            cashBtn.innerHTML = isDeposit
-                ? '<i class="fas fa-check-circle"></i> Xác nhận đã thu tiền cọc'
-                : '<i class="fas fa-check-circle"></i> Xác nhận đã thu tiền';
-            _coPayShowStep('cash');
-        }
-    }
-
-    function coPayGoBack() {
-        _coPayShowStep('method');
-        _coPayState.method = null;
-    }
-
-    function coPayClose() {
-        if (window._bkDepositMode) {
-            bkDepositClose();
-            return;
-        }
-        document.getElementById('co-payment-overlay').classList.remove('active');
-        document.body.style.overflow = '';
-    }
-
-    function coPayCopy(elementId) {
-        const raw = document.getElementById(elementId).innerText.replace(/[₫\s]/g, '').trim();
-        navigator.clipboard.writeText(raw).then(() => {
-            showToast('info', 'Đã sao chép!', raw);
-        }).catch(() => {
-            showToast('warning', 'Không thể sao chép', 'Vui lòng sao chép thủ công.');
-        });
-    }
-
-    // Xác nhận chuyển khoản
-    async function coPayConfirm() {
-        const isDeposit = window._bkDepositMode;
-        const state     = isDeposit ? _bkDepositState : _coPayState;
-        const apiUrl    = isDeposit ? '/api/v1/payment/deposit/employee' : '/api/v1/payment/thanhtoan';
-
-        if (!state.bookingId) {
-            showToast('error', 'Lỗi', 'Không tìm thấy thông tin đặt phòng. Vui lòng thử lại.');
-            return;
-        }
-        const confirmBtn = document.getElementById('co-pay-confirm-btn');
-        confirmBtn.disabled = true;
-        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xác nhận...';
-
-        const token = localStorage.getItem('accessToken');
-        const params = new URLSearchParams();
-        params.append('booking_id', String(state.bookingId));
-        params.append('amount',     String(state.amount));
-        params.append('method_booking', 'BANK_TRANSFER');
-
-        try {
-            const res = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded', ...(token ? { Authorization: 'Bearer ' + token } : {}) },
-                body: params
-            });
-            if (!res.ok) { const t = await res.text().catch(() => ''); throw new Error(t || `Lỗi ${res.status}`); }
-            const msg = await res.text();
-            coPayClose();
-            showToast('success', isDeposit ? '💰 Đặt cọc thành công!' : '🎉 Thanh toán thành công!', msg || 'Giao dịch đã được ghi nhận.');
-            if (!isDeposit) _coPayState = { bookingId: null, amount: 0, method: null };
-        } catch (err) {
-            showToast('error', isDeposit ? 'Đặt cọc thất bại' : 'Thanh toán thất bại', err.message || 'Có lỗi xảy ra.');
-            confirmBtn.disabled = false;
-            confirmBtn.innerHTML = isDeposit
-                ? '<i class="fas fa-check-circle"></i> Đã nhận cọc qua chuyển khoản'
-                : '<i class="fas fa-check-circle"></i> Tôi đã chuyển khoản';
-        }
-    }
-
-    // Xác nhận tiền mặt / thẻ
-    async function coPayCashConfirm() {
-        const isDeposit = window._bkDepositMode;
-        const state     = isDeposit ? _bkDepositState : _coPayState;
-        const apiUrl    = isDeposit ? '/api/v1/payment/deposit/employee' : '/api/v1/payment/thanhtoan';
-
-        if (!state.bookingId) {
-            showToast('error', 'Lỗi', 'Không tìm thấy thông tin đặt phòng. Vui lòng thử lại.');
-            return;
-        }
-        const cashBtn = document.getElementById('co-pay-cash-confirm-btn');
-        cashBtn.disabled = true;
-        cashBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
-
-        const token = localStorage.getItem('accessToken');
-        const params = new URLSearchParams();
-        params.append('booking_id',     String(state.bookingId));
-        params.append('amount',         String(state.amount));
-        params.append('method_booking', state.method);
-
-        try {
-            const res = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded', ...(token ? { Authorization: 'Bearer ' + token } : {}) },
-                body: params
-            });
-            if (!res.ok) { const t = await res.text().catch(() => ''); throw new Error(t || `Lỗi ${res.status}`); }
-            const msg = await res.text();
-            coPayClose();
-            showToast('success', isDeposit ? '💰 Đặt cọc thành công!' : '🎉 Thanh toán thành công!', msg || 'Giao dịch đã được ghi nhận.');
-            if (!isDeposit) _coPayState = { bookingId: null, amount: 0, method: null };
-        } catch (err) {
-            showToast('error', isDeposit ? 'Đặt cọc thất bại' : 'Thanh toán thất bại', err.message || 'Có lỗi xảy ra.');
-            cashBtn.disabled = false;
-            cashBtn.innerHTML = isDeposit
-                ? '<i class="fas fa-check-circle"></i> Xác nhận đã thu tiền cọc'
-                : '<i class="fas fa-check-circle"></i> Xác nhận đã thu tiền';
-        }
-    }
-
-    // Đóng modal khi click overlay
-    document.getElementById('co-payment-overlay').addEventListener('click', function(e) {
-        if (e.target === this) coPayClose();
-    });
-
-    // CO Confirm modal
-    let _coConfirmCallback = null;
-    function coConfirmOpen(roomId, email, employeeId, callback) {
-        _coConfirmCallback = callback;
-        document.getElementById('co-confirm-room').textContent = 'Phòng #' + roomId;
-        document.getElementById('co-confirm-email').textContent = email;
-        document.getElementById('co-confirm-employee').textContent = 'ID: ' + employeeId;
-        document.getElementById('co-confirm-overlay').classList.add('active');
-        document.getElementById('co-confirm-ok-btn').onclick = function () { const cb = _coConfirmCallback; coConfirmClose(); if (cb) cb(); };
-    }
-    function coConfirmClose() {
-        document.getElementById('co-confirm-overlay').classList.remove('active');
-        _coConfirmCallback = null;
-    }
-    document.getElementById('co-confirm-overlay').addEventListener('click', function(e) { if (e.target === this) coConfirmClose(); });
-</script>
-
-<script>
-    // ===== BOOKING ROOM LOGIC =====
-    let _bkAllRooms = [];
-    let _bkSelectedRoom = null;
-
-    function bkReload() { bkLoadRooms(); }
-
-    async function bkLoadRooms() {
-        const grid = document.getElementById('bk-grid');
-        const countEl = document.getElementById('bk-count');
-        document.getElementById('bk-search-input').value = '';
-        document.getElementById('bk-search-clear').classList.add('hidden');
-        document.getElementById('bk-price-hint').classList.add('hidden');
-        grid.innerHTML = '<div class="rs-loading"><i class="fas fa-spinner fa-spin"></i>Đang tải danh sách phòng...</div>';
-        countEl.textContent = '';
-        try {
-            const token = localStorage.getItem('accessToken');
-            const res = await fetch('/api/v1/rooms/status', {
-                headers: token ? { Authorization: 'Bearer ' + token } : {}
-            });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const json = await res.json();
-            _bkAllRooms = Array.isArray(json) ? json : (json.data || []);
-            bkRenderGrid(_bkAllRooms);
-        } catch (err) {
-            grid.innerHTML = '<div class="rs-empty" style="color:#ef4444;">⚠️ Lỗi tải phòng: ' + err.message + '</div>';
-        }
-    }
-
-    function bkRenderGrid(rooms) {
-        const grid = document.getElementById('bk-grid');
-        const countEl = document.getElementById('bk-count');
-        if (!rooms.length) {
-            grid.innerHTML = '<div class="rs-empty">📭 Không có phòng nào khả dụng.</div>';
-            countEl.textContent = '0 phòng';
-            return;
-        }
-        countEl.textContent = rooms.length + ' phòng';
-        grid.innerHTML = rooms.map(r => bkRenderCard(r)).join('');
-    }
-
-    function bkRenderCard(r) {
-        const fmtPrice = n => new Intl.NumberFormat('vi-VN').format(n) + ' ₫/đêm';
-        const imgHtml = (r.images && r.images.length > 0)
-            ? `<img class="bk-card-img" src="${r.images[0]}" alt="${r.name||''}" loading="lazy">`
-            : `<div class="bk-card-img-ph">🏨</div>`;
-        const roomType = r.roomType?.type || r.type || '';
-        return `
-        <div class="bk-card">
-            ${imgHtml}
-            <div class="bk-card-body">
-                <div class="bk-card-name" title="${r.name||''}">${r.name || 'Phòng #' + r.id}</div>
-                ${roomType ? `<div class="bk-card-type"><i class="fas fa-tag" style="font-size:10px;"></i> ${roomType}</div>` : ''}
-                <div class="bk-card-price">${fmtPrice(r.price || 0)}</div>
-                <span class="bk-badge-available"><i class="fas fa-circle" style="font-size:7px;"></i> Available</span>
-                <button class="bk-btn-booking" onclick="bkOpenModal(${JSON.stringify(r).replace(/"/g, '&quot;')})">
-                    <i class="fas fa-calendar-plus"></i> Booking
-                </button>
-            </div>
-        </div>`;
-    }
-
-    function bkOnSearch() {
-        const raw = document.getElementById('bk-search-input').value.replace(/\D/g, '').trim();
-        const clearBtn  = document.getElementById('bk-search-clear');
-        const hintEl    = document.getElementById('bk-price-hint');
-        clearBtn.classList.toggle('hidden', !raw);
-
-        if (!raw) {
-            hintEl.classList.add('hidden');
-            bkRenderGrid(_bkAllRooms);
-            return;
-        }
-
-        const target = Number(raw);
-        const DELTA  = 50000;
-        const lo = target - DELTA;
-        const hi = target + DELTA;
-
-        const filtered = _bkAllRooms.filter(r => {
-            const p = Number(r.price || 0);
-            return p >= lo && p <= hi;
-        });
-
-        const fmt = n => new Intl.NumberFormat('vi-VN').format(n);
-        hintEl.textContent = fmt(lo) + ' ₫ – ' + fmt(hi) + ' ₫';
-        hintEl.classList.remove('hidden');
-
-        bkRenderGrid(filtered);
-    }
-
-    function bkClearSearch() {
-        document.getElementById('bk-search-input').value = '';
-        document.getElementById('bk-search-clear').classList.add('hidden');
-        document.getElementById('bk-price-hint').classList.add('hidden');
-        document.getElementById('bk-price-hint').classList.add('hidden');
-        bkRenderGrid(_bkAllRooms);
-    }
-
-    function bkOpenModal(room) {
-        _bkSelectedRoom = room;
-        const fmtPrice = n => new Intl.NumberFormat('vi-VN').format(n) + ' ₫/đêm';
-        document.getElementById('bk-modal-room-name').textContent = room.name || 'Phòng #' + room.id;
-        document.getElementById('bk-modal-room-price').textContent = fmtPrice(room.price || 0);
-        document.getElementById('bk-customer-name').value = '';
-        document.getElementById('bk-customer-phone').value = '';
-        document.getElementById('bk-checkin-date').value = '';
-        document.getElementById('bk-checkout-date').value = '';
-        document.getElementById('bk-summary').style.display = 'none';
-        const btn = document.getElementById('bk-modal-confirm-btn');
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-calendar-check"></i> Xác nhận đặt phòng';
-        document.getElementById('bk-modal-overlay').classList.add('active');
-        document.body.style.overflow = 'hidden';
-        // Set min date = today
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('bk-checkin-date').min = today;
-        document.getElementById('bk-checkout-date').min = today;
-    }
-
-    function bkUpdateSummary() {
-        const checkin  = document.getElementById('bk-checkin-date').value;
-        const checkout = document.getElementById('bk-checkout-date').value;
-        const summary  = document.getElementById('bk-summary');
-        if (!checkin || !checkout || checkin >= checkout || !_bkSelectedRoom) {
-            summary.style.display = 'none';
-            return;
-        }
-        const nights    = Math.max(1, Math.round((new Date(checkout) - new Date(checkin)) / 86400000));
-        const roomTotal = nights * (_bkSelectedRoom.price || 0);
-        const fee       = Math.round(roomTotal * 0.05);
-        const total     = roomTotal + fee;
-        const deposit   = Math.round(total * 0.30);
-        const remain    = total - deposit;
-        const fmt = n => new Intl.NumberFormat('vi-VN').format(n) + ' ₫';
-        document.getElementById('bk-sum-desc').textContent    = `${_bkSelectedRoom.name || 'Phòng'} × ${nights} đêm`;
-        document.getElementById('bk-sum-room').textContent    = fmt(roomTotal);
-        document.getElementById('bk-sum-fee').textContent     = fmt(fee);
-        document.getElementById('bk-sum-total').textContent   = fmt(total);
-        document.getElementById('bk-sum-deposit').textContent = fmt(deposit);
-        document.getElementById('bk-sum-remain').textContent  = fmt(remain);
-        summary.style.display = 'block';
-    }
-
-    function bkModalClose() {
-        document.getElementById('bk-modal-overlay').classList.remove('active');
-        document.body.style.overflow = '';
-        _bkSelectedRoom = null;
-    }
-
-    async function bkSubmitBooking() {
-        if (!_bkSelectedRoom) return;
-        const customerName  = document.getElementById('bk-customer-name').value.trim();
-        const customerPhone = document.getElementById('bk-customer-phone').value.trim();
-        const checkin    = document.getElementById('bk-checkin-date').value;
-        const checkout   = document.getElementById('bk-checkout-date').value;
-        const employeeId = localStorage.getItem('userId');
-
-        if (!customerName)  { showToast('warning', 'Thiếu thông tin', 'Vui lòng nhập họ tên khách hàng.'); return; }
-        if (!customerPhone) { showToast('warning', 'Thiếu thông tin', 'Vui lòng nhập số điện thoại.'); return; }
-        if (!checkin)    { showToast('warning', 'Thiếu thông tin', 'Vui lòng chọn ngày nhận phòng.'); return; }
-        if (!checkout)   { showToast('warning', 'Thiếu thông tin', 'Vui lòng chọn ngày trả phòng.'); return; }
-        if (checkin >= checkout) { showToast('warning', 'Ngày không hợp lệ', 'Ngày trả phòng phải sau ngày nhận phòng.'); return; }
-        if (!employeeId) { showToast('error', 'Chưa đăng nhập', 'Không tìm thấy thông tin nhân viên. Vui lòng đăng nhập lại!'); return; }
-
-        const btn = document.getElementById('bk-modal-confirm-btn');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
-
-        const token = localStorage.getItem('accessToken');
-        const params = new URLSearchParams();
-        params.append('name', customerName);
-        params.append('phonenumber', customerPhone);
-        params.append('roomId', String(_bkSelectedRoom.id));
-        params.append('enventCheckinDate', checkin);
-        params.append('enventCheckoutDate', checkout);
-        params.append('employeeId', String(employeeId));
-
-        try {
-            const res = await fetch('/api/v1/booking/bookingoffline', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    ...(token ? { Authorization: 'Bearer ' + token } : {})
-                },
-                body: params
-            });
-            if (!res.ok) {
-                const errText = await res.text().catch(() => '');
-                throw new Error(errText || 'Lỗi ' + res.status);
-            }
-            const resData = await res.json().catch(() => null);
-            // ✅ Parse bookingId đúng cách - thử nhiều dạng response wrapper
-            const bookingId = resData?.id
-                ?? resData?.data?.id
-                ?? resData?.bookingId
-                ?? null;
-
-            // ✅ Tính tiền cọc TRƯỚC khi gọi bkModalClose() (sẽ set _bkSelectedRoom = null)
-            const msPerDay  = 86400000;
-            const days      = Math.max(1, Math.round((new Date(checkout) - new Date(checkin)) / msPerDay));
-            const roomTotal = (_bkSelectedRoom?.price || 0) * days;
-            const fee       = Math.round(roomTotal * 0.05);
-            const total     = roomTotal + fee;
-            const deposit   = Math.round(total * 0.30);
-
-            // ✅ Lưu tên phòng trước khi close modal (bkModalClose set _bkSelectedRoom = null)
-            const selectedRoomName = _bkSelectedRoom?.name || 'Phòng #' + _bkSelectedRoom?.id;
-            const selectedRoomRef  = { ..._bkSelectedRoom }; // shallow copy để dùng an toàn
-
-            // ✅ Đóng modal SAU khi đã lưu hết thông tin cần thiết
-            bkModalClose();
-            showToast('success', '🎉 Đặt phòng thành công!', `Phòng ${selectedRoomName} đã được đặt.`);
-            bkLoadRooms();
-
-            // ✅ Dùng biến đã lưu, không dùng _bkSelectedRoom nữa
-            bkDepositOpen(bookingId, selectedRoomName, deposit, days, roomTotal, fee, total);
-        } catch (err) {
-            showToast('error', 'Đặt phòng thất bại', err.message || 'Có lỗi xảy ra.');
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-calendar-check"></i> Xác nhận đặt phòng';
-        }
-    }
-
-    // ===== BOOKING DEPOSIT MODAL LOGIC =====
-
-    function bkDepositOpen(bookingId, roomName, depositAmount, days, roomTotal, fee, total) {
-        _bkDepositState.bookingId = bookingId;
-        _bkDepositState.roomName  = roomName;
-        _bkDepositState.amount    = depositAmount;
-        _bkDepositState.method    = null;
-
-        const fmtVnd = n => new Intl.NumberFormat('vi-VN').format(Math.max(0, Math.round(n))) + ' ₫';
-
-        document.getElementById('co-pay-banner-title-txt').textContent  = 'Đặt cọc phòng';
-        document.getElementById('co-pay-banner-sub').textContent        = 'Chọn phương thức đặt cọc cho khách';
-        document.getElementById('co-pay-amount').textContent            = fmtVnd(depositAmount);
-        document.getElementById('co-pay-amount-label-sub').textContent  = `(${fmtVnd(roomTotal)} + phí 5% ${fmtVnd(fee)}) × 30%`;
-
-        document.getElementById('bk-deposit-amount-row').style.display = 'none';
-        document.getElementById('co-pay-banner-icon').textContent = '💰';
-        window._bkDepositMode = true;
-
-        _coPayShowStep('method');
-        document.getElementById('co-payment-overlay').classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function bkDepositClose() {
-        window._bkDepositMode = false;
-        document.getElementById('bk-deposit-amount-row').style.display = 'none';
-        document.getElementById('co-payment-overlay').classList.remove('active');
-        document.body.style.overflow = '';
-    }
-
-    // ===== END BOOKING DEPOSIT LOGIC =====
-
-    document.getElementById('bk-modal-overlay').addEventListener('click', function(e) {
-        if (e.target === this) bkModalClose();
-    });
-</script>
+<script th:src="@{/js/toast.js}"></script>
+<script th:src="@{/js/header.js}"></script>
+<script th:src="@{/js/sidebar.js}"></script>
+<script th:src="@{/js/room-form.js}"></script>
+<script th:src="@{/js/reset-status.js}"></script>
+<script th:src="@{/js/checkin.js}"></script>
+<script th:src="@{/js/checkout.js}"></script>
+<script th:src="@{/js/booking.js}"></script>
+<script th:src="@{/js/room-type.js}"></script>
 
 </body>
 </html>

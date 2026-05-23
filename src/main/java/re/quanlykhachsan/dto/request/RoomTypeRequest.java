@@ -6,6 +6,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,4 +22,7 @@ public class RoomTypeRequest {
     @NotBlank(message = "không được để chống")
     private String amenities;// nội thất
     private String description;
+    private List<MultipartFile> images;
+    @NotNull(message = "kooong được để chống giá ")
+    private Double price;
 }

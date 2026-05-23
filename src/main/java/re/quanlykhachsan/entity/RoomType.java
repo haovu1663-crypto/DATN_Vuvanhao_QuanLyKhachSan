@@ -1,9 +1,6 @@
 package re.quanlykhachsan.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -12,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -31,5 +30,9 @@ public class RoomType {
     @NotBlank
     private String amenities;// nội thất
     private String description;
+    // ảnh
+    @ElementCollection(fetch = FetchType.EAGER)
+    private List<String> images;
+    private Double price;
 
 }

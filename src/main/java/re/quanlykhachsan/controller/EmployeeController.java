@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import re.quanlykhachsan.dto.request.EmployeeRequest;
 import re.quanlykhachsan.dto.response.ApiResponse;
@@ -40,6 +41,7 @@ public class EmployeeController {
         );
         return  new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+    @PreAuthorize("permitAll()")
     @PostMapping("register")
     public ResponseEntity<?> save(@Valid @ModelAttribute EmployeeRequest employeeRequest) throws DataConfickException {
         ApiResponse<EmployeeResponse> apiResponse = new ApiResponse<>(

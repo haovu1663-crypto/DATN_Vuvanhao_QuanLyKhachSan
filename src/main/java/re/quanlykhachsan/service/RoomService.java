@@ -10,6 +10,7 @@ import re.quanlykhachsan.dto.response.RoomRespone;
 import re.quanlykhachsan.entity.Room;
 import re.quanlykhachsan.entity.RoomType;
 import re.quanlykhachsan.entity.StatusRoom;
+import re.quanlykhachsan.exception.DataConfickException;
 import re.quanlykhachsan.exception.ResourceNotFoundException;
 import re.quanlykhachsan.repository.RoomRepository;
 import re.quanlykhachsan.repository.RoomTypeRepository;
@@ -30,19 +31,13 @@ public class RoomService implements IRoomService {
     private final ModelMapper modelMapper;
     private final UploadService uploadService;
     @Override
-    public RoomRespone add(RoomRequest roomRequest) throws IOException,ResourceNotFoundException {
+    public RoomRespone add(RoomRequest roomRequest) throws IOException, ResourceNotFoundException, DataConfickException {
         Room room = modelMapper.map(roomRequest, Room.class);
-        List<MultipartFile> files = roomRequest.getImages();
-        List<String> imageUrls = new ArrayList<>();
-        for (MultipartFile file : files) {
-            if (!file.isEmpty()) {
-                String url = uploadService.uploadFile(file);
-                imageUrls.add(url);
-            }
-        }
         RoomType roomType = roomTypeRepository.findById(roomRequest.getType_room_id()).orElseThrow(()->new ResourceNotFoundException("không tim thấy roomType có id :"+roomRequest.getType_room_id()));
+        if (roomRepository.existsByNameAndWorkBranch(roomRequest.getName(),roomRequest.getWorkBranch())) {
+            throw new DataConfickException("Phong "+roomRequest.getName() +"đã tồn tại ở chi nhánh "+roomRequest.getWorkBranch());
+        }
         room.setRoomType(roomType);
-        room.setImages(imageUrls);
         room.setWorkBranch(roomRequest.getWorkBranch());
         roomRepository.save(room);
         return modelMapper.map(room, RoomRespone.class);
@@ -56,7 +51,7 @@ public class RoomService implements IRoomService {
 
         // Cập nhật các field cơ bản
         room.setName(roomRequest.getName());
-        room.setPrice(roomRequest.getPrice());
+
         if (roomRequest.getStatus() != null) {
             room.setStatus(roomRequest.getStatus());
         }
@@ -65,24 +60,6 @@ public class RoomService implements IRoomService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy RoomType có id: " + roomRequest.getType_room_id()));
         room.setRoomType(roomType);
 
-        // Xử lý ảnh:
-        // - Có file mới (không rỗng) → upload và thay thế ảnh cũ
-        // - Không có file mới (null hoặc toàn file rỗng) → giữ nguyên ảnh cũ
-        List<MultipartFile> files = roomRequest.getImages();
-        boolean hasNewImages = files != null && files.stream().anyMatch(f -> f != null && !f.isEmpty());
-
-        if (hasNewImages) {
-            List<String> imageUrls = new ArrayList<>();
-            for (MultipartFile file : files) {
-                if (file != null && !file.isEmpty()) {
-                    imageUrls.add(uploadService.uploadFile(file));
-                }
-            }
-            room.setImages(imageUrls);
-        }
-        // Không có ảnh mới → giữ nguyên room.getImages() đang có
-
-        // ✅ Cập nhật workBranch — kiểm tra null/blank trước để tránh ghi đè dữ liệu cũ bằng rỗng
         if (roomRequest.getWorkBranch() != null && !roomRequest.getWorkBranch().isBlank()) {
             room.setWorkBranch(roomRequest.getWorkBranch());
         }
@@ -124,7 +101,7 @@ public class RoomService implements IRoomService {
             if (room.getRoomType() != null) {
                 response.setType_room_id(room.getRoomType().getId());
             }
-            response.setImages(room.getImages());
+
             return response;
         }).collect(Collectors.toList());
     }
@@ -158,7 +135,7 @@ public class RoomService implements IRoomService {
             if (room.getRoomType() != null) {
                 response.setType_room_id(room.getRoomType().getId());
             }
-            response.setImages(room.getImages());
+
             return response;
         }).collect(Collectors.toList());
     }
@@ -183,7 +160,7 @@ public class RoomService implements IRoomService {
             if (room.getRoomType() != null) {
                 response.setType_room_id(room.getRoomType().getId());
             }
-            response.setImages(room.getImages());
+
             return response;
         }).collect(Collectors.toList());
     }
@@ -200,7 +177,7 @@ public class RoomService implements IRoomService {
             if (room.getRoomType() != null) {
                 response.setType_room_id(room.getRoomType().getId());
             }
-            response.setImages(room.getImages());
+
             return response;
         }).collect(Collectors.toList());
     }
@@ -223,7 +200,7 @@ public class RoomService implements IRoomService {
             if (room.getRoomType() != null) {
                 response.setType_room_id(room.getRoomType().getId());
             }
-            response.setImages(room.getImages());
+
             return response;
         }).collect(Collectors.toList());
     }
@@ -244,7 +221,7 @@ public class RoomService implements IRoomService {
             if (room.getRoomType() != null) {
                 response.setType_room_id(room.getRoomType().getId());
             }
-            response.setImages(room.getImages());
+
             return response;
         }).collect(Collectors.toList());
     }

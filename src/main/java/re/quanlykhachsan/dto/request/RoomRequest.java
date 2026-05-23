@@ -19,9 +19,6 @@ public class RoomRequest {
     private String name;
     @Enumerated(EnumType.STRING)
     private StatusRoom status;
-    private List<MultipartFile> images;
-    @NotNull(message = "kooong được để chống giá ")
-    private Double price;
     @NotBlank(message = "Không được để trống chi nhánh làm việc")
     private String workBranch;
 }

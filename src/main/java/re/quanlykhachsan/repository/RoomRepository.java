@@ -9,6 +9,7 @@ import re.quanlykhachsan.entity.Room;
 import re.quanlykhachsan.entity.StatusRoom;
 import re.quanlykhachsan.exception.ResourceNotFoundException;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -32,4 +33,28 @@ public interface RoomRepository extends JpaRepository<Room,Long> {
             "WHERE r.status = re.quanlykhachsan.entity.StatusRoom.CHECKED " +
             "AND b.phonenumber = :phoneNumber")
     List<Room> findCheckedRoomsByPhoneNumber(@Param("phoneNumber") String phoneNumber);
+
+    // hiển thi room khi khach hàng booking theo ngày tháng
+    @Query("""
+        SELECT r FROM Room r 
+        WHERE LOWER(r.workBranch) LIKE LOWER(CONCAT('%', :workBranch, '%'))
+        AND r.roomType.id = :roomTypeId 
+        AND r.roomType.capacity >= :capacity 
+        AND r.id NOT IN (
+            SELECT b.room.id FROM Booking b 
+            WHERE b.room.id IS NOT NULL 
+            AND (:checkIn BETWEEN b.enventCheckinDate AND b.enventCheckoutDate 
+                 OR :checkOut BETWEEN b.enventCheckinDate AND b.enventCheckoutDate 
+                 OR b.enventCheckinDate BETWEEN :checkIn AND :checkOut)
+        )
+    """)
+    List<Room> findAvailableRooms(
+            @Param("workBranch") String workBranch,
+            @Param("roomTypeId") Long roomTypeId,
+            @Param("capacity") int capacity,
+            @Param("checkIn") LocalDate checkIn,
+            @Param("checkOut") LocalDate checkOut
+    );
+
+    boolean existsByNameAndWorkBranch(String name, String workBranch);
 }
