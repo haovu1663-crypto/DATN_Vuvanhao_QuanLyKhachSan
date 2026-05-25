@@ -107,10 +107,16 @@ public class SecurityConfig {
                                         // roomtype
                                         .requestMatchers("/api/v1/roomtypes/add").permitAll()
                                         .requestMatchers("/api/v1/roomtypes/id/").permitAll()
+                                        .requestMatchers("/api/v1/roomtypes/frindroom").permitAll()
                                         // room
                                         .requestMatchers("/api/v1/rooms").permitAll()
                                         .requestMatchers("/api/v1/rooms/**").permitAll()
-                                        .requestMatchers("/**.css", "/**.js", "/js/**", "/images/**", "/static/**").permitAll()
+                                        //checkin
+                                        .requestMatchers("/api/v1/booking/checkin").permitAll()
+                                        .requestMatchers("/api/v1/booking/checkinbooking").permitAll()
+                                        // checkout
+                                        .requestMatchers("/api/v1/booking/checkout").permitAll()
+                                        .requestMatchers("/**.css", "/**.js", "/js/**", "/js2/**", "/images/**", "/static/**").permitAll()
                                         .anyRequest().authenticated() // các api khác thì phải xác thực thì ms vào đc(đăng nhập)
                 )
                 // ✅ đăng ký EntryPoint ở đây

@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import re.quanlykhachsan.dto.request.BookingRequest;
 import re.quanlykhachsan.dto.request.EmployeeBooking;
 import re.quanlykhachsan.dto.response.BookingRespone;
+import re.quanlykhachsan.dto.response.CheckInRespone;
+import re.quanlykhachsan.dto.response.CheckOutBookingRespone;
 import re.quanlykhachsan.dto.response.CheckOutRespone;
 import re.quanlykhachsan.entity.*;
 import re.quanlykhachsan.exception.ResourceNotFoundException;
@@ -15,6 +17,8 @@ import re.quanlykhachsan.service.interfac.IBookingService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -141,5 +145,61 @@ public class BookingService implements IBookingService {
         response.setId(booking.getId());
 //        response.setPrice(remaining); // ← đúng rồi, không còn = 0 nữa
         return response;
+    }
+
+
+    @Override
+    public List<CheckInRespone> CheckIn() {
+        List<Booking> checkIn = bookingRespository.findBookingsNullOrBeforeToday();
+        List<CheckInRespone> checkInRespones =  checkIn.stream().map(
+                n->{
+                    CheckInRespone checkInRespone = new CheckInRespone();
+                    checkInRespone.setBookingId(n.getId());
+                    checkInRespone.setRoomId(n.getRoom().getId());
+                    checkInRespone.setRoomName(n.getRoom().getName());
+                    checkInRespone.setRoomType(n.getRoom().getRoomType().getType());
+                    checkInRespone.setCheckin(n.getEnventCheckinDate());
+                    checkInRespone.setCheckout(n.getEnventCheckoutDate());
+                    return checkInRespone;
+                }
+        ).toList();
+        return checkInRespones;
+    }
+
+    @Override
+    public String checkInBooking(Long employeeId, Long bookingId) throws ResourceNotFoundException {
+        Booking booking= bookingRespository.findById(bookingId).orElseThrow(()-> new ResourceNotFoundException("không tìm thấy hóa đơn đặt phòng "));
+        Employee e = employeeRespository.findById(employeeId).orElseThrow(()-> new ResourceNotFoundException("không tìm thấy nhân viên này "));
+        booking.setCheckInDate( LocalDateTime.now());
+        booking.setEmployee(e);
+        bookingRespository.save(booking);
+        return "Quý khách đã CheckIn thành công " ;
+    }
+
+    @Override
+    public List<CheckOutBookingRespone> CheckOut() {
+        List<Booking> checkIn = bookingRespository.findBookingsCheckOutIsNull();
+        List<CheckOutBookingRespone> checkOutRespones =  checkIn.stream().map(
+                n->{
+                    CheckOutBookingRespone checkOutRespone = new CheckOutBookingRespone();
+                    checkOutRespone.setBookingId(n.getId());
+                    checkOutRespone.setCustomerName(n.getCustomer().getFullname());
+                    checkOutRespone.setRoomName(n.getRoom().getName());
+                    checkOutRespone.setRoomType(n.getRoom().getRoomType().getType());
+                    checkOutRespone.setCheckIntDate(n.getCheckInDate());
+                    return checkOutRespone;
+                }
+        ).toList();
+        return checkOutRespones;
+    }
+
+    @Override
+    public String checkOutBooking(Long bookingId) throws ResourceNotFoundException {
+       Booking booking = bookingRespository.findById(bookingId).orElseThrow();
+       booking.setCheckOutDate(LocalDateTime.now());
+      Integer   daysBetween = ChronoUnit.DAYS.between(booking.getEnventCheckinDate(),LocalDate.now());
+      booking.setToyalPrice(booking.getRoom().getRoomType().getPrice()*daysBetween);
+
+        return "";
     }
 }

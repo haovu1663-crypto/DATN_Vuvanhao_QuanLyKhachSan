@@ -3,11 +3,13 @@ package re.quanlykhachsan.service.interfac;
 import org.springframework.data.repository.query.Param;
 import re.quanlykhachsan.dto.request.RoomRequest;
 import re.quanlykhachsan.dto.response.RoomRespone;
+import re.quanlykhachsan.dto.response.SoPhongRequest;
 import re.quanlykhachsan.entity.StatusRoom;
 import re.quanlykhachsan.exception.DataConfickException;
 import re.quanlykhachsan.exception.ResourceNotFoundException;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface IRoomService {
@@ -24,5 +26,8 @@ public interface IRoomService {
     List<RoomRespone> getListRoomByCustomerEmail( String email);
     List<RoomRespone> getListRoomByStatusCheckIn();
     List<RoomRespone> getListRoomByCustomerEmailCheckedIn( String email);
+
+    //
+    List<SoPhongRequest> getListSoPhong(String workBranch, Long roomtypeId, int capacity, LocalDate checkIn, LocalDate checkOut);
 
 }

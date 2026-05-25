@@ -9,11 +9,13 @@ import org.springframework.web.bind.annotation.*;
 import re.quanlykhachsan.dto.request.RoomRequest;
 import re.quanlykhachsan.dto.response.ApiResponse;
 import re.quanlykhachsan.dto.response.RoomRespone;
+import re.quanlykhachsan.dto.response.SoPhongRequest;
 import re.quanlykhachsan.exception.DataConfickException;
 import re.quanlykhachsan.exception.ResourceNotFoundException;
 import re.quanlykhachsan.service.interfac.IRoomService;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -107,4 +109,15 @@ public class RoomController {
         );
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+
+    //
+    @GetMapping("/findroom")
+    public ResponseEntity<?> getRoomsByRoomId(@RequestParam String workBranch,@RequestParam Long roomTypeId,@RequestParam int capacity ,@RequestParam LocalDate checkIn,@RequestParam LocalDate checkOut ){
+        ApiResponse<List<SoPhongRequest>> response = new ApiResponse<>(
+                "get rooms","400",roomService.getListSoPhong(workBranch,roomTypeId,capacity,checkIn,checkOut)
+        );
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 }

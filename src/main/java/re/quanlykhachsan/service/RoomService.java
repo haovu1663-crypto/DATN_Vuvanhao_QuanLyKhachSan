@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import re.quanlykhachsan.dto.request.RoomRequest;
 import re.quanlykhachsan.dto.response.RoomRespone;
+import re.quanlykhachsan.dto.response.SoPhongRequest;
 import re.quanlykhachsan.entity.Room;
 import re.quanlykhachsan.entity.RoomType;
 import re.quanlykhachsan.entity.StatusRoom;
@@ -19,6 +20,7 @@ import re.quanlykhachsan.service.interfac.IRoomTypeService;
 import re.quanlykhachsan.upload.UploadService;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -226,5 +228,17 @@ public class RoomService implements IRoomService {
         }).collect(Collectors.toList());
     }
 
-
+    @Override
+    public List<SoPhongRequest> getListSoPhong(String workBranch, Long roomtypeId, int capacity, LocalDate checkIn, LocalDate checkOut) {
+       List<Room> rooms = roomRepository.findAvailableRooms(workBranch, roomtypeId, capacity, checkIn, checkOut);
+        List<SoPhongRequest> soPhongRequests = rooms.stream()
+                .map(room -> {
+                    SoPhongRequest request = new SoPhongRequest();
+                    request.setId(room.getId());
+                    request.setName(room.getName());
+                    return request;
+                })
+                .toList();
+        return soPhongRequests;
+    }
 }

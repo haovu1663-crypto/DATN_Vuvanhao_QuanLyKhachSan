@@ -7,8 +7,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import re.quanlykhachsan.dto.request.BookingRequest;
 import re.quanlykhachsan.dto.request.EmployeeBooking;
+import re.quanlykhachsan.dto.response.CheckInRespone;
+import re.quanlykhachsan.dto.response.CheckOutBookingRespone;
 import re.quanlykhachsan.exception.ResourceNotFoundException;
 import re.quanlykhachsan.service.BookingService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/booking")
@@ -41,5 +45,19 @@ public class BookingController {
     ) throws ResourceNotFoundException {
 
         return new ResponseEntity<>( bookingService.CheckOut(employeeId, email, roomId),HttpStatus.OK);
+    }
+
+    //
+    @GetMapping("/checkin")
+    public ResponseEntity<List<CheckInRespone>> getCheckin(){
+        return new ResponseEntity<>(bookingService.CheckIn(), HttpStatus.OK);
+    }
+    @PostMapping("/checkinbooking")
+    public ResponseEntity<String> getCheckin(@RequestParam Long employeeId,@RequestParam Long bookingId) throws ResourceNotFoundException {
+        return new ResponseEntity<>(bookingService.checkInBooking(employeeId,bookingId), HttpStatus.OK);
+    }
+    @GetMapping("/checkout")
+    public ResponseEntity<List<CheckOutBookingRespone>> getCheckOut(){
+        return new ResponseEntity<>(bookingService.CheckOut(), HttpStatus.OK);
     }
 }

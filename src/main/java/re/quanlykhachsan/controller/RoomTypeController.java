@@ -17,6 +17,7 @@ import re.quanlykhachsan.repository.RoomTypeRepository;
 import re.quanlykhachsan.service.RoomTypeService;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -29,48 +30,60 @@ public class RoomTypeController {
 
     @PostMapping("/add")
     public ResponseEntity<?> addRoomType(@Valid @ModelAttribute RoomTypeRequest roomTypeRequest) throws IOException {
-        ApiResponse<RoomTypeResponse>  apiResponse = new ApiResponse(
-                "Add succsess","201 CREATED",roomTypeService.add(roomTypeRequest)
+        ApiResponse<RoomTypeResponse> apiResponse = new ApiResponse(
+                "Add succsess", "201 CREATED", roomTypeService.add(roomTypeRequest)
         );
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
-    @PutMapping(value = "/{id}",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    ResponseEntity<?> update(@Valid @ModelAttribute RoomTypeRequest roomTypeRequest ,@PathVariable Long id) throws ResourceNotFoundException, IOException {
-        ApiResponse<RoomTypeResponse>  apiResponse = new ApiResponse(
-                "update succsess","400 Update",roomTypeService.update(roomTypeRequest,id)
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ResponseEntity<?> update(@Valid @ModelAttribute RoomTypeRequest roomTypeRequest, @PathVariable Long id) throws ResourceNotFoundException, IOException {
+        ApiResponse<RoomTypeResponse> apiResponse = new ApiResponse(
+                "update succsess", "400 Update", roomTypeService.update(roomTypeRequest, id)
         );
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
+
     @DeleteMapping("/{id}")
     ResponseEntity<?> delete(@Valid @PathVariable Long id) throws ResourceNotFoundException, DataConfickException {
-        ApiResponse<RoomTypeResponse>  apiResponse = new ApiResponse(
-                "delete succsess","400 Delete",roomTypeService.delete(id)
+        ApiResponse<RoomTypeResponse> apiResponse = new ApiResponse(
+                "delete succsess", "400 Delete", roomTypeService.delete(id)
         );
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @GetMapping
-    ResponseEntity<?> getRoomType()  {
-        ApiResponse<List<RoomTypeResponse>>  apiResponse = new ApiResponse(
-                "get RoomType","400 ",roomTypeService.getListRoomType()
-        );
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
-    @PreAuthorize("permitAll()")
-    @GetMapping("/find")
-    ResponseEntity<?> getRoomTypeFindCustomer()  {
-        ApiResponse<List<RoomTypeResponse>>  apiResponse = new ApiResponse(
-                "get RoomType","400 ",roomTypeService.getListRoomType()
-        );
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
-    @GetMapping("/id/{id}")
-    ResponseEntity<?> getRoombyid(@PathVariable Long id) throws IOException, ResourceNotFoundException {
-        ApiResponse<List<RoomTypeResponse>>  apiResponse = new ApiResponse(
-                "get RoomType","400 ",roomTypeService.getRoomTypeById(id)
+    ResponseEntity<?> getRoomType() {
+        ApiResponse<List<RoomTypeResponse>> apiResponse = new ApiResponse(
+                "get RoomType", "400 ", roomTypeService.getListRoomType()
         );
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
+    @PreAuthorize("permitAll()")
+    @GetMapping("/find")
+    ResponseEntity<?> getRoomTypeFindCustomer() {
+        ApiResponse<List<RoomTypeResponse>> apiResponse = new ApiResponse(
+                "get RoomType", "400 ", roomTypeService.getListRoomType()
+        );
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/id/{id}")
+    ResponseEntity<?> getRoombyid(@PathVariable Long id) throws IOException, ResourceNotFoundException {
+        ApiResponse<List<RoomTypeResponse>> apiResponse = new ApiResponse(
+                "get RoomType", "400 ", roomTypeService.getRoomTypeById(id)
+        );
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/frindroom")
+    ResponseEntity<?> getroomtypec(@RequestParam String workBranch, @RequestParam int capacity, @RequestParam LocalDate checkin, @RequestParam LocalDate checkout) throws IOException, ResourceNotFoundException {
+        ApiResponse<List<RoomTypeResponse>> apiResponse = new ApiResponse(
+                "get RoomType", "400 ", roomTypeService.getListRoomTypeByWorkBrankAndCapacityAndDate(capacity, workBranch, checkin, checkout)
+        );
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+
+
+    }
 }

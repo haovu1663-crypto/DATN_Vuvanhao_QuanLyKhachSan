@@ -6,6 +6,81 @@ const bkState = {
     calOffset: 0, selecting: 'start'
 };
 
+// ===== ROOM PICKER — hiện danh sách phòng cụ thể trước khi vào booking =====
+function openBooking(rt) {
+    // Lấy thông tin từ thanh tìm kiếm
+    const checkIn  = window._searchCheckIn;
+    const checkOut = window._searchCheckOut;
+    const workBranch = document.getElementById('destVal').textContent.trim();
+
+    if (!checkIn || !checkOut || !window._searchMode) {
+        Swal.fire({ icon: 'warning', title: 'Chưa tìm kiếm', text: 'Vui lòng nhập điểm đến và ngày trên thanh tìm kiếm trước!', confirmButtonColor: '#1a2744' });
+        return;
+    }
+
+    // Gán subtitle
+    const fmt = d => d.split('-').reverse().join('/');
+    document.getElementById('room-picker-subtitle').textContent =
+        workBranch + ' · ' + fmt(checkIn) + ' → ' + fmt(checkOut) + ' · ' + rt.type;
+
+    // Render loading
+    const listEl = document.getElementById('room-picker-list');
+    listEl.innerHTML = '<div style="text-align:center;color:#aaa;padding:20px;font-size:13px;">Đang tải danh sách phòng...</div>';
+
+    // Hiện modal picker
+    const overlay = document.getElementById('modal-room-picker-overlay');
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    // Gọi API lấy phòng cụ thể
+    const capacity = (window._searchCapacity) || 1;
+    const url = '/api/v1/rooms/findroom'
+        + '?workBranch=' + encodeURIComponent(workBranch)
+        + '&roomTypeId=' + rt.id
+        + '&capacity='   + capacity
+        + '&checkIn='    + checkIn
+        + '&checkOut='   + checkOut;
+
+    fetch(url)
+        .then(async res => {
+            if (!res.ok) throw new Error(await res.text());
+            return res.json();
+        })
+        .then(apiResp => {
+            const rooms = Array.isArray(apiResp.data) ? apiResp.data : [];
+            if (!rooms.length) {
+                listEl.innerHTML = '<div style="text-align:center;color:#aaa;padding:20px;font-size:13px;">😔 Không còn phòng trống trong khoảng thời gian này.</div>';
+                return;
+            }
+            // Lưu data vào biến tạm để tránh lỗi escape string trong onclick
+            window._pickerRooms = rooms;
+            window._pickerRt    = rt;
+            listEl.innerHTML = rooms.map((r, idx) =>
+                '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1.5px solid #e2e8f0;border-radius:10px;cursor:pointer;transition:all .15s;" ' +
+                'onmouseover="this.style.borderColor=\'#1a2744\';this.style.background=\'#f0f4ff\'" ' +
+                'onmouseout="this.style.borderColor=\'#e2e8f0\';this.style.background=\'#fff\'">' +
+                '<div style="font-weight:600;color:#1a2744;font-size:14px;">🛏️ ' + (r.name || 'Phòng ' + r.id) + '</div>' +
+                '<button onclick="selectRoom(' + idx + ')" style="font-size:12px;font-weight:700;padding:6px 16px;border-radius:8px;border:none;background:#1a2744;color:#fff;cursor:pointer;">Chọn</button>' +
+                '</div>'
+            ).join('');
+        })
+        .catch(err => {
+            listEl.innerHTML = '<div style="text-align:center;color:#dc2626;padding:20px;font-size:13px;">⚠️ ' + (err.message||'Lỗi tải phòng') + '</div>';
+        });
+}
+
+function hideRoomPicker() {
+    document.getElementById('modal-room-picker-overlay').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+function selectRoom(idx) {
+    const r  = window._pickerRooms[idx];
+    const rt = window._pickerRt;
+    hideRoomPicker();
+    showBooking(r.id, r.name || ('Phòng ' + r.id), rt.type, rt.price);
+}
+
 const BK_MONTHS = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
 const BK_DAYS   = ['CN','T2','T3','T4','T5','T6','T7'];
 
@@ -14,7 +89,9 @@ function showBooking(roomId, roomName, roomType, pricePerNight) {
     bkState.roomName = roomName;
     bkState.roomType = roomType;
     bkState.pricePerNight = pricePerNight;
-    bkState.checkIn = null; bkState.checkOut = null;
+    // Lấy ngày từ search bar (đã được gán bởi selectRoom)
+    bkState.checkIn  = window._searchCheckIn  ? new Date(window._searchCheckIn)  : null;
+    bkState.checkOut = window._searchCheckOut ? new Date(window._searchCheckOut) : null;
     bkState.adults = 1; bkState.children = 0;
     bkState.calOffset = 0; bkState.selecting = 'start';
 
@@ -22,8 +99,8 @@ function showBooking(roomId, roomName, roomType, pricePerNight) {
     document.getElementById('bk-room-type').textContent = roomType + ' · ' + new Intl.NumberFormat('vi-VN').format(pricePerNight) + ' ₫/đêm';
     bkResetUI();
     bkRenderCal();
-    document.getElementById('modal-booking-overlay').classList.add('show');
     document.body.style.overflow = 'hidden';
+    document.getElementById('modal-booking-overlay').classList.add('show');
 }
 
 function hideBooking() {
@@ -36,14 +113,21 @@ function handleBookingOverlayClick(e) {
 }
 
 function bkResetUI() {
-    document.getElementById('bk-val-checkin').textContent  = 'Chọn ngày';
-    document.getElementById('bk-val-checkin').className    = 'bk-date-val empty';
-    document.getElementById('bk-val-checkout').textContent = 'Chọn ngày';
-    document.getElementById('bk-val-checkout').className   = 'bk-date-val empty';
-    document.getElementById('bk-nights-badge').classList.remove('show');
-    document.getElementById('bk-summary').style.display = 'none';
-    document.getElementById('bk-adults-val').textContent   = '1';
-    document.getElementById('bk-children-val').textContent = '0';
+    // Hiển thị ngày từ thanh tìm kiếm
+    const fmt = d => d ? new Date(d).toLocaleDateString('vi-VN', {day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
+    document.getElementById('bk-val-checkin').textContent  = fmt(window._searchCheckIn);
+    document.getElementById('bk-val-checkout').textContent = fmt(window._searchCheckOut);
+    // Tính số đêm
+    if (window._searchCheckIn && window._searchCheckOut) {
+        const nights = Math.round((new Date(window._searchCheckOut) - new Date(window._searchCheckIn)) / 86400000);
+        document.getElementById('bk-nights-badge').textContent = nights + ' đêm';
+        // Tính summary luôn vì ngày đã có sẵn
+        bkUpdateSummary(nights);
+    } else {
+        document.getElementById('bk-summary').style.display = 'none';
+    }
+    var roomInput = document.getElementById('bk-room-list');
+    if (roomInput) roomInput.value = '';
     document.getElementById('bk-notes').value = '';
     // Reset email OTP
     document.getElementById('bk-email').value = '';
@@ -68,7 +152,8 @@ function bkResetUI() {
 }
 
 function bkToggleCal() {
-    document.getElementById('bk-cal-popup').classList.toggle('open');
+    const el = document.getElementById('bk-cal-popup');
+    if (el) el.classList.toggle('open');
 }
 
 function bkNavMonth(dir) {
@@ -77,8 +162,9 @@ function bkNavMonth(dir) {
 }
 
 function bkRenderCal() {
-    const now = new Date(); now.setHours(0,0,0,0);
     const container = document.getElementById('bk-cal-months');
+    if (!container) return; // calendar đã bị xóa khỏi HTML
+    const now = new Date(); now.setHours(0,0,0,0);
     container.innerHTML = '';
     for (let m = 0; m < 2; m++) {
         const base = new Date(now.getFullYear(), now.getMonth() + bkState.calOffset + m, 1);
@@ -197,13 +283,10 @@ function bkChangeGuest(type, delta) {
 }
 
 function bkUpdateBtn() {
-    const btn      = document.getElementById('btn-submit-booking');
-    const hasDates = !!(bkState.checkIn && bkState.checkOut);
-    const ready    = hasDates && _bkOtpVerified;
-    btn.disabled   = !ready;
-    if (!hasDates)            btn.textContent = 'Chọn ngày để đặt phòng';
-    else if (!_bkOtpVerified) btn.textContent = '🔒 Xác thực email đặt phòng';
-    else                      btn.textContent = '✅ Xác nhận đặt phòng';
+    const btn   = document.getElementById('btn-submit-booking');
+    const ready = _bkOtpVerified;
+    btn.disabled = !ready;
+    btn.textContent = ready ? '✅ Xác nhận đặt phòng' : '🔒 Xác thực email đặt phòng';
 }
 
 // Hàm format Date sang chuỗi YYYY-MM-DD để gửi lên Backend
@@ -223,8 +306,11 @@ let _bookingResult = { bookingId: null, depositAmount: 0 };
 
 // ===== GỌI API ĐẶT PHÒNG (bản đầy đủ có thanh toán) =====
 function submitBooking() {
+    // Ưu tiên lấy ngày từ search bar nếu bkState chưa có
+    if (!bkState.checkIn && window._searchCheckIn)   bkState.checkIn  = new Date(window._searchCheckIn);
+    if (!bkState.checkOut && window._searchCheckOut) bkState.checkOut = new Date(window._searchCheckOut);
     if (!bkState.checkIn || !bkState.checkOut) {
-        Swal.fire({ icon: 'warning', title: 'Chưa chọn ngày', text: 'Vui lòng chọn ngày nhận và trả phòng!', confirmButtonColor: '#1a2744' });
+        Swal.fire({ icon: 'warning', title: 'Chưa chọn ngày', text: 'Vui lòng tìm kiếm và chọn ngày trước!', confirmButtonColor: '#1a2744' });
         return;
     }
     const email = document.getElementById('bk-email').value.trim();
@@ -250,6 +336,10 @@ function submitBooking() {
     _bookingResult.depositAmount = parseInt(depositRaw) || 0;
 
     Swal.showLoading();
+
+    // Lấy tên phòng từ input text (nếu người dùng đã nhập)
+    const roomInput = document.getElementById('bk-room-list');
+    if (roomInput && roomInput.value.trim()) bkState.roomName = roomInput.value.trim();
 
     const params = new URLSearchParams();
     params.append('roomId',             bkState.roomId);

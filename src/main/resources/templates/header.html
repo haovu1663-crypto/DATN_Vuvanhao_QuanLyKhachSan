@@ -388,6 +388,22 @@
     </div>
 </div>
 
+<!-- ===== MODAL CHỌN PHÒNG ===== -->
+<div class="modal-overlay" id="modal-room-picker-overlay" onclick="if(event.target===this)hideRoomPicker()" style="display:none;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:20px;max-width:520px;width:95%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(26,39,68,0.18);">
+        <div style="background:linear-gradient(135deg,#1a2744,#2d4a8a);padding:24px 28px 20px;border-radius:20px 20px 0 0;position:relative;">
+            <button onclick="hideRoomPicker()" style="position:absolute;top:14px;right:16px;background:rgba(255,255,255,0.15);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;">✕</button>
+            <h2 style="color:#fff;font-family:'Playfair Display',serif;margin:0 0 4px;font-size:20px;">Chọn phòng</h2>
+            <p id="room-picker-subtitle" style="color:rgba(255,255,255,0.75);font-size:13px;margin:0;"></p>
+        </div>
+        <div style="padding:20px 24px;">
+            <div id="room-picker-list" style="display:flex;flex-direction:column;gap:10px;min-height:80px;">
+                <div style="text-align:center;color:#aaa;padding:20px;font-size:13px;">Đang tải...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- ===== MODAL ĐẶT PHÒNG ===== -->
 <div id="modal-booking-overlay" onclick="handleBookingOverlayClick(event)">
     <div id="booking-section">
@@ -408,59 +424,21 @@
 
             <div class="bk-body">
 
-                <!-- Chọn ngày -->
-                <label class="bk-label">📅 Ngày nhận & trả phòng</label>
-                <div class="bk-date-row">
-                    <div class="bk-date-box" id="bk-box-checkin" onclick="bkToggleCal()">
-                        <span class="bk-date-icon">🏠</span>
-                        <div class="bk-date-label">Nhận phòng</div>
-                        <div class="bk-date-val empty" id="bk-val-checkin">Chọn ngày</div>
+                <!-- Ngày lấy từ thanh tìm kiếm -->
+                <div id="bk-date-info" style="background:#f0f4ff;border-radius:12px;padding:12px 16px;display:flex;gap:24px;margin-bottom:4px;">
+                    <div>
+                        <div style="font-size:11px;color:var(--gray);margin-bottom:2px;">🏠 Nhận phòng</div>
+                        <div id="bk-val-checkin" style="font-size:14px;font-weight:600;color:var(--navy);">—</div>
                     </div>
-                    <div class="bk-date-box" id="bk-box-checkout" onclick="bkToggleCal()">
-                        <span class="bk-date-icon">🚪</span>
-                        <div class="bk-date-label">Trả phòng</div>
-                        <div class="bk-date-val empty" id="bk-val-checkout">Chọn ngày</div>
+                    <div style="border-left:1.5px solid var(--border);"></div>
+                    <div>
+                        <div style="font-size:11px;color:var(--gray);margin-bottom:2px;">🚪 Trả phòng</div>
+                        <div id="bk-val-checkout" style="font-size:14px;font-weight:600;color:var(--navy);">—</div>
                     </div>
-                </div>
-
-                <!-- Calendar inline -->
-                <div class="bk-cal-popup" id="bk-cal-popup">
-                    <div class="bk-cal-header">
-                        <button class="bk-cal-nav" onclick="bkNavMonth(-1)">&#8249;</button>
-                        <span></span>
-                        <button class="bk-cal-nav" onclick="bkNavMonth(1)">&#8250;</button>
-                    </div>
-                    <div class="bk-cal-months" id="bk-cal-months"></div>
-                    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
-                        <button onclick="bkShortcut(1)"  style="font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--white);cursor:pointer;color:var(--navy);">1 đêm</button>
-                        <button onclick="bkShortcut(2)"  style="font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--white);cursor:pointer;color:var(--navy);">2 đêm</button>
-                        <button onclick="bkShortcut(3)"  style="font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--white);cursor:pointer;color:var(--navy);">3 đêm</button>
-                        <button onclick="bkShortcut(7)"  style="font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--white);cursor:pointer;color:var(--navy);">1 tuần</button>
-                        <button onclick="bkClearDates()" style="font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid #fca5a5;background:#fff1f1;cursor:pointer;color:#dc2626;">Xóa</button>
-                    </div>
-                </div>
-
-                <!-- Badge số đêm -->
-                <div class="bk-nights-badge" id="bk-nights-badge">🌙 Đang chọn 0 đêm</div>
-
-                <!-- Số khách -->
-                <label class="bk-label">👥 Số khách</label>
-                <div class="bk-guests-row">
-                    <div class="bk-guest-box">
-                        <div class="bk-date-label">Người lớn</div>
-                        <div class="bk-guest-ctrl">
-                            <button class="bk-counter-btn" onclick="bkChangeGuest('adults',-1)" id="bk-adults-minus">−</button>
-                            <span class="bk-counter-val" id="bk-adults-val">1</span>
-                            <button class="bk-counter-btn" onclick="bkChangeGuest('adults',1)">+</button>
-                        </div>
-                    </div>
-                    <div class="bk-guest-box">
-                        <div class="bk-date-label">Trẻ em</div>
-                        <div class="bk-guest-ctrl">
-                            <button class="bk-counter-btn" onclick="bkChangeGuest('children',-1)" id="bk-children-minus">−</button>
-                            <span class="bk-counter-val" id="bk-children-val">0</span>
-                            <button class="bk-counter-btn" onclick="bkChangeGuest('children',1)">+</button>
-                        </div>
+                    <div style="border-left:1.5px solid var(--border);"></div>
+                    <div>
+                        <div style="font-size:11px;color:var(--gray);margin-bottom:2px;">🌙 Số đêm</div>
+                        <div id="bk-nights-badge" style="font-size:14px;font-weight:600;color:var(--navy);">—</div>
                     </div>
                 </div>
 
@@ -517,12 +495,12 @@
     </div>
 </div>
 
-<script src="/js/auth.js"></script>
-<script src="/js/search-bar.js"></script>
-<script src="/js/register.js"></script>
-<script src="/js/login.js"></script>
-<script src="/js/room-listing.js"></script>
-<script src="/js/booking.js"></script>
-<script src="/js/menu.js"></script>
+<script src="/js2/auth.js"></script>
+<script src="/js2/search-bar.js"></script>
+<script src="/js2/register.js"></script>
+<script src="/js2/login.js"></script>
+<script src="/js2/room-listing.js"></script>
+<script src="/js2/booking.js"></script>
+<script src="/js2/menu.js"></script>
 </body>
 </html>

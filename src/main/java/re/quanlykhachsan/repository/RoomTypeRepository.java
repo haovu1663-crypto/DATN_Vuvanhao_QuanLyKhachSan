@@ -14,22 +14,24 @@ import java.util.List;
 public interface RoomTypeRepository extends JpaRepository<RoomType, Long> {
     // lấy roomtype theo điều kiên khách cần đặt
     @Query("""
-        SELECT DISTINCT rt FROM RoomType rt 
-        JOIN Room r ON r.roomType.id = rt.id 
-        WHERE rt.capacity >= :capacity 
-        AND r.workBranch = :workBranch 
+    SELECT DISTINCT rt FROM RoomType rt 
+    WHERE rt.capacity >= :capacity 
+    AND EXISTS (
+        SELECT r FROM Room r 
+        WHERE r.roomType = rt
+        AND LOWER(r.workBranch) LIKE LOWER(CONCAT('%', :workBranch, '%'))
         AND r.id NOT IN (
             SELECT b.room.id FROM Booking b 
-            WHERE b.room.id IS NOT NULL 
-            AND (:checkIn BETWEEN b.enventCheckinDate AND b.enventCheckoutDate 
-                 OR :checkOut BETWEEN b.enventCheckinDate AND b.enventCheckoutDate 
-                 OR b.enventCheckinDate BETWEEN :checkIn AND :checkOut)
+            WHERE b.room IS NOT NULL 
+            AND (:checkIn  < b.enventCheckoutDate 
+            AND  :checkOut > b.enventCheckinDate)
         )
-    """)
+    )
+""")
     List<RoomType> findAvailableRoomTypes(
-            @Param("capacity") int capacity,
+            @Param("capacity")   int capacity,
             @Param("workBranch") String workBranch,
-            @Param("checkIn") LocalDate checkIn,
-            @Param("checkOut") LocalDate checkOut
+            @Param("checkIn")    LocalDate checkIn,
+            @Param("checkOut")   LocalDate checkOut
     );
 }

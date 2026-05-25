@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class CheckOutRespone {
-    private Long id;// id booking để gán vào bay ment
+    private Long id;
+
+    // id booking để gán vào bay ment
     private  Double price;// tiền cần nhập vào pay ment,
 }

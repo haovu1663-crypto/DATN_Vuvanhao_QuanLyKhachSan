@@ -57,8 +57,8 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     document.getElementById('menuResetStatus')?.addEventListener('click',   e => { e.preventDefault(); switchToView('reset');           rsLoadRooms(); });
-    document.getElementById('menuCheckIn')?.addEventListener('click',       e => { e.preventDefault(); switchToView('checkin');         ciLoadRooms(); });
-    document.getElementById('menuCheckOut')?.addEventListener('click',      e => { e.preventDefault(); switchToView('checkout');        coLoadRooms(); });
+    document.getElementById('menuCheckIn')?.addEventListener('click',       e => { e.preventDefault(); switchToView('checkin');         ciLoadBookings(); });
+    document.getElementById('menuCheckOut')?.addEventListener('click',      e => { e.preventDefault(); switchToView('checkout');        coLoadBookings(); });
     document.getElementById('menuBooking')?.addEventListener('click',       e => { e.preventDefault(); switchToView('booking');         bkLoadRooms(); });
     document.getElementById('menuAddRoomType')?.addEventListener('click',   e => { e.preventDefault(); switchToView('add-room-type');   });
     document.getElementById('menuUpdateRoomType')?.addEventListener('click',e => { e.preventDefault(); switchToView('update-room-type'); });
