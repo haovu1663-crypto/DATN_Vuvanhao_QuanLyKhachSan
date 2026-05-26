@@ -25,7 +25,7 @@ public class PaymentService implements IPaymentService {
         payment.setAmount(paymentRequest.getAmount());
         payment.setMethod(MethodBooking.BANK_TRANSFER);
         payment.setStatus("Success");
-        payment.setPaymentType("Đặt cọc");
+        payment.setPaymentType("DEPOSIT");
         Booking booking = bookingRespository.findById(paymentRequest.getBooking_id()).orElseThrow(()->new ResourceNotFoundException("khồng tìm thấy Id booking"));
         payment.setBooking(booking);
         paymentRespository.save(payment);
@@ -39,7 +39,7 @@ public class PaymentService implements IPaymentService {
         payment.setAmount(paymentRequest.getAmount());
         payment.setMethod(paymentRequest.getMethod_booking());
         payment.setStatus("Success");
-        payment.setPaymentType("Thanh toán phòng ");
+        payment.setPaymentType("PAYMENT");
         Booking booking = bookingRespository.findById(paymentRequest.getBooking_id()).orElseThrow(()->new ResourceNotFoundException("khồng tìm thấy Id booking"));
         payment.setBooking(booking);
         paymentRespository.save(payment);
@@ -53,7 +53,7 @@ public class PaymentService implements IPaymentService {
         payment.setAmount(paymentRequest.getAmount());
         payment.setMethod(paymentRequest.getMethod_booking());
         payment.setStatus("Success");
-        payment.setPaymentType("Đặt cọc ");
+        payment.setPaymentType("DEPOSIT");
         Booking booking = bookingRespository.findById(paymentRequest.getBooking_id()).orElseThrow(()->new ResourceNotFoundException("khồng tìm thấy Id booking"));
         payment.setBooking(booking);
         paymentRespository.save(payment);

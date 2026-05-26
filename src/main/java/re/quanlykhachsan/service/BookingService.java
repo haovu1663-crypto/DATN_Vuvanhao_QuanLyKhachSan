@@ -1,5 +1,6 @@
 package re.quanlykhachsan.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -193,13 +194,23 @@ public class BookingService implements IBookingService {
         return checkOutRespones;
     }
 
-    @Override
-    public String checkOutBooking(Long bookingId) throws ResourceNotFoundException {
-       Booking booking = bookingRespository.findById(bookingId).orElseThrow();
-       booking.setCheckOutDate(LocalDateTime.now());
-      Integer   daysBetween = ChronoUnit.DAYS.between(booking.getEnventCheckinDate(),LocalDate.now());
-      booking.setToyalPrice(booking.getRoom().getRoomType().getPrice()*daysBetween);
 
-        return "";
+    @Override
+    @Transactional
+    public CheckOutRespone checkOutBooking(Long bookingId) throws ResourceNotFoundException {
+        Booking booking = bookingRespository.findByIdWithRoomAndRoomType(bookingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy booking"));
+        booking.setCheckOutDate(LocalDateTime.now());
+        booking.setStatusBooking(StatusBooking.CHECKED_OUT);
+        long daysBetween = ChronoUnit.DAYS.between(booking.getEnventCheckinDate(), booking.getEnventCheckoutDate());
+        booking.setToyalPrice(booking.getRoom().getRoomType().getPrice() * daysBetween);
+        bookingRespository.save(booking);
+
+        CheckOutRespone response = new CheckOutRespone();
+        response.setId(booking.getId());
+        Double alreadyPaid = paymentRepository.findDepositAmountByBookingId(booking.getId());
+        double remaining = booking.getToyalPrice() - alreadyPaid;
+        response.setPrice(remaining); // ← đúng rồi, không còn = 0 nữa
+        return response;
     }
 }

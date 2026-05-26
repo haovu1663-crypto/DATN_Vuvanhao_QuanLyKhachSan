@@ -20,5 +20,5 @@ public interface IBookingService {
     List<CheckInRespone> CheckIn() ;
     String checkInBooking(Long employeeId,Long bookingId) throws ResourceNotFoundException;
     List<CheckOutBookingRespone> CheckOut();
-    String checkOutBooking(Long bookingId) throws ResourceNotFoundException;
+    CheckOutRespone checkOutBooking(Long bookingId) throws ResourceNotFoundException;
 }

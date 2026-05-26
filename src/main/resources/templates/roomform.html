@@ -542,35 +542,81 @@
     </header>
 
     <div class="p-10 w-full flex flex-col gap-6">
-        <!-- Thanh tìm kiếm -->
-        <div class="glass-card rounded-2xl shadow-lg shadow-slate-200/50 px-6 py-5">
-            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">
-                <i class="fas fa-tag mr-1 text-blue-400"></i> Tìm kiếm theo giá phòng (±50.000 ₫)
-            </p>
-            <div class="flex gap-3 items-center">
-                <div class="relative flex-1">
-                    <div class="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center pointer-events-none">
-                        <span class="text-blue-500 font-bold text-sm">₫</span>
+
+        <!-- ── SEARCH BAR kiểu Airbnb ── -->
+        <div class="bk-sb-wrap">
+            <div class="bk-sb" id="bkSearchBar">
+
+                <!-- Nhận phòng -->
+                <div class="bk-sf" id="bk-sf-checkin" onclick="bkToggleDrop('checkin')">
+                    <span class="bk-sf-label"><i class="fas fa-calendar-alt"></i> Nhận phòng</span>
+                    <span class="bk-sf-val" id="bk-val-checkin">Chọn ngày</span>
+                    <div class="bk-drop" id="bk-drop-checkin" onclick="event.stopPropagation()">
+                        <p class="bk-drop-title">Chọn ngày nhận phòng</p>
+                        <input type="date" id="bk-input-checkin" class="bk-date-input" oninput="bkDateChange()">
                     </div>
-                    <input
-                            id="bk-search-input"
-                            type="text"
-                            inputmode="numeric"
-                            placeholder="Nhập giá mong muốn... vd: 500000"
-                            autocomplete="off"
-                            oninput="bkOnSearch()"
-                            class="w-full pl-14 pr-10 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 placeholder:text-slate-400 outline-none transition-all focus:border-blue-400 focus:bg-white focus:shadow-[0_0_0_4px_rgba(59,130,246,0.08)]"
-                    >
-                    <button id="bk-search-clear" onclick="bkClearSearch()"
-                            class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-500 text-xs flex items-center justify-center transition-all">
-                        <i class="fas fa-times"></i>
-                    </button>
                 </div>
-                <div id="bk-price-hint" class="hidden text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-2 rounded-xl whitespace-nowrap border border-blue-100"></div>
+
+                <div class="bk-sf-sep"></div>
+
+                <!-- Trả phòng -->
+                <div class="bk-sf" id="bk-sf-checkout" onclick="bkToggleDrop('checkout')">
+                    <span class="bk-sf-label"><i class="fas fa-calendar-check"></i> Trả phòng</span>
+                    <span class="bk-sf-val" id="bk-val-checkout">Chọn ngày</span>
+                    <div class="bk-drop" id="bk-drop-checkout" onclick="event.stopPropagation()">
+                        <p class="bk-drop-title">Chọn ngày trả phòng</p>
+                        <input type="date" id="bk-input-checkout" class="bk-date-input" oninput="bkDateChange()">
+                    </div>
+                </div>
+
+                <div class="bk-sf-sep"></div>
+
+                <!-- Số khách -->
+                <div class="bk-sf bk-sf-no-border" id="bk-sf-guests" onclick="bkToggleDrop('guests')">
+                    <span class="bk-sf-label"><i class="fas fa-users"></i> Số khách</span>
+                    <span class="bk-sf-val" id="bk-val-guests">1 khách</span>
+                    <div class="bk-drop bk-drop-r" id="bk-drop-guests" onclick="event.stopPropagation()">
+                        <p class="bk-drop-title">Chọn số khách</p>
+                        <div class="bk-gr">
+                            <div class="bk-gi">
+                                <div class="bk-gi-name">Người lớn</div>
+                                <div class="bk-gi-sub">Từ 18 tuổi trở lên</div>
+                            </div>
+                            <div class="bk-ctr">
+                                <button class="bk-ctr-btn" id="bk-adult-minus" onclick="bkChangeGuest('adults',-1)" disabled>−</button>
+                                <span class="bk-ctr-num" id="bk-adult-val">1</span>
+                                <button class="bk-ctr-btn" onclick="bkChangeGuest('adults',1)">+</button>
+                            </div>
+                        </div>
+                        <div class="bk-gr">
+                            <div class="bk-gi">
+                                <div class="bk-gi-name">Trẻ em</div>
+                                <div class="bk-gi-sub">Dưới 18 tuổi</div>
+                            </div>
+                            <div class="bk-ctr">
+                                <button class="bk-ctr-btn" id="bk-child-minus" onclick="bkChangeGuest('children',-1)" disabled>−</button>
+                                <span class="bk-ctr-num" id="bk-child-val">0</span>
+                                <button class="bk-ctr-btn" onclick="bkChangeGuest('children',1)">+</button>
+                            </div>
+                        </div>
+                        <div class="bk-gf">
+                            <button class="bk-gf-reset" onclick="bkResetGuests()">Chọn lại</button>
+                            <button class="bk-gf-apply" onclick="bkApplyGuests()">Áp dụng</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nút tìm -->
+                <button class="bk-sb-btn" onclick="bkDoSearch()">
+                    <i class="fas fa-search"></i>
+                </button>
             </div>
+
+            <!-- Hint ngày đã chọn -->
+            <div id="bk-date-hint" class="bk-date-hint" style="display:none;"></div>
         </div>
 
-        <!-- Danh sách phòng -->
+        <!-- ── Danh sách phòng ── -->
         <div class="glass-card rounded-[2rem] shadow-2xl shadow-slate-200/50 p-8">
             <div class="flex items-center justify-between mb-6">
                 <div>
@@ -789,8 +835,29 @@
                 </div>
             </div>
 
+            <!-- Ngày – readonly, lấy từ search bar, hiển thị dạng text đẹp -->
+            <div class="bk-modal-date-row">
+                <div class="bk-modal-date-box">
+                    <div class="bk-modal-date-label"><i class="fas fa-calendar-alt"></i> Nhận phòng</div>
+                    <div class="bk-modal-date-val" id="bk-modal-display-checkin">—</div>
+                </div>
+                <div class="bk-modal-date-sep"></div>
+                <div class="bk-modal-date-box">
+                    <div class="bk-modal-date-label"><i class="fas fa-calendar-check"></i> Trả phòng</div>
+                    <div class="bk-modal-date-val" id="bk-modal-display-checkout">—</div>
+                </div>
+                <div class="bk-modal-date-sep"></div>
+                <div class="bk-modal-date-box">
+                    <div class="bk-modal-date-label"><i class="fas fa-moon"></i> Số đêm</div>
+                    <div class="bk-modal-date-val" id="bk-modal-display-nights">—</div>
+                </div>
+            </div>
+            <!-- Hidden inputs giữ value thật để booking.js đọc -->
+            <input type="hidden" id="bk-checkin-date">
+            <input type="hidden" id="bk-checkout-date">
+
             <!-- Họ tên & Số điện thoại -->
-            <div class="bk-modal-row">
+            <div class="bk-modal-row" style="margin-top:16px;">
                 <div>
                     <label class="bk-modal-label">Họ và tên khách hàng</label>
                     <input type="text" id="bk-customer-name" class="bk-modal-input" placeholder="Nguyễn Văn A..." style="margin-bottom:0;">
@@ -800,21 +867,9 @@
                     <input type="tel" id="bk-customer-phone" class="bk-modal-input" placeholder="0912 345 678..." style="margin-bottom:0;">
                 </div>
             </div>
-            <div style="height:14px;"></div>
-            <!-- Ngày nhận & trả dự kiến -->
-            <div class="bk-modal-row">
-                <div>
-                    <label class="bk-modal-label">Ngày nhận phòng dự kiến</label>
-                    <input type="date" id="bk-checkin-date" class="bk-modal-input" style="margin-bottom:0;" onchange="bkUpdateSummary()">
-                </div>
-                <div>
-                    <label class="bk-modal-label">Ngày trả phòng dự kiến</label>
-                    <input type="date" id="bk-checkout-date" class="bk-modal-input" style="margin-bottom:0;" onchange="bkUpdateSummary()">
-                </div>
-            </div>
 
-            <!-- Bảng tóm tắt chi phí (hiện khi đủ 2 ngày) -->
-            <div id="bk-summary" style="display:none;margin-top:14px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:14px 16px;">
+            <!-- Bảng tóm tắt chi phí -->
+            <div id="bk-summary" style="display:none;margin-top:16px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:14px 16px;">
                 <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Tóm tắt chi phí</div>
                 <div style="display:flex;flex-direction:column;gap:7px;">
                     <div style="display:flex;justify-content:space-between;font-size:12px;">

@@ -416,6 +416,190 @@ body {
 #view-booking { display: none; }
 #view-booking.active { display: flex; flex-direction: column; }
 
+/* ── Search Bar kiểu Airbnb ── */
+.bk-sb-wrap { position: relative; }
+
+.bk-sb {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 9999px;
+    box-shadow: 0 4px 24px rgba(30,41,59,0.10);
+    transition: box-shadow .2s;
+}
+.bk-sb:hover { box-shadow: 0 6px 32px rgba(30,41,59,0.14); }
+
+.bk-sf {
+    position: relative;
+    flex: 1;
+    padding: 14px 22px;
+    cursor: pointer;
+    border-right: 1.5px solid #e2e8f0;
+    border-radius: 9999px;
+    transition: background .18s;
+    min-width: 0;
+}
+.bk-sf:hover, .bk-sf.bk-sf-active { background: #f1f5f9; }
+.bk-sf-no-border { border-right: none; flex: 0 0 200px; }
+
+.bk-sf-sep { width: 1px; height: 30px; background: transparent; flex-shrink: 0; }
+
+.bk-sf-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: #475569;
+    margin-bottom: 4px;
+    pointer-events: none;
+}
+.bk-sf-label i { color: #3b82f6; font-size: 10px; }
+
+.bk-sf-val {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+}
+
+/* Nút tìm */
+.bk-sb-btn {
+    flex-shrink: 0;
+    width: 52px; height: 52px;
+    margin: 6px 8px 6px 6px;
+    border-radius: 9999px;
+    border: none;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: #fff; font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 14px rgba(37,99,235,0.35);
+    transition: transform .15s, box-shadow .15s;
+}
+.bk-sb-btn:hover { transform: scale(1.07); box-shadow: 0 6px 20px rgba(37,99,235,0.45); }
+
+/* Dropdown chung */
+.bk-drop {
+    display: none;
+    position: absolute;
+    top: calc(100% + 14px);
+    left: 0;
+    background: #fff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 20px;
+    box-shadow: 0 16px 48px rgba(15,23,42,0.14);
+    z-index: 1000;
+    padding: 20px 22px;
+    min-width: 240px;
+    animation: bkDropIn .18s ease;
+}
+.bk-drop.bk-drop-open { display: block; }
+.bk-drop-r { left: auto; right: 0; }
+
+@keyframes bkDropIn {
+    from { transform: translateY(-8px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+.bk-drop-title {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: #94a3b8;
+    margin-bottom: 14px;
+}
+
+/* Date input */
+.bk-date-input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: inherit;
+    font-weight: 600;
+    color: #1e293b;
+    background: #f8fafc;
+    outline: none;
+    cursor: pointer;
+    transition: border-color .15s, box-shadow .15s;
+    box-sizing: border-box;
+}
+.bk-date-input:focus { border-color: #3b82f6; background: #fff; box-shadow: 0 0 0 4px rgba(59,130,246,0.10); }
+
+/* Guests dropdown */
+.bk-gr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+.bk-gr:last-of-type { border-bottom: none; }
+.bk-gi-name { font-size: 13px; font-weight: 700; color: #1e293b; }
+.bk-gi-sub  { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+
+.bk-ctr { display: flex; align-items: center; gap: 10px; }
+.bk-ctr-btn {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 1.5px solid #cbd5e1;
+    background: #fff;
+    font-size: 16px; font-weight: 700; color: #475569;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s; line-height: 1;
+}
+.bk-ctr-btn:hover:not(:disabled) { border-color: #3b82f6; color: #3b82f6; background: #eff6ff; }
+.bk-ctr-btn:disabled { opacity: .35; cursor: not-allowed; }
+.bk-ctr-num { min-width: 22px; text-align: center; font-size: 14px; font-weight: 800; color: #1e293b; }
+
+.bk-gf {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    margin-top: 4px;
+    border-top: 1px solid #f1f5f9;
+}
+.bk-gf-reset {
+    background: none; border: none; font-size: 12px; font-weight: 700;
+    color: #94a3b8; cursor: pointer; text-decoration: underline;
+    text-underline-offset: 2px; padding: 0; font-family: inherit;
+    transition: color .15s;
+}
+.bk-gf-reset:hover { color: #475569; }
+.bk-gf-apply {
+    padding: 8px 18px; border-radius: 10px; border: none;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: #fff; font-size: 12px; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    box-shadow: 0 3px 10px rgba(37,99,235,0.25);
+    transition: opacity .15s, transform .15s;
+}
+.bk-gf-apply:hover { opacity: .9; transform: translateY(-1px); }
+
+/* Hint ngày */
+.bk-date-hint {
+    margin-top: 10px;
+    padding: 9px 18px;
+    background: #eff6ff;
+    border: 1.5px solid #bfdbfe;
+    border-radius: 12px;
+    font-size: 12px; font-weight: 600; color: #1d4ed8;
+    display: flex; align-items: center; gap: 8px;
+}
+
+/* ── Room grid ── */
 .bk-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -465,7 +649,8 @@ body {
 #bk-modal-box {
     background: #fff;
     border-radius: 24px;
-    max-width: 480px; width: 92%;
+    max-width: 500px; width: 92%;
+    max-height: 92vh; overflow-y: auto;
     box-shadow: 0 32px 72px rgba(15,23,42,0.2);
     overflow: hidden;
     animation: rsPopIn .25s cubic-bezier(.34,1.56,.64,1);
@@ -489,12 +674,34 @@ body {
 .bk-modal-body { padding: 22px 28px 28px; }
 .bk-modal-room-info {
     background: #f0f7ff; border: 1.5px solid #bfdbfe;
-    border-radius: 14px; padding: 14px 16px; margin-bottom: 20px;
+    border-radius: 14px; padding: 14px 16px; margin-bottom: 16px;
     display: flex; align-items: center; gap: 12px;
 }
 .bk-modal-room-icon { font-size: 28px; }
 .bk-modal-room-name { font-size: 15px; font-weight: 800; color: #1e293b; }
 .bk-modal-room-price { font-size: 12px; color: #2563eb; font-weight: 600; margin-top: 2px; }
+
+/* Dòng hiển thị ngày trong modal (readonly) */
+.bk-modal-date-row {
+    display: flex;
+    align-items: center;
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    gap: 0;
+}
+.bk-modal-date-box { flex: 1; text-align: center; }
+.bk-modal-date-label {
+    font-size: 10px; font-weight: 700; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px;
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+}
+.bk-modal-date-label i { color: #3b82f6; }
+.bk-modal-date-val { font-size: 13px; font-weight: 800; color: #1e293b; }
+.bk-modal-date-sep { width: 1px; height: 36px; background: #e2e8f0; flex-shrink: 0; margin: 0 4px; }
+
 .bk-modal-label {
     font-size: 11px; font-weight: 700; color: #64748b;
     text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; display: block;

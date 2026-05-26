@@ -60,4 +60,9 @@ public class BookingController {
     public ResponseEntity<List<CheckOutBookingRespone>> getCheckOut(){
         return new ResponseEntity<>(bookingService.CheckOut(), HttpStatus.OK);
     }
+    @PostMapping("/checkoutns")
+    public ResponseEntity<?> checkOut(@RequestParam Long bookingId) throws ResourceNotFoundException {
+        return new ResponseEntity<>(bookingService.checkOutBooking(bookingId), HttpStatus.OK);
+    }
+
 }

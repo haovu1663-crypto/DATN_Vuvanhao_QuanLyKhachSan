@@ -60,6 +60,7 @@
     localStorage.setItem('accessToken', data.accessToken);
     localStorage.setItem('userId', data.userId);
     localStorage.setItem('fullName', data.fullName);
+    // localStorage.setItem('workBranch',data.u)
 
     // Lưu trực tiếp giá trị chuỗi từ backend trả về
     const userRole = data.role || 'ROLE_USER';

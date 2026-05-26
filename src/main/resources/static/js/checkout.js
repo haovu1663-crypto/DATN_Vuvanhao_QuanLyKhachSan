@@ -1,11 +1,19 @@
-// checkout.js — table pattern, giống checkin.js
-// API: GET /api/v1/booking/checkout → List<CheckOutBookingRespone>
-// Fields: bookingId, customerName, roomName, roomType, checkIntDate
+// checkout.js
+// Flow: GET /api/v1/booking/checkout → bảng danh sách
+//       → xác nhận → POST /api/v1/booking/checkoutns?bookingId=X → lưu { id, price }
+//       → chọn phương thức → POST /api/v1/payment/thanhtoan { booking_id, amount, method_booking }
 
 let _coAllBookings = [];
 
+// Response từ /checkoutns — lưu lại để dùng cho payment
+let _coCheckOutData = null; // { id, price }
+let _coPendingBtn   = null;
+
 function coReload() { coLoadBookings(); }
 
+// =====================================================================
+// LOAD DANH SÁCH
+// =====================================================================
 async function coLoadBookings() {
     const tbody = document.getElementById('co-table-body');
     tbody.innerHTML = `<tr><td colspan="7" class="px-5 py-12 text-center text-slate-400">
@@ -37,7 +45,9 @@ async function coLoadBookings() {
     }
 }
 
-// ===== STATS =====
+// =====================================================================
+// STATS
+// =====================================================================
 function coSetStats(bookings) {
     const today = new Date().toISOString().slice(0, 10);
     document.getElementById('co-stat-total').textContent   = bookings ? bookings.length : '—';
@@ -47,7 +57,9 @@ function coSetStats(bookings) {
         ? bookings.filter(b => b.checkIntDate && String(b.checkIntDate).slice(0, 10) < today).length : '—';
 }
 
-// ===== RENDER TABLE =====
+// =====================================================================
+// RENDER TABLE
+// =====================================================================
 function coRenderTable(bookings) {
     const tbody   = document.getElementById('co-table-body');
     const countEl = document.getElementById('co-count');
@@ -78,9 +90,9 @@ function coRenderTable(bookings) {
             }
         }
 
-        const rowBg = idx % 2 !== 0 ? 'background:#f8fafc;' : '';
-        const roomName    = (b.roomName    || '').replace(/'/g, "\\'");
-        const custName    = (b.customerName|| '').replace(/'/g, "\\'");
+        const rowBg    = idx % 2 !== 0 ? 'background:#f8fafc;' : '';
+        const roomName = (b.roomName     || '').replace(/'/g, "\\'");
+        const custName = (b.customerName || '').replace(/'/g, "\\'");
 
         return `<tr id="co-row-${b.bookingId}" style="${rowBg}" class="border-t border-slate-100 hover:bg-amber-50/40 transition-colors">
             <td class="px-5 py-4 text-slate-400 font-semibold text-xs">${idx + 1}</td>
@@ -126,7 +138,9 @@ function coRenderTable(bookings) {
     }).join('');
 }
 
-// ===== FORMAT DATE TIME =====
+// =====================================================================
+// FORMAT
+// =====================================================================
 function coFormatDateTime(val) {
     if (!val) return '<span style="color:#cbd5e1;">—</span>';
     try {
@@ -140,7 +154,9 @@ function coFormatDateTime(val) {
     } catch (_) { return val; }
 }
 
-// ===== FILTER =====
+// =====================================================================
+// FILTER
+// =====================================================================
 function coFilterTable() {
     const q = document.getElementById('co-filter-input').value.trim().toLowerCase();
     document.getElementById('co-filter-clear').classList.toggle('hidden', !q);
@@ -159,9 +175,10 @@ function coFilterClear() {
     coRenderTable(_coAllBookings);
 }
 
-// ===== CONFIRM MODAL =====
+// =====================================================================
+// BƯỚC 1 — CONFIRM MODAL (xác nhận trả phòng)
+// =====================================================================
 let _coPendingBookingId = null;
-let _coPendingBtn       = null;
 
 function coOpenConfirm(bookingId, roomName, customerName, btn) {
     _coPendingBookingId = bookingId;
@@ -180,59 +197,260 @@ function coCloseConfirm() {
     _coPendingBtn       = null;
 }
 
+// =====================================================================
+// BƯỚC 2 — GỌI /checkoutns → LƯU RESPONSE → MỞ PAYMENT MODAL
+// =====================================================================
 async function coDoCheckOut() {
-    const bookingId  = _coPendingBookingId;
-    const btn        = _coPendingBtn;
-    const employeeId = localStorage.getItem('userId') || localStorage.getItem('employeeId');
-
-    if (!employeeId) {
-        showToast('error', 'Chưa đăng nhập', 'Không tìm thấy thông tin nhân viên. Vui lòng đăng nhập lại!');
-        coCloseConfirm();
-        return;
-    }
+    const bookingId = _coPendingBookingId;
+    const btn       = _coPendingBtn;
 
     coCloseConfirm();
 
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tính tiền...';
     btn.style.background = 'linear-gradient(135deg,#94a3b8,#64748b)';
 
     try {
-        const token  = localStorage.getItem('accessToken');
-        const params = new URLSearchParams({ employeeId, bookingId });
-        const res = await fetch('/api/v1/booking/checkoutbooking?' + params.toString(), {
+        const token = localStorage.getItem('accessToken');
+        const res = await fetch('/api/v1/booking/checkoutns?bookingId=' + bookingId, {
             method: 'POST',
             headers: token ? { Authorization: 'Bearer ' + token } : {}
         });
 
         if (!res.ok) {
-            const ct  = res.headers.get('content-type') || '';
+            const ct = res.headers.get('content-type') || '';
             let msg = `Lỗi ${res.status}`;
             if (ct.includes('application/json')) { const j = await res.json(); msg = j.message || JSON.stringify(j); }
             else { msg = await res.text() || msg; }
             throw new Error(msg);
         }
 
-        showToast('success', 'Check Out thành công!', `Booking #${bookingId} đã trả phòng`);
-        btn.innerHTML = '<i class="fas fa-check"></i> Đã Check Out';
-        btn.style.background = 'linear-gradient(135deg,#16a34a,#15803d)';
-        btn.style.boxShadow  = '0 2px 8px rgba(22,163,74,0.25)';
+        // ✅ Lưu lại toàn bộ response từ /checkoutns { id, price, ... }
+        _coCheckOutData = await res.json();
 
-        setTimeout(() => {
-            _coAllBookings = _coAllBookings.filter(b => b.bookingId !== bookingId);
-            coRenderTable(_coAllBookings);
-        }, 1500);
+        // Khôi phục nút tạm (sẽ đổi hẳn sau khi thanh toán xong)
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-door-closed"></i> Check Out';
+        btn.style.background = 'linear-gradient(135deg,#f59e0b,#d97706)';
+
+        // Mở modal payment với số tiền từ response
+        coPayOpen(_coCheckOutData, btn);
 
     } catch (err) {
-        showToast('error', 'Check Out thất bại', err.message);
+        showToast('error', 'Checkout thất bại', err.message);
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-door-closed"></i> Check Out';
         btn.style.background = 'linear-gradient(135deg,#f59e0b,#d97706)';
     }
 }
 
-// Đóng modal khi click nền
+// =====================================================================
+// BƯỚC 3 — MỞ PAYMENT MODAL (dùng modal sẵn có trong roomform.html)
+// =====================================================================
+function coPayOpen(checkOutData, btn) {
+    _coCheckOutData = checkOutData; // { id, price }
+    _coPendingBtn   = btn;
+
+    const price = checkOutData?.price ?? checkOutData?.totalPrice ?? checkOutData?.toyalPrice ?? null;
+    const formattedPrice = price != null
+        ? new Intl.NumberFormat('vi-VN').format(price) + ' ₫'
+        : 'Liên hệ thu ngân';
+
+    // Điền số tiền vào các ô trong modal
+    const amountEl     = document.getElementById('co-pay-amount');
+    const amountCopyEl = document.getElementById('co-pay-amount-copy');
+    const cashAmountEl = document.getElementById('co-cash-amount-display');
+    if (amountEl)     amountEl.textContent     = formattedPrice;
+    if (amountCopyEl) amountCopyEl.textContent = formattedPrice;
+    if (cashAmountEl) cashAmountEl.textContent = formattedPrice;
+
+    // Cập nhật nội dung chuyển khoản
+    const contentEl = document.getElementById('co-pay-content');
+    if (contentEl) contentEl.textContent = 'CHECKOUT ' + checkOutData.id;
+
+    // Cập nhật QR nếu có tiền
+    const qrImg = document.getElementById('co-pay-qr-img');
+    if (qrImg && price) {
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=CHECKOUT${checkOutData.id}-${price}&bgcolor=ffffff`;
+    }
+
+    // Reset về bước chọn phương thức
+    const stepMethod = document.getElementById('co-pay-step-method');
+    const stepBank   = document.getElementById('co-pay-step-bank');
+    const stepCash   = document.getElementById('co-pay-step-cash');
+    if (stepMethod) stepMethod.style.display = '';
+    if (stepBank)   stepBank.style.display   = 'none';
+    if (stepCash)   stepCash.style.display   = 'none';
+
+    // Mở overlay
+    const overlay = document.getElementById('co-payment-overlay');
+    if (overlay) overlay.style.display = 'flex';
+}
+
+function coPayClose() {
+    const overlay = document.getElementById('co-payment-overlay');
+    if (overlay) overlay.style.display = 'none';
+}
+
+// =====================================================================
+// CHỌN PHƯƠNG THỨC — dùng bởi các nút trong roomform.html
+// =====================================================================
+// Lưu method đang chọn (giá trị enum MethodBooking phía backend)
+let _coSelectedMethod = null;
+
+function coPaySelectMethod(method) {
+    _coSelectedMethod = method; // 'BANK_TRANSFER' | 'CASH' | 'CREDIT_CARD'
+
+    const stepMethod = document.getElementById('co-pay-step-method');
+    const stepBank   = document.getElementById('co-pay-step-bank');
+    const stepCash   = document.getElementById('co-pay-step-cash');
+
+    if (stepMethod) stepMethod.style.display = 'none';
+
+    if (method === 'BANK_TRANSFER') {
+        if (stepBank) stepBank.style.display = '';
+    } else {
+        // CASH hoặc CREDIT_CARD → dùng chung màn hình cash
+        const cashIcon    = document.getElementById('co-cash-icon');
+        const cashLabel   = document.getElementById('co-cash-method-label');
+        const cashMethodV = document.getElementById('co-cash-method-val');
+
+        if (method === 'CASH') {
+            if (cashIcon)    cashIcon.textContent    = '💵';
+            if (cashLabel)   cashLabel.textContent   = 'Thanh toán tiền mặt';
+            if (cashMethodV) cashMethodV.textContent = '💵 Tiền mặt';
+        } else {
+            if (cashIcon)    cashIcon.textContent    = '💳';
+            if (cashLabel)   cashLabel.textContent   = 'Thanh toán thẻ tín dụng / ATM';
+            if (cashMethodV) cashMethodV.textContent = '💳 Thẻ tín dụng / ATM';
+        }
+        if (stepCash) stepCash.style.display = '';
+    }
+}
+
+function coPayGoBack() {
+    _coSelectedMethod = null;
+    const stepMethod = document.getElementById('co-pay-step-method');
+    const stepBank   = document.getElementById('co-pay-step-bank');
+    const stepCash   = document.getElementById('co-pay-step-cash');
+    if (stepMethod) stepMethod.style.display = '';
+    if (stepBank)   stepBank.style.display   = 'none';
+    if (stepCash)   stepCash.style.display   = 'none';
+}
+
+// =====================================================================
+// BƯỚC 4 — GỌI /payment/thanhtoan với dữ liệu từ _coCheckOutData
+// Dùng chung cho cả chuyển khoản (coPayConfirm) và tiền mặt/thẻ (coPayCashConfirm)
+// =====================================================================
+async function _coCallPayment(confirmBtnId) {
+    if (!_coCheckOutData) {
+        showToast('error', 'Lỗi', 'Không có dữ liệu checkout. Vui lòng thử lại!');
+        return;
+    }
+    if (!_coSelectedMethod) {
+        showToast('error', 'Chưa chọn phương thức', 'Vui lòng chọn phương thức thanh toán!');
+        return;
+    }
+
+    const confirmBtn = document.getElementById(confirmBtnId);
+    if (confirmBtn) {
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+    }
+
+    try {
+        const token = localStorage.getItem('accessToken');
+
+        // Gửi dưới dạng form (application/x-www-form-urlencoded)
+        // Backend dùng @ModelAttribute nên không nhận JSON
+        const bookingId = _coCheckOutData.id;
+        const price = _coCheckOutData?.price ?? _coCheckOutData?.totalPrice ?? _coCheckOutData?.toyalPrice ?? 0;
+
+        // Guard: dam bao booking_id hop le truoc khi gui
+        if (bookingId == null || String(bookingId) === 'null' || String(bookingId) === 'undefined' || isNaN(Number(bookingId))) {
+            throw new Error('booking_id khong hop le: ' + bookingId + '. Vui long thu lai!');
+        }
+
+        const params = new URLSearchParams({
+            booking_id:     Number(bookingId),
+            amount:         price,
+            method_booking: _coSelectedMethod
+        });
+
+        const res = await fetch('/api/v1/payment/thanhtoan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                ...(token ? { Authorization: 'Bearer ' + token } : {})
+            },
+            body: params.toString()
+        });
+
+        if (!res.ok) {
+            const ct = res.headers.get('content-type') || '';
+            let msg = `Lỗi ${res.status}`;
+            if (ct.includes('application/json')) { const j = await res.json(); msg = j.message || JSON.stringify(j); }
+            else { msg = await res.text() || msg; }
+            throw new Error(msg);
+        }
+
+        // Thành công
+        const closedId  = _coCheckOutData.id;
+        const closedBtn = _coPendingBtn;
+        coPayClose();
+
+        showToast('success', 'Thanh toán thành công!', `Booking #${closedId} đã hoàn tất`);
+
+        if (closedBtn) {
+            closedBtn.innerHTML = '<i class="fas fa-check"></i> Đã Check Out';
+            closedBtn.style.background = 'linear-gradient(135deg,#16a34a,#15803d)';
+            closedBtn.style.boxShadow  = '0 2px 8px rgba(22,163,74,0.25)';
+            closedBtn.disabled = true;
+        }
+
+        // Xoá khỏi danh sách sau 1.5s
+        setTimeout(() => {
+            _coAllBookings = _coAllBookings.filter(b => b.bookingId !== closedId);
+            coRenderTable(_coAllBookings);
+        }, 1500);
+
+        // Reset state
+        _coCheckOutData   = null;
+        _coSelectedMethod = null;
+        _coPendingBtn     = null;
+
+    } catch (err) {
+        showToast('error', 'Thanh toán thất bại', err.message);
+        if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = confirmBtnId === 'co-pay-confirm-btn'
+                ? '<i class="fas fa-check-circle"></i> Tôi đã chuyển khoản'
+                : '<i class="fas fa-check-circle"></i> Xác nhận đã thu tiền';
+        }
+    }
+}
+
+// Gắn vào 2 nút trong roomform.html
+function coPayConfirm()     { _coSelectedMethod = _coSelectedMethod || 'BANK_TRANSFER'; _coCallPayment('co-pay-confirm-btn'); }
+function coPayCashConfirm() { _coCallPayment('co-pay-cash-confirm-btn'); }
+
+// Copy số tài khoản / số tiền
+function coPayCopy(elId) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    const text = el.textContent.trim();
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('success', 'Đã sao chép!', text);
+    });
+}
+
+// =====================================================================
+// ĐÓNG MODAL KHI CLICK NỀN
+// =====================================================================
 document.addEventListener('DOMContentLoaded', () => {
     const overlay = document.getElementById('co-modal-overlay');
     if (overlay) overlay.addEventListener('click', e => { if (e.target === overlay) coCloseConfirm(); });
+
+    const payOverlay = document.getElementById('co-payment-overlay');
+    if (payOverlay) payOverlay.addEventListener('click', e => { if (e.target === payOverlay) coPayClose(); });
 });

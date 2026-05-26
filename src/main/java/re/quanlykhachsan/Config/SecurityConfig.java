@@ -116,6 +116,7 @@ public class SecurityConfig {
                                         .requestMatchers("/api/v1/booking/checkinbooking").permitAll()
                                         // checkout
                                         .requestMatchers("/api/v1/booking/checkout").permitAll()
+                                        .requestMatchers("/api/v1/booking/checkoutns").permitAll()
                                         .requestMatchers("/**.css", "/**.js", "/js/**", "/js2/**", "/images/**", "/static/**").permitAll()
                                         .anyRequest().authenticated() // các api khác thì phải xác thực thì ms vào đc(đăng nhập)
                 )

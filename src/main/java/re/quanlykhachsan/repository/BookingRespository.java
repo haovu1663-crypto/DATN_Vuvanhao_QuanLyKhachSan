@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import re.quanlykhachsan.entity.Booking;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BookingRespository extends JpaRepository<Booking,Long> {
@@ -36,4 +37,8 @@ public interface BookingRespository extends JpaRepository<Booking,Long> {
     // danh sach caanf check out
     @Query("SELECT b FROM Booking b JOIN FETCH b.room r JOIN FETCH r.roomType LEFT JOIN FETCH b.customer WHERE b.CheckOutDate IS NULL AND b.CheckInDate IS NOT NULL ORDER BY b.enventCheckinDate ASC")
     List<Booking> findBookingsCheckOutIsNull();
+
+    // lấy booking kèm room và roomType để tránh LazyInitializationException
+    @Query("SELECT b FROM Booking b JOIN FETCH b.room r JOIN FETCH r.roomType WHERE b.id = :id")
+    Optional<Booking> findByIdWithRoomAndRoomType(@Param("id") Long id);
 }
