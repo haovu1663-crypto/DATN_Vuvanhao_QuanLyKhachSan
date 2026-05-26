@@ -16,4 +16,6 @@ public interface IRoomTypeService {
     List<RoomTypeResponse> getListRoomType();
     List<RoomTypeResponse> getListRoomTypeByWorkBrankAndCapacityAndDate(Integer capacity, String workBranch, LocalDate checIn , LocalDate checOut) throws IOException;
     RoomTypeResponse getRoomTypeById(Long id) throws ResourceNotFoundException, IOException;
+    List<RoomTypeResponse> getListRoomTypeByWorkBrankAndCapacityAndDateBookingOff(Integer capacity, String workBranch, LocalDate checIn , LocalDate checOut) throws IOException;
+
 }

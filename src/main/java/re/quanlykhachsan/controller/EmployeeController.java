@@ -63,4 +63,8 @@ public class EmployeeController {
         );
         return  new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
+    @GetMapping("/getbranch")
+    public ResponseEntity<?> getbranch(@RequestParam Long id)  {
+        return  new ResponseEntity<>(employeeService.getBranch(id), HttpStatus.OK);
+    }
 }

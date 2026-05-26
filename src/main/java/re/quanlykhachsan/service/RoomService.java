@@ -241,4 +241,18 @@ public class RoomService implements IRoomService {
                 .toList();
         return soPhongRequests;
     }
+
+    @Override
+    public List<SoPhongRequest> getListSoPhongBookingOff(String workBranch, Long roomtypeId, int capacity, LocalDate checkIn, LocalDate checkOut) {
+        List<Room> rooms = roomRepository.findAvailableRoomBookingOff(workBranch, roomtypeId, capacity, checkIn, checkOut);
+        List<SoPhongRequest> soPhongRequests = rooms.stream()
+                .map(room -> {
+                    SoPhongRequest request = new SoPhongRequest();
+                    request.setId(room.getId());
+                    request.setName(room.getName());
+                    return request;
+                })
+                .toList();
+        return soPhongRequests;
+    }
 }

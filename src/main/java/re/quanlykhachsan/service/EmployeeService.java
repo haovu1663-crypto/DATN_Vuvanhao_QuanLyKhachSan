@@ -91,4 +91,8 @@ public class EmployeeService implements IEmployeeSevice {
             throw new DataConfickException("Email này đã được đăng ký rồi vui lòng nhập tài khoản khác ");
         }
     }
+    public String getBranch(Long employeeId){
+        Employee employee = employeeRepository.findById(employeeId).orElse(null);
+        return employee.getWorkBranch();
+    }
 }

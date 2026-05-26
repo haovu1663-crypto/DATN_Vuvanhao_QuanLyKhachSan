@@ -57,6 +57,28 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             @Param("checkIn")    LocalDate checkIn,
             @Param("checkOut")   LocalDate checkOut
     );
+    // lấy ra phong với ngày thánh chưa checkin và đúng chi nhanh tuyệt đối
+    // lấy ra phòng chưa được đặt trong khoảng ngày khách yêu cầu
+    // dùng công thức overlap chuẩn: checkIn < b.enventCheckoutDate AND checkOut > b.enventCheckinDate
+    @Query("""
+    SELECT r FROM Room r
+    WHERE r.roomType.capacity >= :capacity
+    AND r.roomType.id = :roomTypeId
+    AND r.workBranch = :workBranch
+    AND r.id NOT IN (
+        SELECT b.room.id FROM Booking b
+        WHERE b.room.id IS NOT NULL
+        AND :checkIn < b.enventCheckoutDate
+        AND :checkOut > b.enventCheckinDate
+    )
+""")
+    List<Room> findAvailableRoomBookingOff(
+            @Param("workBranch") String workBranch,
+            @Param("roomTypeId") Long roomTypeId,
+            @Param("capacity")   int capacity,
+            @Param("checkIn")    LocalDate checkIn,
+            @Param("checkOut")   LocalDate checkOut
+    );
 
     boolean existsByNameAndWorkBranch(String name, String workBranch);
 }

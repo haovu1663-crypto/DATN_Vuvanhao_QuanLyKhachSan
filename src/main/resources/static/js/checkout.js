@@ -298,7 +298,7 @@ function coPayClose() {
 // Lưu method đang chọn (giá trị enum MethodBooking phía backend)
 let _coSelectedMethod = null;
 
-function coPaySelectMethod(method) {
+function coPaySelectMethod_co(method) {
     _coSelectedMethod = method; // 'BANK_TRANSFER' | 'CASH' | 'CREDIT_CARD'
 
     const stepMethod = document.getElementById('co-pay-step-method');
@@ -431,8 +431,8 @@ async function _coCallPayment(confirmBtnId) {
 }
 
 // Gắn vào 2 nút trong roomform.html
-function coPayConfirm()     { _coSelectedMethod = _coSelectedMethod || 'BANK_TRANSFER'; _coCallPayment('co-pay-confirm-btn'); }
-function coPayCashConfirm() { _coCallPayment('co-pay-cash-confirm-btn'); }
+function coPayConfirm_co()     { _coSelectedMethod = _coSelectedMethod || 'BANK_TRANSFER'; _coCallPayment('co-pay-confirm-btn'); }
+function coPayCashConfirm_co() { _coCallPayment('co-pay-cash-confirm-btn'); }
 
 // Copy số tài khoản / số tiền
 function coPayCopy(elId) {

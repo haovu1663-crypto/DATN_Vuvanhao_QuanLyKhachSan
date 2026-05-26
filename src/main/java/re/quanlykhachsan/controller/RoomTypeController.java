@@ -76,14 +76,21 @@ public class RoomTypeController {
         );
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
-
+    // khách hàng tìm kiếm loại phòng online
     @GetMapping("/frindroom")
     ResponseEntity<?> getroomtypec(@RequestParam String workBranch, @RequestParam int capacity, @RequestParam LocalDate checkin, @RequestParam LocalDate checkout) throws IOException, ResourceNotFoundException {
         ApiResponse<List<RoomTypeResponse>> apiResponse = new ApiResponse(
                 "get RoomType", "400 ", roomTypeService.getListRoomTypeByWorkBrankAndCapacityAndDate(capacity, workBranch, checkin, checkout)
         );
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-
-
     }
+    // employee tìm kiếm theo yêu cầu của khách hang
+    @GetMapping("/frindroomoff")
+    ResponseEntity<?> getroomtypeobokking(@RequestParam String workBranch, @RequestParam int capacity, @RequestParam LocalDate checkin, @RequestParam LocalDate checkout) throws IOException, ResourceNotFoundException {
+        ApiResponse<List<RoomTypeResponse>> apiResponse = new ApiResponse(
+                "get RoomType", "400 ", roomTypeService.getListRoomTypeByWorkBrankAndCapacityAndDateBookingOff(capacity, workBranch, checkin, checkout)
+        );
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+
 }

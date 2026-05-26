@@ -98,4 +98,12 @@ public class RoomTypeService implements IRoomTypeService {
         RoomTypeResponse roomTypeResponse=modelMapper.map(roomType,RoomTypeResponse.class);
         return roomTypeResponse;
     }
+
+    @Override
+    public List<RoomTypeResponse> getListRoomTypeByWorkBrankAndCapacityAndDateBookingOff(Integer capacity, String workBranch, LocalDate checIn, LocalDate checOut) throws IOException {
+        List<RoomType> roomTypeList=roomTypeRepository.findAvailableRoomTypesBooking(capacity,workBranch,checIn,checOut);
+        return  roomTypeList.stream()
+                .map(en -> modelMapper.map(en, RoomTypeResponse.class))
+                .collect(Collectors.toList());
+    }
 }

@@ -119,5 +119,12 @@ public class RoomController {
         );
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+    @GetMapping("/findroombookingoff")
+    public ResponseEntity<?> getRoomsByRoomtypeidBookingOff(@RequestParam String workBranch,@RequestParam Long roomTypeId,@RequestParam int capacity ,@RequestParam LocalDate checkIn,@RequestParam LocalDate checkOut ){
+        ApiResponse<List<SoPhongRequest>> response = new ApiResponse<>(
+                "get rooms","400",roomService.getListSoPhongBookingOff(workBranch,roomTypeId,capacity,checkIn,checkOut)
+        );
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 
 }

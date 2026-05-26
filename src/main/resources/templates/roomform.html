@@ -505,10 +505,14 @@
 
 <!-- ===== BOOKING VIEW ===== -->
 <main id="view-booking" class="flex-1 flex-col overflow-y-auto relative">
-    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-20 border-b border-slate-200 flex items-center justify-between px-10">
+    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-24 border-b border-slate-200 flex items-center justify-between px-10">
         <div>
             <h1 class="text-2xl font-bold text-slate-800">Booking Room</h1>
             <p class="text-xs text-slate-500 font-medium">Dashboard / Rooms / Booking</p>
+            <p class="text-xs font-semibold mt-0.5 flex items-center gap-1.5" style="color:#2563eb;">
+                <i class="fas fa-map-marker-alt" style="font-size:10px;"></i>
+                <span id="work-branch-text">—</span>
+            </p>
         </div>
         <div class="flex items-center gap-4">
             <button onclick="bkReload()" class="flex items-center gap-2 px-5 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl font-semibold text-sm transition-all">
@@ -616,21 +620,24 @@
             <div id="bk-date-hint" class="bk-date-hint" style="display:none;"></div>
         </div>
 
-        <!-- ── Danh sách phòng ── -->
+        <!-- ── Loại phòng (RoomType) ── -->
         <div class="glass-card rounded-[2rem] shadow-2xl shadow-slate-200/50 p-8">
             <div class="flex items-center justify-between mb-6">
                 <div>
-                    <h2 class="text-lg font-bold text-slate-700">Danh sách phòng trống</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Các phòng đang ở trạng thái <b>Available</b> – sẵn sàng đặt</p>
+                    <h2 class="text-lg font-bold text-slate-700">Loại phòng</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Tất cả loại phòng hiện có – chọn để tạo booking</p>
                 </div>
-                <span class="text-xs bg-green-50 text-green-600 font-semibold px-3 py-1.5 rounded-full" id="bk-count"></span>
-            </div>
-            <div class="bk-grid" id="bk-grid">
-                <div class="rs-loading">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    Đang tải danh sách phòng...
+                <div class="flex items-center gap-3">
+                    <span class="text-xs bg-blue-50 text-blue-600 font-semibold px-3 py-1.5 rounded-full" id="bkrt-count"></span>
+                    <button onclick="bkrtLoad()" class="flex items-center gap-2 px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-500 rounded-xl font-semibold text-xs transition-all">
+                        <i class="fas fa-sync-alt text-xs"></i> Tải lại
+                    </button>
                 </div>
             </div>
+            <!-- Filter chips -->
+            <div id="bkrt-filter" class="flex flex-wrap gap-2 mb-5"></div>
+            <!-- Grid cards -->
+            <div id="bkrt-grid" class="bkrt-grid"></div>
         </div>
     </div>
 </main>
@@ -1234,6 +1241,285 @@
 <!-- ===== TOAST CONTAINER ===== -->
 <div id="toast-container"></div>
 
+<!-- ===== ROOMTYPE GRID IN BOOKING TAB ===== -->
+<style>
+    /* Grid layout */
+    .bkrt-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 20px;
+    }
+
+    /* Card */
+    .bkrt-card {
+        border-radius: 20px;
+        border: 1.5px solid #e8edf5;
+        background: #fff;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: box-shadow .2s, transform .2s;
+        cursor: pointer;
+    }
+    .bkrt-card:hover {
+        box-shadow: 0 8px 32px rgba(37,99,235,0.13);
+        transform: translateY(-2px);
+    }
+
+    /* Ảnh */
+    .bkrt-img {
+        position: relative;
+        height: 160px;
+        background: #f1f5f9;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    .bkrt-img img {
+        width: 100%; height: 100%; object-fit: cover; display: block;
+        transition: transform .3s;
+    }
+    .bkrt-card:hover .bkrt-img img { transform: scale(1.04); }
+    .bkrt-img-ph {
+        width: 100%; height: 100%;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        color: #94a3b8; gap: 6px; font-size: 12px;
+    }
+    .bkrt-img-ph i { font-size: 28px; }
+    .bkrt-img-badge {
+        position: absolute; bottom: 8px; right: 8px;
+        background: rgba(0,0,0,0.52); color: #fff;
+        font-size: 10px; font-weight: 600;
+        padding: 2px 8px; border-radius: 10px;
+    }
+    .bkrt-img-arrow {
+        position: absolute; top: 50%; transform: translateY(-50%);
+        background: rgba(0,0,0,0.4); border: none; color: #fff;
+        width: 26px; height: 26px; border-radius: 50%;
+        cursor: pointer; font-size: 15px;
+        display: flex; align-items: center; justify-content: center;
+        transition: background .15s; line-height: 1;
+    }
+    .bkrt-img-arrow:hover { background: rgba(0,0,0,0.7); }
+    .bkrt-img-arrow.left  { left: 6px; }
+    .bkrt-img-arrow.right { right: 6px; }
+
+    /* Body */
+    .bkrt-body {
+        padding: 14px 16px 16px;
+        display: flex; flex-direction: column; gap: 6px; flex: 1;
+    }
+    .bkrt-type-badge {
+        display: inline-flex; align-items: center; gap: 5px;
+        background: #eff6ff; color: #2563eb;
+        font-size: 10px; font-weight: 700; letter-spacing: .4px;
+        padding: 3px 10px; border-radius: 20px;
+        text-transform: uppercase; width: fit-content;
+    }
+    .bkrt-name {
+        font-size: 15px; font-weight: 700; color: #1e293b; line-height: 1.3;
+    }
+    .bkrt-meta {
+        font-size: 11px; color: #94a3b8; display: flex; align-items: center; gap: 6px;
+    }
+    .bkrt-meta i { font-size: 10px; }
+    .bkrt-amenities {
+        display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px;
+    }
+    .bkrt-amenity {
+        background: #f8fafc; color: #475569;
+        font-size: 10px; font-weight: 500;
+        padding: 2px 8px; border-radius: 6px;
+        border: 1px solid #e2e8f0;
+    }
+    .bkrt-desc {
+        font-size: 12px; color: #64748b; line-height: 1.5;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .bkrt-footer {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-top: auto; padding-top: 10px;
+        border-top: 1px solid #f1f5f9;
+    }
+    .bkrt-price-label { font-size: 10px; color: #94a3b8; font-weight: 500; }
+    .bkrt-price { font-size: 16px; font-weight: 800; color: #1e293b; }
+    .bkrt-btn {
+        padding: 7px 16px;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: #fff; border: none; border-radius: 12px;
+        font-size: 12px; font-weight: 700; cursor: pointer;
+        transition: opacity .15s, transform .15s;
+        display: flex; align-items: center; gap: 5px;
+    }
+    .bkrt-btn:hover { opacity: .88; transform: translateY(-1px); }
+
+    /* Filter chips */
+    .bkrt-chip {
+        padding: 5px 14px; border-radius: 20px;
+        border: 1.5px solid #e2e8f0; background: #fff;
+        font-size: 12px; font-weight: 600; color: #64748b;
+        cursor: pointer; transition: all .15s;
+    }
+    .bkrt-chip:hover { border-color: #2563eb; color: #2563eb; }
+    .bkrt-chip.active {
+        background: #2563eb; color: #fff; border-color: #2563eb;
+    }
+
+    /* Loading / empty / error */
+    .bkrt-loading, .bkrt-empty, .bkrt-error {
+        grid-column: 1 / -1;
+        display: flex; flex-direction: column; align-items: center;
+        justify-content: center; gap: 10px;
+        padding: 48px 0; color: #94a3b8; font-size: 14px;
+    }
+    .bkrt-loading i { font-size: 22px; color: #2563eb; }
+    .bkrt-error { color: #ef4444; }
+</style>
+
+<script>
+    // ===== ROOMTYPE GRID IN BOOKING TAB =====
+    let _bkrtAll = [];
+    let _bkrtFilter = null;
+    const _bkrtCarousel = {};
+
+    async function bkrtLoad() {
+        const grid = document.getElementById('bkrt-grid');
+        const countEl = document.getElementById('bkrt-count');
+        grid.innerHTML = '<div class="bkrt-loading"><i class="fas fa-spinner fa-spin"></i><span>Đang tải loại phòng...</span></div>';
+        countEl.textContent = '';
+        try {
+            const token = localStorage.getItem('accessToken');
+            const res = await fetch('/api/v1/roomtypes', {
+                headers: token ? { Authorization: 'Bearer ' + token } : {}
+            });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const json = await res.json();
+            _bkrtAll = Array.isArray(json.data) ? json.data : (Array.isArray(json) ? json : []);
+            _bkrtFilter = null;
+            bkrtBuildChips();
+            bkrtRender();
+        } catch (err) {
+            grid.innerHTML = '<div class="bkrt-error"><i class="fas fa-exclamation-triangle"></i><span>Lỗi tải dữ liệu: ' + err.message + '</span></div>';
+        }
+    }
+
+    function bkrtBuildChips() {
+        const wrap = document.getElementById('bkrt-filter');
+        let html = '<button class="bkrt-chip active" onclick="bkrtSetFilter(null,this)">Tất cả</button>';
+        _bkrtAll.forEach(rt => {
+            if (rt.type) html += '<button class="bkrt-chip" onclick="bkrtSetFilter(' + rt.id + ',this)">' + rt.type + '</button>';
+        });
+        wrap.innerHTML = html;
+    }
+
+    function bkrtSetFilter(id, btn) {
+        _bkrtFilter = id;
+        document.querySelectorAll('.bkrt-chip').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        bkrtRender();
+    }
+
+    function bkrtRender() {
+        const grid = document.getElementById('bkrt-grid');
+        const countEl = document.getElementById('bkrt-count');
+        const list = _bkrtFilter ? _bkrtAll.filter(r => r.id == _bkrtFilter) : _bkrtAll;
+        countEl.textContent = list.length + ' loại phòng';
+        if (!list.length) {
+            grid.innerHTML = '<div class="bkrt-empty"><i class="fas fa-door-open"></i><span>Không có loại phòng nào.</span></div>';
+            return;
+        }
+        grid.innerHTML = list.map(bkrtCard).join('');
+    }
+
+    function bkrtCard(rt) {
+        const name  = rt.type || ('Loại #' + rt.id);
+        const cap   = rt.capacity ? rt.capacity + ' người' : '—';
+        const price = rt.price ? new Intl.NumberFormat('vi-VN').format(rt.price) + ' ₫' : '—';
+        const desc  = rt.description || '';
+        const amenities = (rt.amenities || '').split(',').map(a => a.trim()).filter(Boolean).slice(0, 4);
+        const cid   = 'bkrt-c-' + rt.id;
+
+        const hasImg = Array.isArray(rt.images) && rt.images.length > 0;
+        let imgHtml;
+        if (hasImg) {
+            imgHtml = '<img id="' + cid + '-img" src="' + rt.images[0] + '" alt="' + name + '" loading="lazy">';
+            if (rt.images.length > 1) {
+                imgHtml += '<button class="bkrt-img-arrow left" onclick="bkrtSlide(event,\'' + cid + '\',' + JSON.stringify(rt.images).replace(/"/g,'&quot;') + ',-1)">&#8249;</button>'
+                    + '<button class="bkrt-img-arrow right" onclick="bkrtSlide(event,\'' + cid + '\',' + JSON.stringify(rt.images).replace(/"/g,'&quot;') + ',1)">&#8250;</button>'
+                    + '<span class="bkrt-img-badge" id="' + cid + '-badge">1 / ' + rt.images.length + '</span>';
+            }
+        } else {
+            imgHtml = '<div class="bkrt-img-ph"><i class="fas fa-bed"></i><span>Chưa có ảnh</span></div>';
+        }
+
+        const amenityHtml = amenities.map(a => '<span class="bkrt-amenity">' + a + '</span>').join('');
+
+        return '<div class="bkrt-card">'
+            + '<div class="bkrt-img">' + imgHtml + '</div>'
+            + '<div class="bkrt-body">'
+            + '<span class="bkrt-type-badge"><i class="fas fa-tag"></i>' + name + '</span>'
+            + '<div class="bkrt-name">' + name + '</div>'
+            + '<div class="bkrt-meta"><i class="fas fa-users"></i>Tối đa ' + cap + ' &nbsp;·&nbsp; <i class="fas fa-hashtag"></i>ID: ' + rt.id + '</div>'
+            + (amenityHtml ? '<div class="bkrt-amenities">' + amenityHtml + '</div>' : '')
+            + (desc ? '<div class="bkrt-desc">' + desc + '</div>' : '')
+            + '<div class="bkrt-footer">'
+            + '<div><div class="bkrt-price-label">Giá mỗi đêm</div><div class="bkrt-price">' + price + '</div></div>'
+            + '<button class="bkrt-btn" onclick="bkrtSelectType(' + JSON.stringify(rt).replace(/"/g,'&quot;') + ')"><i class="fas fa-calendar-plus"></i> Chọn</button>'
+            + '</div>'
+            + '</div>'
+            + '</div>';
+    }
+
+    function bkrtSlide(event, cid, images, dir) {
+        event.stopPropagation();
+        const total = images.length;
+        _bkrtCarousel[cid] = ((_bkrtCarousel[cid] || 0) + dir + total) % total;
+        const idx = _bkrtCarousel[cid];
+        const imgEl   = document.getElementById(cid + '-img');
+        const badgeEl = document.getElementById(cid + '-badge');
+        if (imgEl)   imgEl.src = images[idx];
+        if (badgeEl) badgeEl.textContent = (idx + 1) + ' / ' + total;
+    }
+
+    // Khi chọn loại phòng → cuộn xuống danh sách phòng trống và highlight
+    // Auto load khi tab booking được mở
+    document.addEventListener('DOMContentLoaded', function() {
+        // Hook vào sự kiện click menu Booking để load roomtypes
+        const menuBooking = document.getElementById('menuBooking');
+        if (menuBooking) {
+            menuBooking.addEventListener('click', function() {
+                if (!_bkrtAll.length) bkrtLoad();
+            });
+        }
+        // Load luôn nếu booking đang visible
+        const viewBooking = document.getElementById('view-booking');
+        if (viewBooking && (viewBooking.style.display !== 'none' && viewBooking.classList.contains('flex'))) {
+            bkrtLoad();
+        }
+    });
+</script>
+
+<script>
+    // ===== WORK BRANCH FROM LOCALSTORAGE =====
+    (function rfLoadBranch() {
+        let name = '';
+        try {
+            const raw = localStorage.getItem('workBranch');
+            if (!raw) return;
+            const branchData = JSON.parse(raw);
+            name = typeof branchData === 'string'
+                ? branchData
+                : (branchData.name || branchData.branchName || branchData.branch || JSON.stringify(branchData));
+        } catch (e) {
+            name = localStorage.getItem('workBranch') || '';
+        }
+        if (!name) return;
+        ['work-branch-text'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = name;
+        });
+    })();
+</script>
 <script th:src="@{/js/toast.js}"></script>
 <script th:src="@{/js/header.js}"></script>
 <script th:src="@{/js/sidebar.js}"></script>
@@ -1243,6 +1529,45 @@
 <script th:src="@{/js/checkout.js}"></script>
 <script th:src="@{/js/booking.js}"></script>
 <script th:src="@{/js/room-type.js}"></script>
+
+<!-- ===== MODAL CHỌN PHÒNG (BOOKING OFF) ===== -->
+<div id="bk-room-picker-overlay"
+     onclick="if(event.target===this)bkHidePicker()"
+     style="display:none;position:fixed;inset:0;z-index:9999;
+            background:rgba(15,23,42,0.5);backdrop-filter:blur(4px);
+            align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:24px;width:95%;max-width:520px;
+                max-height:88vh;overflow:hidden;display:flex;flex-direction:column;
+                box-shadow:0 24px 60px rgba(0,0,0,0.2);animation:bkPickerIn .18s ease;">
+        <!-- Banner -->
+        <div style="background:linear-gradient(135deg,#1e3a8a,#2563eb);
+                    padding:22px 24px 18px;position:relative;flex-shrink:0;">
+            <button onclick="bkHidePicker()"
+                    style="position:absolute;top:14px;right:16px;
+                           background:rgba(255,255,255,0.15);border:none;color:#fff;
+                           width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;
+                           display:flex;align-items:center;justify-content:center;">✕</button>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+                <div style="width:36px;height:36px;border-radius:10px;
+                            background:rgba(255,255,255,0.15);
+                            display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-bed" style="color:#fff;font-size:16px;"></i>
+                </div>
+                <h2 id="bk-room-picker-title"
+                    style="color:#fff;font-size:18px;font-weight:800;margin:0;"></h2>
+            </div>
+            <p id="bk-room-picker-subtitle"
+               style="color:rgba(255,255,255,0.72);font-size:12px;margin:0;"></p>
+        </div>
+        <!-- List -->
+        <div style="padding:16px 20px;overflow-y:auto;flex:1;">
+            <div id="bk-room-picker-list" style="display:flex;flex-direction:column;gap:10px;min-height:80px;"></div>
+        </div>
+    </div>
+</div>
+<style>
+    @keyframes bkPickerIn { from { transform:scale(.93);opacity:0; } to { transform:scale(1);opacity:1; } }
+</style>
 
 </body>
 </html>
