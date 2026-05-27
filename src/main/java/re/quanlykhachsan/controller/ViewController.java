@@ -18,8 +18,8 @@ public class ViewController {
     public String demo() {
         return "header";
     }
-    @GetMapping("/employee")
-    public String register() {
-        return "registerEmployee";
-    }
+//    @GetMapping("/employee")
+//    public String register() {
+//        return "registerEmployee";
+//    }
 }

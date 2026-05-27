@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', function() {
         'booking':           'menuBooking',
         'add-room-type':     'menuAddRoomType',
         'update-room-type':  'menuUpdateRoomType',
+        'add-employee':      'menuAddEmployee',
+        'manage-employee':   'menuManageEmployee',
+        'update-employee':   'menuManageEmployee',
     };
 
     function setActiveMenu(view) {
@@ -28,6 +31,9 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('view-booking').style.display          = view === 'booking'            ? 'flex' : 'none';
         document.getElementById('view-add-room-type').style.display    = view === 'add-room-type'      ? 'flex' : 'none';
         document.getElementById('view-update-room-type').style.display = view === 'update-room-type'   ? 'flex' : 'none';
+        document.getElementById('view-add-employee').style.display     = view === 'add-employee'       ? 'flex' : 'none';
+        document.getElementById('view-manage-employee').style.display  = view === 'manage-employee'    ? 'flex' : 'none';
+        document.getElementById('view-update-employee').style.display  = view === 'update-employee'    ? 'flex' : 'none';
         setActiveMenu(view);
 
         // ===== SWITCH ADD / UPDATE ROOM FORM =====
@@ -64,5 +70,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('menuUpdateRoomType')?.addEventListener('click',e => { e.preventDefault(); switchToView('update-room-type'); });
     document.getElementById('menuAdd')?.addEventListener('click',           e => { e.preventDefault(); switchToView('form');            });
     document.getElementById('menuUpdate')?.addEventListener('click',        e => { e.preventDefault(); switchToView('update');          });
+    document.getElementById('menuAddEmployee')?.addEventListener('click',    e => { e.preventDefault(); switchToView('add-employee');    });
+    document.getElementById('menuManageEmployee')?.addEventListener('click', e => { e.preventDefault(); switchToView('manage-employee'); empLoadList(); });
+
+    // Default: mở Booking Room khi load trang
+    switchToView('booking');
+    if (typeof bkLoadRooms === 'function') bkLoadRooms();
 
 });
