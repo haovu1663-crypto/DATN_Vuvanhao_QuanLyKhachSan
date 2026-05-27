@@ -290,6 +290,9 @@ function coPayOpen(checkOutData, btn) {
 function coPayClose() {
     const overlay = document.getElementById('co-payment-overlay');
     if (overlay) overlay.style.display = 'none';
+    // Reset cả method lẫn deposit mode để lần sau dùng đúng nhánh
+    _coSelectedMethod      = null;
+    window._bkDepositMode  = false;
 }
 
 // =====================================================================
@@ -297,6 +300,8 @@ function coPayClose() {
 // =====================================================================
 // Lưu method đang chọn (giá trị enum MethodBooking phía backend)
 let _coSelectedMethod = null;
+// Hook cho booking.js reset method khi đóng deposit modal
+window._coSelectedMethodReset = function() { _coSelectedMethod = null; };
 
 function coPaySelectMethod_co(method) {
     _coSelectedMethod = method; // 'BANK_TRANSFER' | 'CASH' | 'CREDIT_CARD'
@@ -330,6 +335,8 @@ function coPaySelectMethod_co(method) {
 
 function coPayGoBack() {
     _coSelectedMethod = null;
+    // Reset method trong deposit state nếu đang ở chế độ booking
+    if (window._bkDepositState) window._bkDepositState.method = null;
     const stepMethod = document.getElementById('co-pay-step-method');
     const stepBank   = document.getElementById('co-pay-step-bank');
     const stepCash   = document.getElementById('co-pay-step-cash');
@@ -394,7 +401,13 @@ async function _coCallPayment(confirmBtnId) {
             throw new Error(msg);
         }
 
-        // Thành công
+        // Thành công — reset nút TRƯỚC khi đóng modal, tránh bị stuck lần sau
+        if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = confirmBtnId === 'co-pay-confirm-btn'
+                ? '<i class="fas fa-check-circle"></i> Tôi đã chuyển khoản'
+                : '<i class="fas fa-check-circle"></i> Xác nhận đã thu tiền';
+        }
         const closedId  = _coCheckOutData.id;
         const closedBtn = _coPendingBtn;
         coPayClose();
@@ -452,5 +465,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (overlay) overlay.addEventListener('click', e => { if (e.target === overlay) coCloseConfirm(); });
 
     const payOverlay = document.getElementById('co-payment-overlay');
-    if (payOverlay) payOverlay.addEventListener('click', e => { if (e.target === payOverlay) coPayClose(); });
+    if (payOverlay) payOverlay.addEventListener('click', e => {
+        if (e.target === payOverlay) {
+            // Phân biệt mode: nếu đang ở deposit (booking) thì gọi bkDepositClose,
+            // ngược lại gọi coPayClose — tránh _bkDepositMode bị stuck
+            if (window._bkDepositMode && typeof bkDepositClose === 'function') {
+                bkDepositClose();
+            } else {
+                coPayClose();
+            }
+        }
+    });
 });

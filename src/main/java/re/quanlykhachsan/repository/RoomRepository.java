@@ -42,7 +42,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
         SELECT r FROM Room r
         WHERE r.roomType.capacity >= :capacity
         AND r.roomType.id = :roomTypeId
-        AND LOWER(r.workBranch) LIKE LOWER(CONCAT('%', :workBranch, '%'))
+        AND r.workBranch = :workBranch
         AND r.id NOT IN (
             SELECT b.room.id FROM Booking b
             WHERE b.room.id IS NOT NULL

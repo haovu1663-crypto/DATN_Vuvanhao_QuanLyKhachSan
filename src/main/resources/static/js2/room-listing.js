@@ -33,7 +33,7 @@ function loadRoomsBySearch(workBranch, capacity, checkIn, checkOut) {
     document.getElementById('room-count-text').textContent = 'Đang tìm kiếm...';
     document.getElementById('room-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-    const url = '/api/v1/roomtypes/frindroom'
+    const url = '/api/v1/roomtypes/frindroomhn'
         + '?workBranch=' + encodeURIComponent(workBranch)
         + '&capacity='   + capacity
         + '&checkin='    + checkIn
@@ -113,17 +113,25 @@ function renderNoMatch() {
     return '<div style="text-align:center;padding:40px 0;color:var(--gray);font-size:14px;">Không tìm thấy loại phòng phù hợp với bộ lọc</div>';
 }
 
-// ---- Render 1 card loại phòng (dữ liệu từ RoomTypeResponse) ----
+// ---- Render 1 card loại phòng (dữ liệu từ RoomTypeResponse hoặc RoomTypeDisplayDTO) ----
 function renderRoomCard(rt) {
     const typeName  = rt.type        || '—';
     const capacity  = rt.capacity    ? rt.capacity + ' người' : '—';
     const amenities = rt.amenities   || '';
     const desc      = rt.description || '';
     const price     = rt.price ? new Intl.NumberFormat('vi-VN').format(rt.price) + ' ₫' : '—';
+    const branch    = rt.workBranch  || null;   // có trong RoomTypeDisplayDTO (api /frindroomhn)
 
     // Nội thất (tối đa 4 tag)
     const amenityTags = amenities.split(',').map(a=>a.trim()).filter(Boolean).slice(0,4)
         .map(a => '<span style="background:#f0f4ff;color:var(--navy);font-size:11px;font-weight:500;padding:2px 8px;border-radius:6px;">' + a + '</span>').join('');
+
+    // Badge chi nhánh — chỉ xuất hiện khi API trả về workBranch (/frindroomhn)
+    const branchBadge = branch
+        ? '<span style="display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#1a2744,#2d4a8a);color:#fff;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:0.3px;">'
+        + '📍 ' + branch
+        + '</span>'
+        : '';
 
     // Nút đặt phòng
     const bookBtn = '<button class="rc-btn-book" onclick="openBooking(' + JSON.stringify(rt).replace(/"/g,"&quot;") + ')">Đặt phòng</button>';
@@ -153,6 +161,7 @@ function renderRoomCard(rt) {
         '<div class="rc-type">' + typeName + '</div>' +
         '<div class="rc-name">' + typeName + '</div>' +
         '<div class="rc-id">ID: ' + rt.id + ' &nbsp;·&nbsp; Tối đa ' + capacity + '</div>' +
+        (branchBadge ? '<div style="margin-top:6px;">' + branchBadge + '</div>' : '') +
         (amenityTags ? '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;">' + amenityTags + '</div>' : '') +
         (desc ? '<div style="font-size:13px;color:var(--gray);line-height:1.5;margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">' + desc + '</div>' : '') +
         '<div class="rc-footer">' +

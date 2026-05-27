@@ -109,6 +109,7 @@ public class SecurityConfig {
                                         .requestMatchers("/api/v1/roomtypes/id/").permitAll()
                                         .requestMatchers("/api/v1/roomtypes/frindroom").permitAll()
                                         .requestMatchers("/api/v1/roomtypes/frindroomoff").permitAll()
+                                        .requestMatchers("/api/v1/roomtypes/frindroomhn").permitAll()
                                         // room
                                         .requestMatchers("/api/v1/rooms").permitAll()
                                         .requestMatchers("/api/v1/rooms/**").permitAll()

@@ -79,7 +79,7 @@ public class BookingService implements IBookingService {
 
     @Override
     public void bookingCheckIn(Long employeeId, String email, Long roomId) throws ResourceNotFoundException {
-       // lấy ra id boooking từ email khách đặt khòng
+        // lấy ra id boooking từ email khách đặt khòng
         Booking booking = bookingRespository.findByCustomerEmailAndRoomIdAndToyalPriceIsNull(email, roomId);
 
 
@@ -96,7 +96,7 @@ public class BookingService implements IBookingService {
         booking.setEmployee(employee);
         bookingRespository.save(booking);
         roomService.updateStatusCurrentToChecked(roomId);
-   }
+    }
 
     @Override
     public CheckOutRespone CheckOut(Long employeeId, String email, Long roomId) throws ResourceNotFoundException {
@@ -105,7 +105,7 @@ public class BookingService implements IBookingService {
         if (email.contains("@")) {
             booking = bookingRespository.findByCustomerEmailAndRoomIdAndToyalPriceIsNull(email, roomId);
         } else {
-           booking=bookingRespository.findBookingsByRoomIdAndPhoneAndToyalPriceIsNull(email, roomId);
+            booking=bookingRespository.findBookingsByRoomIdAndPhoneAndToyalPriceIsNull(email, roomId);
         }
         Room room = roomRespository.findById(roomId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng"));
@@ -184,7 +184,8 @@ public class BookingService implements IBookingService {
                 n->{
                     CheckOutBookingRespone checkOutRespone = new CheckOutBookingRespone();
                     checkOutRespone.setBookingId(n.getId());
-                    checkOutRespone.setCustomerName(n.getCustomer().getFullname());
+                    String customerName = (n.getCustomer() != null) ? n.getCustomer().getFullname() : n.getName();
+                    checkOutRespone.setCustomerName(customerName);
                     checkOutRespone.setRoomName(n.getRoom().getName());
                     checkOutRespone.setRoomType(n.getRoom().getRoomType().getType());
                     checkOutRespone.setCheckIntDate(n.getCheckInDate());

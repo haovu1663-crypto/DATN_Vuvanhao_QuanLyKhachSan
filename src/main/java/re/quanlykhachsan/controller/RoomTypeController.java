@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import re.quanlykhachsan.dto.request.RoomTypeRequest;
 import re.quanlykhachsan.dto.response.ApiResponse;
+import re.quanlykhachsan.dto.response.RoomTypeDisplayDTO;
 import re.quanlykhachsan.dto.response.RoomTypeResponse;
 import re.quanlykhachsan.entity.RoomType;
 import re.quanlykhachsan.exception.DataConfickException;
@@ -89,6 +90,14 @@ public class RoomTypeController {
     ResponseEntity<?> getroomtypeobokking(@RequestParam String workBranch, @RequestParam int capacity, @RequestParam LocalDate checkin, @RequestParam LocalDate checkout) throws IOException, ResourceNotFoundException {
         ApiResponse<List<RoomTypeResponse>> apiResponse = new ApiResponse(
                 "get RoomType", "400 ", roomTypeService.getListRoomTypeByWorkBrankAndCapacityAndDateBookingOff(capacity, workBranch, checkin, checkout)
+        );
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+    }
+    // khách hàng tìm kiếm loại phòng online nhưng nó có thể cùng thành phố
+    @GetMapping("/frindroomhn")
+    ResponseEntity<?> getroomtypechn(@RequestParam String workBranch, @RequestParam int capacity, @RequestParam LocalDate checkin, @RequestParam LocalDate checkout) throws IOException, ResourceNotFoundException {
+        ApiResponse<List<RoomTypeDisplayDTO>> apiResponse = new ApiResponse(
+                "get RoomType", "400 ", roomTypeService.getListRoomTypeByWorkBrankAndCapacityAndDate2(capacity, workBranch, checkin, checkout)
         );
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }

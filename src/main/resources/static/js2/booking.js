@@ -8,10 +8,13 @@ const bkState = {
 
 // ===== ROOM PICKER — hiện danh sách phòng cụ thể trước khi vào booking =====
 function openBooking(rt) {
-    // Lấy thông tin từ thanh tìm kiếm
     const checkIn  = window._searchCheckIn;
     const checkOut = window._searchCheckOut;
-    const workBranch = document.getElementById('destVal').textContent.trim();
+    // Ưu tiên lấy workBranch từ thẻ RoomType (rt.workBranch có khi dùng api /frindroomhn)
+    // Fallback về thanh tìm kiếm nếu không có (khi dùng api /frindroom thông thường)
+    const workBranch = (rt.workBranch && rt.workBranch.trim())
+        ? rt.workBranch.trim()
+        : document.getElementById('destVal').textContent.trim();
 
     if (!checkIn || !checkOut || !window._searchMode) {
         Swal.fire({ icon: 'warning', title: 'Chưa tìm kiếm', text: 'Vui lòng nhập điểm đến và ngày trên thanh tìm kiếm trước!', confirmButtonColor: '#1a2744' });

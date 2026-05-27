@@ -3,6 +3,7 @@ let _bkAllRooms = [];
 let _bkSelectedRoom = null;
 let _bkGuests = { adults: 1, children: 0 };
 let _bkDepositState = { bookingId: null, roomName: '', amount: 0, method: null };
+window._bkDepositState = _bkDepositState; // expose để checkout.js reset method khi goBack
 
 function bkReload() { bkLoadRooms(); }
 
@@ -461,6 +462,8 @@ function bkDepositOpen(bookingId, roomName, depositAmount, days, roomTotal, fee,
 
 function bkDepositClose() {
     window._bkDepositMode = false;
+    // Xóa method đã chọn trong checkout để tránh state thừa khi mở lại
+    if (typeof _coSelectedMethod !== 'undefined') window._coSelectedMethodReset && window._coSelectedMethodReset();
     const overlay = document.getElementById('co-payment-overlay');
     if (overlay) {
         overlay.classList.remove('active');
@@ -511,13 +514,25 @@ async function _bkCallDeposit(confirmBtnId) {
             throw new Error(msg);
         }
 
+        // Reset nút về trạng thái ban đầu trước khi đóng modal
+        const successBtn = document.getElementById(confirmBtnId);
+        if (successBtn) {
+            successBtn.disabled = false;
+            successBtn.innerHTML = confirmBtnId === 'co-pay-confirm-btn'
+                ? '<i class="fas fa-check-circle"></i> Tôi đã chuyển khoản'
+                : '<i class="fas fa-check-circle"></i> Xác nhận đã thu tiền';
+        }
+
         // Thành công
         bkDepositClose();
         showToast('success', '💰 Đặt cọc thành công!',
             `Booking #${_bkDepositState.bookingId} — ${_bkDepositState.roomName} đã đặt cọc.`);
 
-        // Reset state
-        _bkDepositState = { bookingId: null, roomName: '', amount: 0, method: null };
+        // Reset state in-place để window._bkDepositState luôn trỏ đúng object
+        _bkDepositState.bookingId = null;
+        _bkDepositState.roomName  = '';
+        _bkDepositState.amount    = 0;
+        _bkDepositState.method    = null;
 
     } catch (err) {
         showToast('error', 'Đặt cọc thất bại', err.message);
