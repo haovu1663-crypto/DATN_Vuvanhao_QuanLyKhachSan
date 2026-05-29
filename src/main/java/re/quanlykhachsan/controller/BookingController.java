@@ -64,5 +64,12 @@ public class BookingController {
     public ResponseEntity<?> checkOut(@RequestParam Long bookingId) throws ResourceNotFoundException {
         return new ResponseEntity<>(bookingService.checkOutBooking(bookingId), HttpStatus.OK);
     }
+    // thoongs kê theo ngày
+
+    // thong kê theo tháng
+
+    // thống kê theo quý
+
+    // thống kê theo năm
 
 }

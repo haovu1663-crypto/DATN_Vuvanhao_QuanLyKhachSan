@@ -38,22 +38,25 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
 
     // lấy ra phòng chưa được đặt trong khoảng ngày khách yêu cầu
     // dùng công thức overlap chuẩn: checkIn < b.enventCheckoutDate AND checkOut > b.enventCheckinDate
-    @Query("""
-        SELECT r FROM Room r
-        WHERE r.roomType.capacity >= :capacity
-        AND r.roomType.id = :roomTypeId
-        AND r.workBranch = :workBranch
-        AND r.id NOT IN (
-            SELECT b.room.id FROM Booking b
-            WHERE b.room.id IS NOT NULL
-            AND :checkIn  < b.enventCheckoutDate
-            AND :checkOut > b.enventCheckinDate
-        )
-    """)
+    @Query(value = """
+    SELECT r.* FROM room r
+    WHERE r.room_type_id = :roomTypeId
+    AND r.work_branch = :workBranch
+    AND r.id NOT IN (
+        SELECT b.room_id FROM booking b
+        WHERE b.room_id IS NOT NULL
+        AND b.status_booking NOT IN ('CANCELLED')
+        AND :checkIn < CASE 
+            WHEN b.status_booking = 'CHECKED_OUT' AND b.check_out_date IS NOT NULL 
+                THEN DATE(b.check_out_date)
+            ELSE b.envent_checkout_date
+        END
+        AND :checkOut > b.envent_checkin_date
+    )
+""", nativeQuery = true)
     List<Room> findAvailableRooms(
             @Param("workBranch") String workBranch,
             @Param("roomTypeId") Long roomTypeId,
-            @Param("capacity")   int capacity,
             @Param("checkIn")    LocalDate checkIn,
             @Param("checkOut")   LocalDate checkOut
     );

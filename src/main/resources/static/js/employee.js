@@ -142,10 +142,7 @@ function empLoadList() {
         </tr>`;
     empty?.classList.add('hidden');
 
-    const token = localStorage.getItem('accessToken');
-    fetch('/api/v1/employees', {
-        headers: token ? { Authorization: 'Bearer ' + token } : {}
-    })
+    fetch('/api/v1/employees', {})
         .then(async res => {
             if (!res.ok) throw new Error('Lỗi ' + res.status);
             return res.json();
@@ -282,19 +279,17 @@ function empDeleteConfirm(id, name) {
 ============================================================ */
 
 function empOpenUpdate(id) {
-    // Chuyển sang view update trước, sau đó load dữ liệu
+    // Lưu id vào localStorage để dùng khi submit
+    localStorage.setItem('editEmployeeId', id);
+
     if (typeof switchToView === 'function') switchToView('update-employee');
 
-    const token = localStorage.getItem('accessToken');
-    fetch('/api/v1/employees/' + id, {
-        headers: token ? { Authorization: 'Bearer ' + token } : {}
-    })
+    fetch('/api/v1/employees/' + id)
         .then(async res => {
             if (!res.ok) throw new Error('Lỗi ' + res.status);
             return res.json();
         })
         .then(json => {
-            // Hỗ trợ cả ApiResponse wrapper { data: {...} } và object thẳng
             const emp = json.data ?? json;
             eupFillForm(emp);
         })
@@ -316,12 +311,13 @@ function eupFillForm(emp) {
     document.getElementById('eup-username').value    = emp.userName ?? emp.username ?? '';
     document.getElementById('eup-password').value   = '';
 
-    // Salary — format hiển thị
-    const salaryRaw = emp.salary ? String(emp.salary) : '';
+    // Salary — parse float rồi lấy phần nguyên (tránh lỗi với 7899759.0)
+    const salaryNum = emp.salary ? Math.round(parseFloat(emp.salary)) : 0;
+    const salaryRaw = salaryNum ? String(salaryNum) : '';
     const salaryEl  = document.getElementById('eup-salary');
     salaryEl.dataset.raw = salaryRaw;
-    salaryEl.value = salaryRaw
-        ? new Intl.NumberFormat('vi-VN').format(parseInt(salaryRaw))
+    salaryEl.value = salaryNum
+        ? new Intl.NumberFormat('vi-VN').format(salaryNum)
         : '';
 
     // Department
@@ -329,16 +325,28 @@ function eupFillForm(emp) {
     deptSel.value = emp.department ?? '';
     eupUpdateDeptBadge(deptSel);
 
-    // Location — workBranch có thể là full-string hoặc short key
+    // Location — match linh hoạt giữa short key và full string
     const locSel = document.getElementById('eup-location');
-    const locVal = emp.workBranch ?? emp.location ?? '';
-    // Thử match theo value trực tiếp
+    const locVal = (emp.workBranch ?? emp.location ?? '').trim();
+    console.log('[eupFillForm] workBranch từ API:', JSON.stringify(locVal));
+
+    // Bước 1: match trực tiếp theo value
     locSel.value = locVal;
-    // Nếu không match, thử tìm option chứa chuỗi đó
+
+    // Bước 2: nếu không match, duyệt từng option linh hoạt hơn
     if (!locSel.value) {
+        const lc = locVal.toLowerCase();
+        let found = '';
         Array.from(locSel.options).forEach(opt => {
-            if (opt.value && locVal.includes(opt.value)) locSel.value = opt.value;
+            if (!opt.value) return;
+            if (lc.includes(opt.value.toLowerCase()) ||
+                opt.value.toLowerCase().includes(lc) ||
+                opt.text.toLowerCase().includes(lc)) {
+                found = opt.value;
+            }
         });
+        locSel.value = found;
+        console.log('[eupFillForm] fallback match:', JSON.stringify(found));
     }
 
     // Update banner name
@@ -382,6 +390,21 @@ function eupSubmit() {
     const empName   = document.getElementById('eup-name').value.trim();
     const password  = document.getElementById('eup-password').value;
 
+    // Nếu eup-id rỗng thì lấy từ localStorage
+    if (!empId) {
+        const savedId = localStorage.getItem('editEmployeeId');
+        if (!savedId) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: 'Không tìm thấy ID nhân viên. Vui lòng thử lại.',
+                confirmButtonColor: '#dc2626'
+            });
+            return;
+        }
+        document.getElementById('eup-id').value = savedId;
+    }
+
     const fields = [
         { id: 'eup-name',       check: v => v.length > 0,                          label: 'Họ và tên' },
         { id: 'eup-department', check: v => v !== '',                               label: 'Chức vụ' },
@@ -392,8 +415,14 @@ function eupSubmit() {
         { id: 'eup-username',   check: v => /^[a-z0-9_]{3,}$/.test(v),             label: 'Tên đăng nhập' },
     ];
     // Chỉ validate password nếu người dùng nhập
-    if (password.length > 0) {
-        fields.push({ id: 'eup-password', check: v => v.length >= 6, label: 'Mật khẩu (tối thiểu 6 ký tự)' });
+    if (password.length > 0 && password.length < 6) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Mật khẩu không hợp lệ',
+            text: 'Mật khẩu phải từ 6 ký tự trở lên.',
+            confirmButtonColor: '#0f1c35'
+        });
+        return;
     }
 
     let errors = [];
@@ -421,16 +450,17 @@ function eupSubmit() {
     formData.append('phone',      document.getElementById('eup-phone').value.trim());
     formData.append('userName',   document.getElementById('eup-username').value.trim());
     formData.append('salary',     salaryRaw);
-    if (password.length > 0) formData.append('password', password);
+    formData.append('password', password);
 
     const btn = document.getElementById('eup-btn-submit');
     btn.disabled  = true;
     btn.innerHTML = '⏳&nbsp; Đang xử lý...';
 
     const token = localStorage.getItem('accessToken');
-    fetch('/api/v1/employees/' + empId, {
+    // Lấy lại empId sau khi có thể đã được set từ localStorage
+    const finalEmpId = document.getElementById('eup-id').value;
+    fetch('/api/v1/customer/emp/' + finalEmpId, {
         method: 'PUT',
-        headers: token ? { Authorization: 'Bearer ' + token } : {},
         body: formData
     })
         .then(async res => {
@@ -448,6 +478,7 @@ function eupSubmit() {
         .then(() => {
             btn.disabled  = false;
             btn.innerHTML = '<span>💾</span> Cập nhật nhân viên';
+            localStorage.removeItem('editEmployeeId');
             Swal.fire({
                 icon: 'success',
                 title: 'Cập nhật thành công! 🎉',

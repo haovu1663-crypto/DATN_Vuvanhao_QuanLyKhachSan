@@ -55,8 +55,13 @@ public class EmployeeService implements IEmployeeSevice {
         if (employeeRepository.existsByUserName(employeeRequest.getUserName())&& i.getId()!=id) {
             throw new DataConfickException("UserName này đã được sử dụng vui lòng nhập lại ");
         }
+
         Employee employee = modelMapper.map(employeeRequest, Employee.class);
-        employee.setPassword(passwordEncoder.encode(employeeRequest.getPassword()));
+        if (employeeRequest.getPassword() != null && !employeeRequest.getPassword().isBlank()) {
+            employee.setPassword(passwordEncoder.encode(employeeRequest.getPassword()));
+        } else {
+            employee.setPassword(i.getPassword()); // giữ nguyên password cũ
+        }
         employee.setId(id);
         employeeRepository.save(employee);
         return modelMapper.map(employee, EmployeeResponse.class);
@@ -70,9 +75,9 @@ public class EmployeeService implements IEmployeeSevice {
     }
 
     @Override
-    public EmployeeResponse getbyId(Long id) throws ResourceNotFoundException{
+    public EmployeeRequest getbyId(Long id) throws ResourceNotFoundException{
         Employee employee = employeeRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("không tìm thấy nhân viên nào có id : "+id));
-        return modelMapper.map(employee,EmployeeResponse.class);
+        return modelMapper.map(employee,EmployeeRequest.class);
     }
 
     @Override

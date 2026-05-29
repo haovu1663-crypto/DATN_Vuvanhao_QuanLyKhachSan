@@ -87,7 +87,8 @@ public class SecurityConfig {
                 // phân quyền cho các API theo đường dẫn
                 .authorizeHttpRequests(
                         req->
-                                req     .requestMatchers("/employee").permitAll()
+                                req
+                                        .requestMatchers("/api/v1/customer/**").permitAll()
                                         .requestMatchers("/api/email/booking").permitAll()
                                         .requestMatchers("/api/v1/booking/checkin/").permitAll()
                                         .requestMatchers("/api/v1/rooms/status/curently").permitAll()
@@ -104,6 +105,9 @@ public class SecurityConfig {
                                         .requestMatchers("/api/email/register").permitAll()
                                         .requestMatchers("/api/email/register/employee").permitAll()
                                         .requestMatchers("/home").permitAll()
+                                        //
+                                        .requestMatchers("/api/v1/employees/**").permitAll()
+                                        .requestMatchers("/api/v1/customer/emp/**").permitAll()
                                         // roomtype
                                         .requestMatchers("/api/v1/roomtypes/add").permitAll()
                                         .requestMatchers("/api/v1/roomtypes/id/").permitAll()
@@ -121,7 +125,11 @@ public class SecurityConfig {
                                         .requestMatchers("/api/v1/booking/checkout").permitAll()
                                         .requestMatchers("/api/v1/booking/checkoutns").permitAll()
                                         // em ployee
+
                                         .requestMatchers("/api/v1/employees/getbranch").permitAll()
+                                        // thống kê
+                                        .requestMatchers("/api/v1/revenue/**").permitAll()
+                                        .requestMatchers("/api/v1/employees/update/**").hasAuthority("ROLE_MANAGER")
                                         .requestMatchers("/**.css", "/**.js", "/js/**", "/js2/**", "/images/**", "/static/**").permitAll()
                                         .anyRequest().authenticated() // các api khác thì phải xác thực thì ms vào đc(đăng nhập)
 

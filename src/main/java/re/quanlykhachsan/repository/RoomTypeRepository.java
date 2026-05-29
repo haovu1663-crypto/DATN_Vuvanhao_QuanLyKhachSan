@@ -63,9 +63,6 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Long> {
 
 
 
-    // Tìm kiếm gần đúng theo workBranch (LIKE), trả về từng dòng rt+workBranch riêng.
-    // Service sẽ gộp các dòng cùng rt.id lại thành 1 DTO với danh sách workBranches.
-    // Ví dụ: tìm "hà nội" → trả cả "Hà Nội - Hoàn Kiếm" và "Hà Nội - Cầu Giấy" của cùng 1 RoomType.
     @Query("""
     SELECT DISTINCT new re.quanlykhachsan.dto.response.RoomTypeDisplayDTO(
         rt.id, 
@@ -82,9 +79,14 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Long> {
     AND LOWER(r.workBranch) LIKE LOWER(CONCAT('%', :workBranch, '%'))
     AND r.id NOT IN (
         SELECT b.room.id FROM Booking b 
-        WHERE b.room IS NOT NULL 
-        AND (:checkIn < b.enventCheckoutDate 
-        AND  :checkOut > b.enventCheckinDate)
+        WHERE b.room IS NOT NULL
+        AND b.statusBooking NOT IN ('CANCELLED')
+        AND :checkIn < CASE
+            WHEN b.statusBooking = 'CHECKED_OUT' AND b.CheckOutDate IS NOT NULL
+                THEN FUNCTION('DATE', b.CheckOutDate)
+            ELSE b.enventCheckoutDate
+        END
+        AND :checkOut > b.enventCheckinDate
     )
 """)
     List<RoomTypeDisplayDTO> findAvailableRoomTypesWithBranch(

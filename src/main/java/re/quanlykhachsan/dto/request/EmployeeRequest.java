@@ -25,8 +25,8 @@ public class EmployeeRequest {
     @NotBlank(message = "Username không được để trống")
 //    @Pattern(regexp = "^[a-zA-Z0-9_]{5,20}$", message = "Username từ 5-20 ký tự, không chứa ký tự đặc biệt")
     private String userName;
-    @NotBlank(message = "Mật khẩu không được để trống")
-    @Pattern(regexp = "^\\S{6,}$", message = "Mật khẩu phải từ 6 ký tự trở lên và không chứa khoảng trắng")
+
+
     private String password;
     @NotNull
     private String workBranch;

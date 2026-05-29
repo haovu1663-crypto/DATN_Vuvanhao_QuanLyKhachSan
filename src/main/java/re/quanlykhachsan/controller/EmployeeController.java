@@ -36,7 +36,7 @@ public class EmployeeController {
         return  new ResponseEntity<>(apiResponse, HttpStatus.OK);
     } @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Long id) throws ResourceNotFoundException {
-        ApiResponse<EmployeeResponse> apiResponse = new ApiResponse<>(
+        ApiResponse<EmployeeRequest> apiResponse = new ApiResponse<>(
                 "Get Employee","400",employeeService.getbyId(id)
         );
         return  new ResponseEntity<>(apiResponse, HttpStatus.OK);
@@ -49,7 +49,8 @@ public class EmployeeController {
         );
         return  new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
-    @PutMapping("/{id}")
+    @PreAuthorize("permitAll()")
+    @PutMapping("/update/{id}")
     public ResponseEntity<?> upfate(@Valid @ModelAttribute EmployeeRequest employeeRequest,@PathVariable Long id) throws ResourceNotFoundException, DataConfickException {
         ApiResponse<EmployeeResponse> apiResponse = new ApiResponse<>(
                 "Update success","200", employeeService.update(employeeRequest,id)

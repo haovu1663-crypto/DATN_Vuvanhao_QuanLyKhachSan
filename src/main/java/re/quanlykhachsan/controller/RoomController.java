@@ -115,7 +115,7 @@ public class RoomController {
     @GetMapping("/findroom")
     public ResponseEntity<?> getRoomsByRoomId(@RequestParam String workBranch,@RequestParam Long roomTypeId,@RequestParam int capacity ,@RequestParam LocalDate checkIn,@RequestParam LocalDate checkOut ){
         ApiResponse<List<SoPhongRequest>> response = new ApiResponse<>(
-                "get rooms","400",roomService.getListSoPhong(workBranch,roomTypeId,capacity,checkIn,checkOut)
+                "get rooms","400",roomService.getListSoPhong(workBranch,roomTypeId,checkIn,checkOut)
         );
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

@@ -119,12 +119,18 @@ function renderRoomCard(rt) {
     const capacity  = rt.capacity    ? rt.capacity + ' người' : '—';
     const amenities = rt.amenities   || '';
     const desc      = rt.description || '';
-    const price     = rt.price ? new Intl.NumberFormat('vi-VN').format(rt.price) + ' ₫' : '—';
+    const priceRaw     = rt.price || 0;
+    const priceDisplay = priceRaw ? new Intl.NumberFormat('vi-VN').format(priceRaw) + ' ₫' : '—';
+    const priceOriginal = priceRaw ? new Intl.NumberFormat('vi-VN').format(Math.round(priceRaw * 1.5)) + ' ₫' : null;
     const branch    = rt.workBranch  || null;   // có trong RoomTypeDisplayDTO (api /frindroomhn)
 
-    // Nội thất (tối đa 4 tag)
+    // Nội thất (tối đa 4 tag) — icon map
+    const amenityIconMap = {'wifi':'📶','tv':'📺','máy lạnh':'❄️','mini-bar':'🍹','bồn tắm jacuzzi':'🛁','sofa':'🛋️','bàn ăn':'🍽️','tủ lạnh':'🧊','2 giường đơn':'🛏️','giường đôi':'🛏️','giường king-size':'👑','2 giường đôi lớn':'🛏️','khu vực bếp nhỏ':'🍳','đồ dùng gia đình':'🏠'};
     const amenityTags = amenities.split(',').map(a=>a.trim()).filter(Boolean).slice(0,4)
-        .map(a => '<span style="background:#f0f4ff;color:var(--navy);font-size:11px;font-weight:500;padding:2px 8px;border-radius:6px;">' + a + '</span>').join('');
+        .map(a => {
+            const icon = amenityIconMap[a.toLowerCase()] || '✦';
+            return '<span style="display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#eef2ff,#f5f0ff);color:#4338ca;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid #c7d2fe;">' + icon + ' ' + a + '</span>';
+        }).join('');
 
     // Badge chi nhánh — chỉ xuất hiện khi API trả về workBranch (/frindroomhn)
     const branchBadge = branch
@@ -166,8 +172,16 @@ function renderRoomCard(rt) {
         (desc ? '<div style="font-size:13px;color:var(--gray);line-height:1.5;margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">' + desc + '</div>' : '') +
         '<div class="rc-footer">' +
         '<div>' +
-        '<div class="rc-price-night">Giá mỗi đêm</div>' +
-        '<div class="rc-price">' + price + '</div>' +
+        '<div class="rc-price-night" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;letter-spacing:0.4px;background:linear-gradient(135deg,#ff6b35,#e91e8c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-transform:uppercase;">🌙 Giá mỗi đêm</div>' +
+        (priceOriginal
+            ? '<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">'
+            + '<span style="font-size:12.5px;color:#aaa;text-decoration:line-through;font-weight:400;">' + priceOriginal + '</span>'
+            + '<span style="background:linear-gradient(135deg,#ff6b35,#f7c59f);color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;letter-spacing:0.5px;box-shadow:0 2px 6px rgba(255,107,53,0.35);">🔥 -33%</span>'
+            + '</div>'
+            : '') +
+        '<div style="display:flex;align-items:center;gap:8px;">' +
+        '<div class="rc-price" style="background:linear-gradient(135deg,#1a2744,#2d6a9f);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">' + priceDisplay + '</div>' +
+        '</div>' +
         '</div>' +
         '<div class="rc-btn-group">' +
         bookBtn +

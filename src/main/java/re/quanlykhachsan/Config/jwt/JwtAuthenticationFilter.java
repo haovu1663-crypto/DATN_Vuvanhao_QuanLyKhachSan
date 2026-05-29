@@ -17,22 +17,27 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-      // chặn reqquest và lây token giai mã
-        //lây token
-        String token =getTokenFromRequest(request);
-        // giải mã token
+        String token = getTokenFromRequest(request);
 
+        // Không có token thì cho đi tiếp, không cần xác thực
+        if (token == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // Có token thì mới kiểm tra
         try {
-            // gọi thẳng parse ở đây thay vì dùng validateToken()
             Jwts.parserBuilder()
-                    .setSigningKey(jwtService.getJwtSecretKey()) // cần public method này
+                    .setSigningKey(jwtService.getJwtSecretKey())
                     .build()
                     .parseClaimsJws(token);
 
@@ -52,33 +57,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             request.setAttribute("jwt_error", "Token không hợp lệ");
         }
-//            if (token != null && jwtService.validateToken(token)) {
-//            // token hợp lệ rồi giải mã
-//                String username = jwtService.getUsernameFromToken(token);
-//            // load user từ database
-//                UserDetails userDetails =userDetailsService.loadUserByUsername(username);
-//            // lưu vào security context holder : userdetail , password(có thể null), danh sách quyền
-//                SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
-//            }
-
-
-
-        // cho request đi tiếp(có token hay không thì trương trình đêều đi tiêp )
 
         filterChain.doFilter(request, response);
     }
 
-
-
-    // tạo hàm lấy reqest
     public String getTokenFromRequest(HttpServletRequest request) {
-        // lấy phần header
         String authorization = request.getHeader("Authorization");
-        // loại bỏ bearer
         if (authorization != null && authorization.startsWith("Bearer ")) {
             return authorization.substring(7);
         }
         return null;
     }
-
 }
