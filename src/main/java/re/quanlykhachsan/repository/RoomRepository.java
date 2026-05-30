@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import re.quanlykhachsan.entity.Room;
+import re.quanlykhachsan.entity.StatusBooking;
 import re.quanlykhachsan.entity.StatusRoom;
 
 import java.time.LocalDate;
@@ -71,7 +72,12 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     AND r.id NOT IN (
         SELECT b.room.id FROM Booking b
         WHERE b.room.id IS NOT NULL
-        AND :checkIn < b.enventCheckoutDate
+        AND b.statusBooking NOT IN ('CANCELLED')
+        AND :checkIn < CASE
+            WHEN b.statusBooking = 'CHECKED_OUT' AND b.CheckOutDate IS NOT NULL
+                THEN FUNCTION('DATE', b.CheckOutDate)
+            ELSE b.enventCheckoutDate
+        END
         AND :checkOut > b.enventCheckinDate
     )
 """)
@@ -84,4 +90,11 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     );
 
     boolean existsByNameAndWorkBranch(String name, String workBranch);
+
+    // lấy danh sách room checked_in booking để làm service
+    @Query("SELECT DISTINCT r FROM Booking b JOIN b.room r WHERE r.workBranch = :workBranch AND b.statusBooking = :status")
+    List<Room> findRoomsByWorkBranchAndStatus(
+            @Param("workBranch") String workBranch,
+            @Param("status") StatusBooking status
+    );
 }

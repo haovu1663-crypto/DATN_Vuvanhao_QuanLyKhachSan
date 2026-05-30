@@ -49,8 +49,13 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Long> {
             SELECT b.room.id FROM Booking b 
             WHERE b.room IS NOT NULL 
             AND b.room.workBranch = :workBranch
-            AND (:checkIn < b.enventCheckoutDate 
-            AND  :checkOut > b.enventCheckinDate)
+            AND b.statusBooking NOT IN ('CANCELLED')
+            AND :checkIn < CASE
+                WHEN b.statusBooking = 'CHECKED_OUT' AND b.CheckOutDate IS NOT NULL
+                    THEN FUNCTION('DATE', b.CheckOutDate)
+                ELSE b.enventCheckoutDate
+            END
+            AND :checkOut > b.enventCheckinDate
         )
     )
 """)

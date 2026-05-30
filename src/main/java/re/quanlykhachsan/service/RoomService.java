@@ -10,6 +10,7 @@ import re.quanlykhachsan.dto.response.RoomRespone;
 import re.quanlykhachsan.dto.response.SoPhongRequest;
 import re.quanlykhachsan.entity.Room;
 import re.quanlykhachsan.entity.RoomType;
+import re.quanlykhachsan.entity.StatusBooking;
 import re.quanlykhachsan.entity.StatusRoom;
 import re.quanlykhachsan.exception.DataConfickException;
 import re.quanlykhachsan.exception.ResourceNotFoundException;
@@ -245,6 +246,19 @@ public class RoomService implements IRoomService {
     @Override
     public List<SoPhongRequest> getListSoPhongBookingOff(String workBranch, Long roomtypeId, int capacity, LocalDate checkIn, LocalDate checkOut) {
         List<Room> rooms = roomRepository.findAvailableRoomBookingOff(workBranch, roomtypeId, capacity, checkIn, checkOut);
+        List<SoPhongRequest> soPhongRequests = rooms.stream()
+                .map(room -> {
+                    SoPhongRequest request = new SoPhongRequest();
+                    request.setId(room.getId());
+                    request.setName(room.getName());
+                    return request;
+                })
+                .toList();
+        return soPhongRequests;
+    }
+    @Override
+    public List<SoPhongRequest> getRoomService(String workBranch) {
+      List<Room> rooms = roomRepository.findRoomsByWorkBranchAndStatus(workBranch, StatusBooking.CHECKED_IN);
         List<SoPhongRequest> soPhongRequests = rooms.stream()
                 .map(room -> {
                     SoPhongRequest request = new SoPhongRequest();

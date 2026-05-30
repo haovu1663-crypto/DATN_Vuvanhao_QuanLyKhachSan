@@ -6,10 +6,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import re.quanlykhachsan.dto.request.BookingRequest;
 import re.quanlykhachsan.dto.request.EmployeeBooking;
-import re.quanlykhachsan.dto.response.BookingRespone;
-import re.quanlykhachsan.dto.response.CheckInRespone;
-import re.quanlykhachsan.dto.response.CheckOutBookingRespone;
-import re.quanlykhachsan.dto.response.CheckOutRespone;
+import re.quanlykhachsan.dto.response.*;
 import re.quanlykhachsan.entity.*;
 import re.quanlykhachsan.exception.ResourceNotFoundException;
 import re.quanlykhachsan.repository.*;
@@ -20,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -173,6 +171,7 @@ public class BookingService implements IBookingService {
         Employee e = employeeRespository.findById(employeeId).orElseThrow(()-> new ResourceNotFoundException("không tìm thấy nhân viên này "));
         booking.setCheckInDate( LocalDateTime.now());
         booking.setEmployee(e);
+        booking.setStatusBooking(StatusBooking.CHECKED_IN);
         bookingRespository.save(booking);
         return "Quý khách đã CheckIn thành công " ;
     }
@@ -214,4 +213,71 @@ public class BookingService implements IBookingService {
         response.setPrice(remaining); // ← đúng rồi, không còn = 0 nữa
         return response;
     }
+    // hiện thi ls đặt phòng đã đã
+    public List<StoryBookingOfCutomer> storyBookingOfCutomerCheckOut(Long id) {
+        List<Booking> bookings = bookingRespository.findBookingsByCustomerAndStatus(id, StatusBooking.CHECKED_OUT);
+
+        return bookings.stream()
+                .map(booking -> {
+                    StoryBookingOfCutomer dto = new StoryBookingOfCutomer();
+                    dto.setBookingId(booking.getId());
+                    dto.setPrice(booking.getToyalPrice()); // Lưu ý chính tả 'toyalPrice' từ entity của bạn
+                    dto.setCutomerName(booking.getCustomer().getFullname());
+
+                    // Sửa lại hàm set cho đúng (giả định DTO của bạn có hàm setRoomName hoặc tương đương)
+                    dto.setRoomName(booking.getRoom().getName());
+
+                    dto.setCheckInDate(booking.getCheckInDate());
+                    dto.setCheckOutDate(booking.getCheckOutDate());
+                    dto.setStatus("đã Kết thúc");
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+    // hiện thi ls đặt phòng đã đã
+    public List<StoryBookingOfCutomer> storyBookingOfCutomerCheckIn(Long id){
+        List<Booking> bookings = bookingRespository.findBookingsByCustomerAndStatus(id, StatusBooking.CHECKED_IN);
+
+        return bookings.stream()
+                .map(booking -> {
+                    StoryBookingOfCutomer dto = new StoryBookingOfCutomer();
+                    dto.setBookingId(booking.getId());
+                    dto.setPrice(0); // Lưu ý chính tả 'toyalPrice' từ entity của bạn
+                    dto.setCutomerName(booking.getCustomer().getFullname());
+
+                    // Sửa lại hàm set cho đúng (giả định DTO của bạn có hàm setRoomName hoặc tương đương)
+                    dto.setRoomName(booking.getRoom().getName());
+
+                    dto.setCheckInDate(booking.getCheckInDate());
+                    dto.setCheckOutDate(booking.getCheckOutDate());
+                    dto.setStatus("đã Kết thúc");
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+    public List<StoryBookingOfCutomer> storyBookingOfCutomerPending(Long id) {
+        List<Booking> bookings = bookingRespository.findBookingsByCustomerAndStatus(id, StatusBooking.PENDING);
+
+        return bookings.stream()
+                .map(booking -> {
+                    StoryBookingOfCutomer dto = new StoryBookingOfCutomer();
+                    dto.setBookingId(booking.getId());
+                    dto.setPrice(0);
+                    dto.setCutomerName(booking.getCustomer().getFullname());
+                    dto.setRoomName(booking.getRoom().getName());
+
+                    // Ngày dự kiến (khách đặt online)
+                    dto.setEnventCheckInTime(booking.getEnventCheckinDate());   // fix: trước đặt nhầm setEnventCheckOutTime
+                    dto.setEnventCheckOutTime(booking.getEnventCheckoutDate());
+
+                    // Ngày thực tế nhận / trả (PENDING thường null, FE sẽ kiểm tra và hiển nếu có)
+                    dto.setCheckInDate(booking.getCheckInDate());
+                    dto.setCheckOutDate(booking.getCheckOutDate());
+
+                    dto.setStatus("Chờ xác nhận");   // fix: status đúng nghĩa
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
 }

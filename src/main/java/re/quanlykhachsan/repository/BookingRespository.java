@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import re.quanlykhachsan.entity.Booking;
+import re.quanlykhachsan.entity.StatusBooking;
 
 import java.util.List;
 import java.util.Optional;
@@ -41,4 +42,17 @@ public interface BookingRespository extends JpaRepository<Booking,Long> {
     // lấy booking kèm room và roomType để tránh LazyInitializationException
     @Query("SELECT b FROM Booking b JOIN FETCH b.room r JOIN FETCH r.roomType WHERE b.id = :id")
     Optional<Booking> findByIdWithRoomAndRoomType(@Param("id") Long id);
+
+
+    // lịch sử đặt phong cua khách hàng
+    @Query("SELECT b FROM Booking b " +
+            "JOIN FETCH b.customer " +        // ✅ load Customer luôn
+            "JOIN FETCH b.room r " +           // ✅ load Room luôn (dùng ở dto)
+            "JOIN FETCH r.roomType " +
+            "WHERE b.customer.id = :customerId AND b.statusBooking = :status")
+    List<Booking> findBookingsByCustomerAndStatus(
+            @Param("customerId") Long customerId,
+            @Param("status") StatusBooking statusBooking
+    );
+
 }

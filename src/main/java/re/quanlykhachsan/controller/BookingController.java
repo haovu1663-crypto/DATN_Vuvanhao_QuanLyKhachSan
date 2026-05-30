@@ -64,12 +64,17 @@ public class BookingController {
     public ResponseEntity<?> checkOut(@RequestParam Long bookingId) throws ResourceNotFoundException {
         return new ResponseEntity<>(bookingService.checkOutBooking(bookingId), HttpStatus.OK);
     }
-    // thoongs kê theo ngày
-
-    // thong kê theo tháng
-
-    // thống kê theo quý
-
-    // thống kê theo năm
-
+   // lich sử đã check in
+   @GetMapping("/storychcekout/{id}")
+   public ResponseEntity<?> storycheckOut(@PathVariable Long id) {
+       return new ResponseEntity<>(bookingService.storyBookingOfCutomerCheckOut(id), HttpStatus.OK);
+   }
+    @GetMapping("/storychcekin/{id}")
+    public ResponseEntity<?> storycheckIn(@PathVariable Long id) {
+        return new ResponseEntity<>(bookingService.storyBookingOfCutomerCheckIn(id), HttpStatus.OK);
+    }
+    @GetMapping("/storypending/{id}")
+    public ResponseEntity<?> storypending(@PathVariable Long id) {
+        return new ResponseEntity<>(bookingService.storyBookingOfCutomerPending(id), HttpStatus.OK);
+    }
 }

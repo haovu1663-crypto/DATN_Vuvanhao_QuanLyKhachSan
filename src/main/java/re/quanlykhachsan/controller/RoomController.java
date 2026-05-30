@@ -126,5 +126,11 @@ public class RoomController {
         );
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
+    @GetMapping("/findroomservice")
+    public ResponseEntity<?> getRoomsService(@RequestParam String workBranch){
+        ApiResponse<List<SoPhongRequest>> response = new ApiResponse<>(
+                "get rooms","400",roomService.getRoomService(workBranch)
+        );
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }
