@@ -77,4 +77,9 @@ public class BookingController {
     public ResponseEntity<?> storypending(@PathVariable Long id) {
         return new ResponseEntity<>(bookingService.storyBookingOfCutomerPending(id), HttpStatus.OK);
     }
+    @GetMapping("/roomservice")
+    public ResponseEntity<?> roomservice(@RequestParam String workBrach) {
+        return new ResponseEntity<>(bookingService.soPhongService(workBrach), HttpStatus.OK);
+    }
+
 }

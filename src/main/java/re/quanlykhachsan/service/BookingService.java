@@ -36,12 +36,15 @@ public class BookingService implements IBookingService {
         booking.setCheckInDate(null);
         booking.setCheckOutDate(null);
         booking.setToyalPrice(null);
+
         // vì là khách đặt phòng online nên sẽ không có id của nhân viên nên khi nào treck out sẽ thêm nhân viên \
         // thêm phong
         Room room = roomRespository.findById(bookingRequest.getRoomId()).orElseThrow(()->new ResourceNotFoundException("không tìm thấy phòng này"));
         booking.setRoom(room);
         Customer customer = customerRespository.findById(bookingRequest.getCustomerId()).orElseThrow(()->new ResourceNotFoundException("không tìm thấy khách hàng này trong hệ thống "));
         booking.setCustomer(customer);
+        booking.setName(customer.getFullname());
+        booking.setPhonenumber(customer.getPhone());
         // ngày nhận trả dự kến
         booking.setEnventCheckinDate(bookingRequest.getEnventCheckinDate());
         booking.setEnventCheckoutDate(bookingRequest.getEnventCheckoutDate());
@@ -280,4 +283,18 @@ public class BookingService implements IBookingService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<SoPhongServiceRequest> soPhongService(String workBrach) {
+       List<Booking> bookings = bookingRespository.findByRoom_WorkBranchAndStatusBooking(workBrach, StatusBooking.CHECKED_IN);
+        List<SoPhongServiceRequest> soPhongRequests = bookings.stream()
+                .map(room -> {
+                    SoPhongServiceRequest request = new SoPhongServiceRequest();
+                    request.setId(room.getId());
+                    request.setName(room.getRoom().getName());
+                    request.setNameCutomer(room.getName());
+                    return request;
+                })
+                .toList();
+        return soPhongRequests;
+    }
 }

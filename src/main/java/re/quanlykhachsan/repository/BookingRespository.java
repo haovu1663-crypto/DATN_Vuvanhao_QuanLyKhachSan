@@ -55,4 +55,15 @@ public interface BookingRespository extends JpaRepository<Booking,Long> {
             @Param("status") StatusBooking statusBooking
     );
 
+    // lấy ra booking có room đã ở để lam
+    @Query("SELECT b FROM Booking b " +
+            "JOIN FETCH b.room r " +
+            "LEFT JOIN FETCH b.customer " +
+            "LEFT JOIN FETCH b.employee " +
+            "WHERE r.workBranch = :workBranch " +
+            "AND b.statusBooking = :statusBooking")
+    List<Booking> findByRoom_WorkBranchAndStatusBooking(
+            @Param("workBranch") String workBranch,
+            @Param("statusBooking") StatusBooking statusBooking
+    );
 }

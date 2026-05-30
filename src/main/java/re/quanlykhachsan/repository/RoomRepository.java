@@ -92,9 +92,5 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     boolean existsByNameAndWorkBranch(String name, String workBranch);
 
     // lấy danh sách room checked_in booking để làm service
-    @Query("SELECT DISTINCT r FROM Booking b JOIN b.room r WHERE r.workBranch = :workBranch AND b.statusBooking = :status")
-    List<Room> findRoomsByWorkBranchAndStatus(
-            @Param("workBranch") String workBranch,
-            @Param("status") StatusBooking status
-    );
+
 }
