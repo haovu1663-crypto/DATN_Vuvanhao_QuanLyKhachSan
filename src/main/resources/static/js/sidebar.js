@@ -76,10 +76,14 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('menuUpdate')?.addEventListener('click',        e => { e.preventDefault(); switchToView('update');          });
     document.getElementById('menuManageEmployee')?.addEventListener('click', e => { e.preventDefault(); switchToView('manage-employee'); empLoadList(); });
     document.getElementById('menuRevenue')?.addEventListener('click',        e => { e.preventDefault(); switchToView('revenue'); });
-    document.getElementById('menuService')?.addEventListener('click',        e => { e.preventDefault(); switchToView('service'); svLoadRooms(); });
+    document.getElementById('menuService')?.addEventListener('click',        e => { e.preventDefault(); switchToView('service'); if (typeof svLoad === 'function') svLoad(); else if (typeof svLoadRooms === 'function') svLoadRooms(); });
 
     // Default: mở Booking Room khi load trang
     switchToView('booking');
-    if (typeof bkLoadRooms === 'function') bkLoadRooms();
+    setTimeout(function() {
+        if (typeof bkLoadRooms === 'function' && document.getElementById('bkrt-grid')) {
+            bkLoadRooms();
+        }
+    }, 100);
 
 });

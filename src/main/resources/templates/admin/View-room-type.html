@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<body>
+
+<th:block th:fragment="content">
+    <main id="view-add-room-type" class="flex-1 flex flex-col overflow-y-auto relative">
+        <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-20 border-b border-slate-200 flex items-center justify-between px-10">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">Thêm loại phòng mới</h1>
+                <p class="text-xs text-slate-500 font-medium">Dashboard / Room Types / Create</p>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="relative cursor-pointer text-slate-400 hover:text-blue-600 transition-colors" title="Thông báo">
+                    <i class="far fa-bell text-xl"></i>
+                    <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full border-2 border-white"></span>
+                </div>
+            </div>
+        </header>
+
+        <div class="p-8 max-w-2xl mx-auto w-full">
+
+            <!-- THÔNG TIN CƠ BẢN -->
+            <div class="rt-section">
+                <div class="rt-section-title">Thông tin cơ bản</div>
+
+                <div class="rt-two-col" style="margin-bottom:16px;">
+                    <div>
+                        <label class="rt-label">Loại phòng <span class="rt-required">*</span></label>
+                        <input id="rt-name" type="text" class="rt-input" placeholder="VD: Deluxe, Suite, Standard..."
+                               oninput="rtCharCount('rt-name','rt-name-count',60)" maxlength="60">
+                        <div class="rt-char-count"><span id="rt-name-count">0</span>/60</div>
+                    </div>
+                    <div>
+                        <label class="rt-label">Giá mỗi đêm (VNĐ) <span class="rt-required">*</span></label>
+                        <div class="rt-price-wrap">
+                            <span class="rt-price-prefix">₫</span>
+                            <input id="rt-price" type="text" class="rt-input" placeholder="0"
+                                   oninput="rtFormatPrice(this)">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:16px;">
+                    <label class="rt-label">Nội thất / Tiện nghi <span class="rt-required">*</span></label>
+                    <input id="rt-amenities" type="text" class="rt-input" placeholder="VD: TV, Điều hòa, Bồn tắm, Minibar..."
+                           oninput="rtCharCount('rt-amenities','rt-amenities-count',200)" maxlength="200">
+                    <div class="rt-char-count"><span id="rt-amenities-count">0</span>/200</div>
+                </div>
+
+                <div>
+                    <label class="rt-label">Mô tả</label>
+                    <textarea id="rt-description" class="rt-textarea" placeholder="Mô tả chi tiết về loại phòng..."
+                              oninput="rtCharCount('rt-description','rt-desc-count',500)" maxlength="500"></textarea>
+                    <div class="rt-char-count"><span id="rt-desc-count">0</span>/500</div>
+                </div>
+            </div>
+
+            <!-- SỨC CHỨA -->
+            <div class="rt-section">
+                <div class="rt-section-title">Sức chứa</div>
+                <div class="rt-capacity-row">
+                    <button class="rt-cap-btn" onclick="rtCapChange(-1)" type="button">−</button>
+                    <span class="rt-cap-num" id="rt-cap-num">2</span>
+                    <button class="rt-cap-btn" onclick="rtCapChange(1)" type="button">+</button>
+                    <span class="rt-cap-label">khách (tối đa 15)</span>
+                </div>
+                <input type="hidden" id="rt-capacity" value="2">
+            </div>
+
+            <!-- ẢNH LOẠI PHÒNG -->
+            <div class="rt-section">
+                <div class="rt-section-title">Ảnh loại phòng</div>
+                <div class="rt-upload-zone" onclick="document.getElementById('rt-file-input').click()" id="rt-upload-zone">
+                    <input type="file" id="rt-file-input" class="hidden" multiple accept="image/png,image/jpeg,image/webp" onchange="rtHandleFiles(this.files)">
+                    <div class="rt-upload-icon"><i class="fas fa-image"></i></div>
+                    <div class="rt-upload-text">Nhấn để chọn ảnh hoặc kéo thả vào đây</div>
+                    <div class="rt-upload-sub">PNG, JPG, WEBP — tối đa 5 ảnh</div>
+                </div>
+                <div class="rt-preview-grid" id="rt-preview-grid"></div>
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="rt-actions">
+                <button class="rt-btn-cancel" onclick="rtCancel()" type="button">Hủy</button>
+                <button class="rt-btn-save" id="rt-btn-save" onclick="rtSubmit()" type="button">
+                    <i class="fas fa-paper-plane"></i> Lưu loại phòng
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ===== VIEW: UPDATE ROOM TYPE ===== -->
+    <main id="view-update-room-type" class="flex-1 flex flex-col overflow-y-auto relative" style="display:none;">
+        <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-20 border-b border-slate-200 flex items-center justify-between px-10">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">Cập nhật loại phòng</h1>
+                <p class="text-xs text-slate-500 font-medium">Dashboard / Room Types / Update</p>
+            </div>
+        </header>
+
+        <div class="p-8 max-w-2xl mx-auto w-full">
+
+            <!-- Ô TÌM KIẾM THEO ID -->
+            <div class="rt-section" style="background:linear-gradient(135deg,#eff6ff,#e0e7ff);border:1.5px solid #bfdbfe;">
+                <div class="rt-section-title" style="color:#1d4ed8;">🔍 Tìm kiếm loại phòng theo ID</div>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <input id="rtu-search-id" type="number" class="rt-input" placeholder="Nhập ID loại phòng..." style="flex:1;">
+                    <button onclick="rtuFetchById()" type="button"
+                            style="padding:10px 20px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;border:none;border-radius:10px;font-weight:600;cursor:pointer;white-space:nowrap;">
+                        <i class="fas fa-search"></i> Tải dữ liệu
+                    </button>
+                </div>
+            </div>
+
+            <!-- THÔNG TIN CƠ BẢN -->
+            <div class="rt-section">
+                <div class="rt-section-title">Thông tin cơ bản</div>
+                <input type="hidden" id="rtu-id">
+
+                <div class="rt-two-col" style="margin-bottom:16px;">
+                    <div>
+                        <label class="rt-label">Loại phòng <span class="rt-required">*</span></label>
+                        <input id="rtu-name" type="text" class="rt-input" placeholder="VD: Deluxe, Suite, Standard..."
+                               oninput="rtCharCount('rtu-name','rtu-name-count',60)" maxlength="60">
+                        <div class="rt-char-count"><span id="rtu-name-count">0</span>/60</div>
+                    </div>
+                    <div>
+                        <label class="rt-label">Giá mỗi đêm (VNĐ) <span class="rt-required">*</span></label>
+                        <div class="rt-price-wrap">
+                            <span class="rt-price-prefix">₫</span>
+                            <input id="rtu-price" type="text" class="rt-input" placeholder="0"
+                                   oninput="rtuFormatPrice(this)">
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:16px;">
+                    <label class="rt-label">Nội thất / Tiện nghi <span class="rt-required">*</span></label>
+                    <input id="rtu-amenities" type="text" class="rt-input" placeholder="VD: TV, Điều hòa, Bồn tắm, Minibar..."
+                           oninput="rtCharCount('rtu-amenities','rtu-amenities-count',200)" maxlength="200">
+                    <div class="rt-char-count"><span id="rtu-amenities-count">0</span>/200</div>
+                </div>
+
+                <div>
+                    <label class="rt-label">Mô tả</label>
+                    <textarea id="rtu-description" class="rt-textarea" placeholder="Mô tả chi tiết về loại phòng..."
+                              oninput="rtCharCount('rtu-description','rtu-desc-count',500)" maxlength="500"></textarea>
+                    <div class="rt-char-count"><span id="rtu-desc-count">0</span>/500</div>
+                </div>
+            </div>
+
+            <!-- SỨC CHỨA -->
+            <div class="rt-section">
+                <div class="rt-section-title">Sức chứa</div>
+                <div class="rt-capacity-row">
+                    <button class="rt-cap-btn" onclick="rtuCapChange(-1)" type="button">−</button>
+                    <span class="rt-cap-num" id="rtu-cap-num">2</span>
+                    <button class="rt-cap-btn" onclick="rtuCapChange(1)" type="button">+</button>
+                    <span class="rt-cap-label">khách (tối đa 15)</span>
+                </div>
+                <input type="hidden" id="rtu-capacity" value="2">
+            </div>
+
+            <!-- ẢNH LOẠI PHÒNG -->
+            <div class="rt-section">
+                <div class="rt-section-title">Ảnh loại phòng</div>
+                <div class="rt-upload-zone" onclick="document.getElementById('rtu-file-input').click()" id="rtu-upload-zone">
+                    <input type="file" id="rtu-file-input" class="hidden" multiple accept="image/png,image/jpeg,image/webp" onchange="rtuHandleFiles(this.files)">
+                    <div class="rt-upload-icon"><i class="fas fa-image"></i></div>
+                    <div class="rt-upload-text">Nhấn để chọn ảnh hoặc kéo thả vào đây</div>
+                    <div class="rt-upload-sub">PNG, JPG, WEBP — tối đa 5 ảnh</div>
+                </div>
+                <div class="rt-preview-grid" id="rtu-preview-grid"></div>
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="rt-actions">
+                <button class="rt-btn-cancel" onclick="switchToView('add-room-type')" type="button">Hủy</button>
+                <button class="rt-btn-save" id="rtu-btn-save" onclick="rtuSubmit()" type="button">
+                    <i class="fas fa-sync-alt"></i> Cập nhật loại phòng
+                </button>
+            </div>
+
+        </div>
+</th:block>
+
+</body>
+</html>

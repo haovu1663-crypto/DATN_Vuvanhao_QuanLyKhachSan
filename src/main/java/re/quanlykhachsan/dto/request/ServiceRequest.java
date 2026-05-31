@@ -14,7 +14,8 @@ public class ServiceRequest {
     private String name;// tên
     private String description;
     private List<MultipartFile> images;
+    private List<String> keepImages; // URL ảnh cũ cần giữ lại khi update
     private Double price;
-    private LocalDateTime createdAt;
-    private  String status;
+
+    private boolean active;
 }

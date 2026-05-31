@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<body>
+
+<th:block th:fragment="content">
+    <div id="rs-confirm-overlay">
+        <div id="rs-confirm-box">
+            <div class="rs-confirm-icon">✅</div>
+            <div class="rs-confirm-title">Xác nhận chuyển trạng thái</div>
+            <div class="rs-confirm-desc">
+                Bạn có chắc chắn phòng đã sẵn sàng cho thuê chưa?<br>
+                Hành động này sẽ chuyển phòng về trạng thái <strong>Available</strong>.
+            </div>
+            <div class="rs-confirm-actions">
+                <button class="rs-confirm-cancel" onclick="rsConfirmClose()">Huỷ bỏ</button>
+                <button class="rs-confirm-ok" id="rs-confirm-ok-btn">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CI CONFIRM MODAL ===== -->
+    <div id="ci-confirm-overlay">
+        <div id="ci-confirm-box">
+            <div class="ci-confirm-header">
+                <div class="ci-confirm-icon-wrap">🚪</div>
+                <div class="ci-confirm-title">Xác nhận Check In</div>
+                <div class="ci-confirm-subtitle">Vui lòng kiểm tra thông tin trước khi xác nhận</div>
+            </div>
+            <div class="ci-confirm-details">
+                <div class="ci-confirm-row">
+                    <span class="ci-confirm-label"><i class="fas fa-door-open"></i> Phòng</span>
+                    <span class="ci-confirm-value" id="ci-confirm-room">—</span>
+                </div>
+                <div style="height:1px;background:#e2e8f0;margin:2px 0;"></div>
+                <div class="ci-confirm-row">
+                    <span class="ci-confirm-label"><i class="fab fa-google"></i> Email</span>
+                    <span class="ci-confirm-value" id="ci-confirm-email">—</span>
+                </div>
+                <div style="height:1px;background:#e2e8f0;margin:2px 0;"></div>
+                <div class="ci-confirm-row">
+                    <span class="ci-confirm-label"><i class="fas fa-user-tie"></i> Nhân viên</span>
+                    <span class="ci-confirm-value" id="ci-confirm-employee">—</span>
+                </div>
+            </div>
+            <div class="ci-confirm-actions">
+                <button class="ci-confirm-cancel" onclick="ciConfirmClose()">Huỷ bỏ</button>
+                <button class="ci-confirm-ok" id="ci-confirm-ok-btn">
+                    <i class="fas fa-check-circle"></i> Xác nhận Check In
+                </button>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+</body>
+</html>

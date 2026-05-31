@@ -50,6 +50,12 @@ public class ServiceController {
         );
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
-
+    @GetMapping("/{id}")
+    public ResponseEntity<?> get(@PathVariable Long id) throws ResourceNotFoundException {
+        return  new ResponseEntity<>(serviceService.getById(id), HttpStatus.OK);
+    }
+    @GetMapping()
+    public ResponseEntity<?> get()  {
+        return  new ResponseEntity<>(serviceService.getAllActive(), HttpStatus.OK);
+    }
 }
