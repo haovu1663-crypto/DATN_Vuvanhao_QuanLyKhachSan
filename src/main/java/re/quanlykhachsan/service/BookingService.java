@@ -289,8 +289,8 @@ public class BookingService implements IBookingService {
         List<SoPhongServiceRequest> soPhongRequests = bookings.stream()
                 .map(room -> {
                     SoPhongServiceRequest request = new SoPhongServiceRequest();
-                    request.setId(room.getId());
-                    request.setName(room.getRoom().getName());
+                    request.setId(room.getId());           // booking id ✅
+                    request.setName(room.getRoom().getName());     // tên phòng ✅
                     request.setNameCutomer(room.getName());
                     return request;
                 })

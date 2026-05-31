@@ -9,6 +9,55 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <link rel="stylesheet" th:href="@{/roomform.css}">
+    <style>
+        /* ===== NÚT ADD DỊCH VỤ ===== */
+        .sv-add-service-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity .15s, transform .1s;
+            white-space: nowrap;
+        }
+        .sv-add-service-btn:hover  { opacity: .88; transform: translateY(-1px); }
+        .sv-add-service-btn:active { opacity: 1;   transform: translateY(0);    }
+        .sv-add-service-btn i { font-size: 11px; }
+
+        /* ===== NÚT ADD SERVICE HEADER ===== */
+        .sv-add-service-header-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.35);
+            transition: opacity .15s, transform .1s, box-shadow .15s;
+        }
+        .sv-add-service-header-btn:hover  {
+            opacity: .9;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(37,99,235,0.45);
+        }
+        .sv-add-service-header-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+        }
+        .sv-add-service-header-btn i { font-size: 12px; }
+    </style>
 </head>
 <body class="bg-[#f8fafc] flex h-screen overflow-hidden text-slate-900">
 
@@ -1801,15 +1850,21 @@
                     <p class="sv-subtitle">Danh sách khách đang check-in tại chi nhánh</p>
                 </div>
             </div>
-            <div class="sv-search-wrap">
-                <span class="sv-search-icon"><i class="fas fa-search"></i></span>
-                <input
-                        type="text"
-                        id="svSearchInput"
-                        class="sv-search-input"
-                        placeholder="Tìm theo tên phòng..."
-                        oninput="svFilterRooms(this.value)"
-                />
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div class="sv-search-wrap">
+                    <span class="sv-search-icon"><i class="fas fa-search"></i></span>
+                    <input
+                            type="text"
+                            id="svSearchInput"
+                            class="sv-search-input"
+                            placeholder="Tìm theo tên phòng..."
+                            oninput="svFilterRooms(this.value)"
+                    />
+                </div>
+                <button class="sv-add-service-header-btn" onclick="svOpenAddService(null, null)">
+                    <i class="fas fa-plus"></i>
+                    Add Service
+                </button>
             </div>
         </div>
 
@@ -1818,10 +1873,10 @@
             <table class="sv-table">
                 <thead>
                 <tr>
-                    <th>#</th>
+                    <th>ID Booking</th>
                     <th>Tên phòng</th>
                     <th>Tên khách</th>
-                    <th>ID phòng</th>
+                    <th>Dịch vụ</th>
                 </tr>
                 </thead>
                 <tbody id="svTableBody">
@@ -1993,6 +2048,7 @@
 <script th:src="@{/js/toast.js}"></script>
 <script th:src="@{/js/header.js}"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script th:src="@{/js/service.js}"></script>
 <script th:src="@{/js/sidebar.js}"></script>
 <script th:src="@{/js/room-form.js}"></script>
 <script th:src="@{/js/reset-status.js}"></script>

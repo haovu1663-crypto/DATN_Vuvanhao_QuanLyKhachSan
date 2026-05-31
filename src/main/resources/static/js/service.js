@@ -18,7 +18,7 @@
     /*  Hàm chính: load dữ liệu từ API                                      */
     /* ------------------------------------------------------------------ */
     window.svLoadRooms = async function () {
-        const workBrach = localStorage.getItem('workBranch') || '';
+        const workBrach = (localStorage.getItem('workBranch') || '').trim();
 
         if (!workBrach) {
             svRenderError('Không tìm thấy thông tin chi nhánh (workBranch) trong localStorage.');
@@ -62,11 +62,24 @@
     };
 
     /* ------------------------------------------------------------------ */
+    /*  Mở modal / xử lý thêm dịch vụ (tuỳ chỉnh theo nghiệp vụ)           */
+    /* ------------------------------------------------------------------ */
+    window.svOpenAddService = function (bookingId, roomName) {
+        // TODO: mở modal hoặc điều hướng tới trang thêm dịch vụ
+        Swal.fire({
+            icon: 'info',
+            title: 'Thêm dịch vụ',
+            text: `Booking #${bookingId} — Phòng: ${roomName}`,
+            confirmButtonColor: '#2563eb'
+        });
+    };
+
+    /* ------------------------------------------------------------------ */
     /*  Render bảng                                                          */
     /* ------------------------------------------------------------------ */
     function svRender(rooms) {
-        const tbody        = document.getElementById('svTableBody');
-        const emptyState   = document.getElementById('svEmptyState');
+        const tbody      = document.getElementById('svTableBody');
+        const emptyState = document.getElementById('svEmptyState');
 
         if (!tbody) return;
 
@@ -78,15 +91,15 @@
 
         if (emptyState) emptyState.style.display = 'none';
 
-        tbody.innerHTML = rooms.map((room, idx) => {
-            const roomName     = escHtml(room.name       || '—');
+        tbody.innerHTML = rooms.map((room) => {
+            const roomName     = escHtml(room.name        || '—');
             const customerName = escHtml(room.nameCutomer || '—');
-            const roomId       = room.id ?? '—';
+            const bookingId    = room.id ?? '—';
             const initial      = customerName.charAt(0).toUpperCase() || '?';
 
             return `
-            <tr data-room-id="${roomId}">
-                <td>${idx + 1}</td>
+            <tr data-room-id="${bookingId}">
+                <td>${bookingId}</td>
                 <td>
                     <span class="sv-room-badge">
                         <i class="fas fa-door-open"></i>
@@ -99,7 +112,16 @@
                         ${customerName}
                     </div>
                 </td>
-                <td>${roomId}</td>
+                <td>
+                    <button
+                        class="sv-add-service-btn"
+                        onclick="svOpenAddService(${bookingId}, '${roomName}')"
+                        title="Thêm dịch vụ cho phòng ${roomName}"
+                    >
+                        <i class="fas fa-plus"></i>
+                        Add dịch vụ
+                    </button>
+                </td>
             </tr>`;
         }).join('');
     }
