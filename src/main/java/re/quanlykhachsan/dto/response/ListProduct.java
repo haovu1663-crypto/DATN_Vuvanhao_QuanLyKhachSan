@@ -9,6 +9,7 @@ import java.util.List;
 @Setter
 public class ListProduct {
     private Long id;
+    private String type;
     private String name;// tên
     private List<String> images;
     private Double price;

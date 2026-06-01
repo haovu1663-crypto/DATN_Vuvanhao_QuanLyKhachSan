@@ -248,21 +248,68 @@ async function coDoCheckOut() {
 // BƯỚC 3 — MỞ PAYMENT MODAL (dùng modal sẵn có trong roomform.html)
 // =====================================================================
 function coPayOpen(checkOutData, btn) {
-    _coCheckOutData = checkOutData; // { id, price }
+    _coCheckOutData = checkOutData;
     _coPendingBtn   = btn;
 
-    const price = checkOutData?.price ?? checkOutData?.totalPrice ?? checkOutData?.toyalPrice ?? null;
-    const formattedPrice = price != null
-        ? new Intl.NumberFormat('vi-VN').format(price) + ' ₫'
-        : 'Liên hệ thu ngân';
+    const fmt = v => new Intl.NumberFormat('vi-VN').format(v || 0) + ' ₫';
+
+    // ── Số tiền còn lại cần thanh toán (gửi lên payment API) ──
+    const price = checkOutData?.price ?? checkOutData?.totalPrice ?? checkOutData?.toyalPrice ?? 0;
+    const formattedPrice = fmt(price);
 
     // Điền số tiền vào các ô trong modal
-    const amountEl     = document.getElementById('co-pay-amount');
-    const amountCopyEl = document.getElementById('co-pay-amount-copy');
-    const cashAmountEl = document.getElementById('co-cash-amount-display');
-    if (amountEl)     amountEl.textContent     = formattedPrice;
-    if (amountCopyEl) amountCopyEl.textContent = formattedPrice;
-    if (cashAmountEl) cashAmountEl.textContent = formattedPrice;
+    ['co-pay-amount', 'co-pay-amount-copy', 'co-cash-amount-display'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = formattedPrice;
+    });
+
+    // ── Breakdown chi tiết (nếu backend trả về) ──
+    const breakdownEl = document.getElementById('co-pay-breakdown');
+    if (breakdownEl) {
+        const roomAmt    = checkOutData.roomAmount    ?? null;
+        const svcAmt     = checkOutData.serviceAmount ?? null;
+        const totalAmt   = checkOutData.totalPrice    ?? null;
+        const paidAmt    = checkOutData.alreadyPaid   ?? null;
+        const days       = checkOutData.days          ?? null;
+
+        if (roomAmt !== null) {
+            breakdownEl.style.display = '';
+            breakdownEl.innerHTML = `
+            <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;
+                        padding:14px 16px;margin-bottom:14px;font-size:13px;">
+                <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;
+                            letter-spacing:.06em;margin-bottom:10px;">
+                    <i class="fas fa-receipt"></i> Chi tiết hóa đơn
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px;">
+                    <div style="display:flex;justify-content:space-between;color:#475569;">
+                        <span><i class="fas fa-bed" style="width:16px;color:#94a3b8;"></i>
+                              Tiền phòng${days ? ' (' + days + ' đêm)' : ''}</span>
+                        <span style="font-weight:600;">${fmt(roomAmt)}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;color:#475569;">
+                        <span><i class="fas fa-concierge-bell" style="width:16px;color:#94a3b8;"></i>
+                              Tiền dịch vụ</span>
+                        <span style="font-weight:600;color:${svcAmt > 0 ? '#2563eb' : '#94a3b8'};">
+                            ${fmt(svcAmt)}</span>
+                    </div>
+                    ${paidAmt > 0 ? `
+                    <div style="display:flex;justify-content:space-between;color:#475569;">
+                        <span><i class="fas fa-coins" style="width:16px;color:#94a3b8;"></i>
+                              Đã đặt cọc</span>
+                        <span style="font-weight:600;color:#16a34a;">- ${fmt(paidAmt)}</span>
+                    </div>` : ''}
+                    <div style="height:1px;background:#e2e8f0;margin:4px 0;"></div>
+                    <div style="display:flex;justify-content:space-between;font-weight:800;font-size:14px;">
+                        <span style="color:#1e293b;">Còn lại cần thanh toán</span>
+                        <span style="color:#dc2626;">${fmt(price)}</span>
+                    </div>
+                </div>
+            </div>`;
+        } else {
+            breakdownEl.style.display = 'none';
+        }
+    }
 
     // Cập nhật nội dung chuyển khoản
     const contentEl = document.getElementById('co-pay-content');

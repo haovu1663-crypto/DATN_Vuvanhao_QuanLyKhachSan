@@ -1590,6 +1590,9 @@
                 <div class="co-pay-total-amount" id="co-pay-amount">—</div>
             </div>
 
+            <!-- Breakdown chi tiết hóa đơn (hiện khi checkout có dịch vụ) -->
+            <div id="co-pay-breakdown" style="display:none;"></div>
+
             <!-- Ô nhập tiền cọc (chỉ hiện khi đặt phòng offline) -->
             <div id="bk-deposit-amount-row" style="display:none;margin-bottom:18px;">
                 <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Số tiền đặt cọc (₫)</label>
@@ -2348,17 +2351,21 @@
             </div>
         </div>
 
-        <!-- Search bar -->
+        <!-- Thanh tìm kiếm + Tab loại dịch vụ -->
         <div style="padding:14px 20px 0;flex-shrink:0;">
-            <div style="position:relative;">
-                <i class="fas fa-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:13px;"></i>
+            <!-- Search -->
+            <div style="position:relative;margin-bottom:12px;">
+                <i class="fas fa-search" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:13px;"></i>
                 <input id="sv-order-search" type="text" placeholder="Tìm dịch vụ..."
-                       oninput="svOrderFilter(this.value)"
+                       oninput="svOrderSearch(this.value)"
                        style="width:100%;padding:10px 14px 10px 38px;border:1.5px solid #e2e8f0;
                               border-radius:12px;font-size:13px;font-family:inherit;color:#1e293b;
-                              background:#f8fafc;outline:none;box-sizing:border-box;
-                              transition:border-color .15s;"
+                              background:#f8fafc;outline:none;box-sizing:border-box;transition:border-color .15s;"
                        onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e2e8f0'">
+            </div>
+            <!-- Tabs loại -->
+            <div id="sv-order-tabs" class="sv-type-bar" style="margin-bottom:4px;">
+                <div style="color:#94a3b8;font-size:12px;padding:6px 8px;">Đang tải...</div>
             </div>
         </div>
 
@@ -2418,6 +2425,7 @@
         let _svOrderAll       = [];   // toàn bộ danh sách từ API
         let _svOrderFiltered  = [];   // sau khi lọc
         let _svOrderQty       = {};   // { serviceId: quantity }
+        let _svOrderActiveType = 'ALL'; // tab đang chọn
 
         /* ---------- MỞ MODAL ---------- */
         window.svOpenOrderModal = async function (bookingId, roomName) {
@@ -2428,8 +2436,7 @@
             const sub = document.getElementById('sv-order-banner-sub');
             if (sub) sub.textContent = `Booking #${bookingId}  ·  Phòng: ${roomName}`;
 
-            const search = document.getElementById('sv-order-search');
-            if (search) search.value = '';
+            _svOrderActiveType = 'ALL';
 
             svOrderSummaryUpdate();
 
@@ -2456,20 +2463,64 @@
                 const json = await res.json();
                 _svOrderAll = Array.isArray(json) ? json : (Array.isArray(json.data) ? json.data : []);
                 _svOrderFiltered = [..._svOrderAll];
+                svOrderRenderTabs();
                 svOrderRender();
             } catch (e) {
                 svOrderListHtml('<div style="text-align:center;padding:40px 0;color:#ef4444;"><i class="fas fa-exclamation-circle" style="font-size:22px;margin-bottom:10px;display:block;"></i>Không thể tải dịch vụ. Thử lại sau.</div>');
             }
         }
 
-        /* ---------- LỌC ---------- */
-        window.svOrderFilter = function (kw) {
-            kw = (kw || '').toLowerCase().trim();
-            _svOrderFiltered = kw
-                ? _svOrderAll.filter(s => (s.name || '').toLowerCase().includes(kw))
-                : [..._svOrderAll];
+        /* ---------- ICON THEO TYPE ---------- */
+        function svTypeIcon(t) {
+            if (!t || t === 'ALL')  return 'fas fa-th-large';
+            const l = t.toLowerCase();
+            if (l.includes('ăn') || l.includes('uống') || l.includes('food')) return 'fas fa-utensils';
+            if (l.includes('giặt') || l.includes('ủi') || l.includes('laundry')) return 'fas fa-tshirt';
+            if (l.includes('spa') || l.includes('massage'))  return 'fas fa-spa';
+            if (l.includes('đưa đón') || l.includes('transfer')) return 'fas fa-car';
+            if (l.includes('thuê xe') || l.includes('xe'))   return 'fas fa-motorcycle';
+            return 'fas fa-concierge-bell';
+        }
+
+        /* ---------- RENDER TABS ---------- */
+        function svOrderRenderTabs() {
+            const types  = ['ALL', ...new Set(_svOrderAll.map(s => s.type || 'Khác').filter(Boolean))];
+            const tabsEl = document.getElementById('sv-order-tabs');
+            if (!tabsEl) return;
+            tabsEl.innerHTML = types.map(t => {
+                const active = t === _svOrderActiveType;
+                const label  = t === 'ALL' ? 'Tất cả' : t;
+                return `<button type="button"
+                class="sv-type-pill${active ? ' active' : ''}"
+                data-sv-tab="${t}"
+                onclick="svOrderFilterByType('${t}')"
+            ><i class="${svTypeIcon(t)}"></i> ${label}</button>`;
+            }).join('');
+        }
+
+        /* ---------- LỌC THEO TYPE ---------- */
+        window.svOrderFilterByType = function (type) {
+            _svOrderActiveType = type;
+            svOrderApplyFilter();
+            svOrderRenderTabs();
             svOrderRender();
         };
+
+        /* ---------- TÌM KIẾM ---------- */
+        window.svOrderSearch = function (kw) {
+            svOrderApplyFilter(kw);
+            svOrderRender();
+        };
+
+        /* ---------- ÁP DỤNG CẢ 2 BỘ LỌC ---------- */
+        function svOrderApplyFilter(kw) {
+            const search = (kw !== undefined ? kw : (document.getElementById('sv-order-search') || {}).value || '').toLowerCase().trim();
+            _svOrderFiltered = _svOrderAll.filter(s => {
+                const matchType = _svOrderActiveType === 'ALL' || (s.type || 'Khác') === _svOrderActiveType;
+                const matchKw   = !search || (s.name || '').toLowerCase().includes(search);
+                return matchType && matchKw;
+            });
+        }
 
         /* ---------- RENDER DANH SÁCH ---------- */
         function svOrderRender() {

@@ -10,6 +10,7 @@ import re.quanlykhachsan.dto.response.*;
 import re.quanlykhachsan.entity.*;
 import re.quanlykhachsan.exception.ResourceNotFoundException;
 import re.quanlykhachsan.repository.*;
+import re.quanlykhachsan.repository.OrderRepository;
 import re.quanlykhachsan.service.interfac.IBookingService;
 
 import java.time.LocalDate;
@@ -29,6 +30,7 @@ public class BookingService implements IBookingService {
     private final RoomService roomService;
     private final ModelMapper modelMapper;
     private final PaymentRespository paymentRepository;
+    private final OrderRepository orderRepository;
     @Override
     public BookingRespone CustomerBooking(BookingRequest bookingRequest) throws ResourceNotFoundException {
         Booking booking = new Booking();
@@ -58,7 +60,7 @@ public class BookingService implements IBookingService {
     @Override
     public BookingRespone EmployeeBooking(EmployeeBooking bookingRequest) throws ResourceNotFoundException {
         Booking booking = new Booking();
-        booking.setStatusBooking(StatusBooking.PENDING);
+        booking.setStatusBooking(StatusBooking.CHECKED_IN);
         booking.setCheckInDate(LocalDateTime.now());
         booking.setCheckOutDate(null);
         booking.setToyalPrice(null);
@@ -205,15 +207,34 @@ public class BookingService implements IBookingService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy booking"));
         booking.setCheckOutDate(LocalDateTime.now());
         booking.setStatusBooking(StatusBooking.CHECKED_OUT);
+
+        // --- Tiền phòng ---
         long daysBetween = ChronoUnit.DAYS.between(booking.getEnventCheckinDate(), booking.getEnventCheckoutDate());
-        booking.setToyalPrice(booking.getRoom().getRoomType().getPrice() * daysBetween);
+        double roomAmount = booking.getRoom().getRoomType().getPrice() * daysBetween;
+
+        // --- Tiền dịch vụ: tổng amount từ bảng orders theo bookingId ---
+        Double serviceAmount = orderRepository.sumAmountByBookingId(bookingId);
+        if (serviceAmount == null) serviceAmount = 0.0;
+
+        // --- Tổng = tiền phòng + tiền dịch vụ ---
+        double totalPrice = roomAmount + serviceAmount;
+        booking.setToyalPrice(totalPrice);
         bookingRespository.save(booking);
+
+        // --- Tiền đã cọc ---
+        Double alreadyPaid = paymentRepository.findDepositAmountByBookingId(bookingId);
+        if (alreadyPaid == null) alreadyPaid = 0.0;
+
+        double remaining = totalPrice - alreadyPaid;
 
         CheckOutRespone response = new CheckOutRespone();
         response.setId(booking.getId());
-        Double alreadyPaid = paymentRepository.findDepositAmountByBookingId(booking.getId());
-        double remaining = booking.getToyalPrice() - alreadyPaid;
-        response.setPrice(remaining); // ← đúng rồi, không còn = 0 nữa
+        response.setPrice(remaining);          // còn lại cần thanh toán
+        response.setRoomAmount(roomAmount);    // tiền phòng
+        response.setServiceAmount(serviceAmount); // tiền dịch vụ
+        response.setTotalPrice(totalPrice);    // tổng cộng
+        response.setAlreadyPaid(alreadyPaid);  // đã cọc
+        response.setDays((int) daysBetween);   // số ngày ở
         return response;
     }
     // hiện thi ls đặt phòng đã đã
@@ -285,7 +306,7 @@ public class BookingService implements IBookingService {
 
     @Override
     public List<SoPhongServiceRequest> soPhongService(String workBrach) {
-       List<Booking> bookings = bookingRespository.findByRoom_WorkBranchAndStatusBooking(workBrach, StatusBooking.CHECKED_IN);
+        List<Booking> bookings = bookingRespository.findByRoom_WorkBranchAndStatusBooking(workBrach, StatusBooking.CHECKED_IN);
         List<SoPhongServiceRequest> soPhongRequests = bookings.stream()
                 .map(room -> {
                     SoPhongServiceRequest request = new SoPhongServiceRequest();
