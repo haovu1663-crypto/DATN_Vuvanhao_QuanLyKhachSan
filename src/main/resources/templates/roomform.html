@@ -374,10 +374,14 @@
 
 <!-- ===== VIEW RESET STATUS ===== -->
 <main id="view-reset-status" class="flex-1 flex-col overflow-y-auto relative">
-    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-20 border-b border-slate-200 flex items-center justify-between px-10">
+    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-24 border-b border-slate-200 flex items-center justify-between px-10">
         <div>
             <h1 class="text-2xl font-bold text-slate-800">Reset Status Phòng</h1>
             <p class="text-xs text-slate-500 font-medium">Dashboard / Rooms / Reset Status</p>
+            <p class="text-xs font-semibold mt-0.5 flex items-center gap-1.5" style="color:#2563eb;">
+                <i class="fas fa-map-marker-alt" style="font-size:10px;"></i>
+                <span id="rs-branch-text">—</span>
+            </p>
         </div>
         <div class="flex items-center gap-4">
             <button onclick="rsReload()" class="flex items-center gap-2 px-5 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl font-semibold text-sm transition-all">
@@ -430,10 +434,14 @@
 
 <!-- ===== CHECK IN VIEW ===== -->
 <main id="view-checkin" class="flex-1 flex flex-col overflow-y-auto relative">
-    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-20 border-b border-slate-200 flex items-center justify-between px-10">
+    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-24 border-b border-slate-200 flex items-center justify-between px-10">
         <div>
             <h1 class="text-2xl font-bold text-slate-800">Check In Room</h1>
             <p class="text-xs text-slate-500 font-medium">Dashboard / Rooms / Check In</p>
+            <p class="text-xs font-semibold mt-0.5 flex items-center gap-1.5" style="color:#2563eb;">
+                <i class="fas fa-map-marker-alt" style="font-size:10px;"></i>
+                <span id="ci-branch-text">—</span>
+            </p>
         </div>
         <div class="flex items-center gap-4">
             <button onclick="ciReload()" class="flex items-center gap-2 px-5 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl font-semibold text-sm transition-all">
@@ -558,10 +566,14 @@
 
 <!-- ===== CHECK OUT VIEW ===== -->
 <main id="view-checkout" class="flex-1 flex flex-col overflow-y-auto relative">
-    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-20 border-b border-slate-200 flex items-center justify-between px-10">
+    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-24 border-b border-slate-200 flex items-center justify-between px-10">
         <div>
             <h1 class="text-2xl font-bold text-slate-800">Check Out Room</h1>
             <p class="text-xs text-slate-500 font-medium">Dashboard / Rooms / Check Out</p>
+            <p class="text-xs font-semibold mt-0.5 flex items-center gap-1.5" style="color:#2563eb;">
+                <i class="fas fa-map-marker-alt" style="font-size:10px;"></i>
+                <span id="co-branch-text">—</span>
+            </p>
         </div>
         <div class="flex items-center gap-4">
             <button onclick="coReload()" class="flex items-center gap-2 px-5 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-600 rounded-xl font-semibold text-sm transition-all">
@@ -1222,10 +1234,30 @@
             <h1 class="text-2xl font-bold text-slate-800">Thêm loại phòng mới</h1>
             <p class="text-xs text-slate-500 font-medium">Dashboard / Room Types / Create</p>
         </div>
-        <div class="flex items-center gap-6">
+        <div class="flex items-center gap-4">
+            <div class="h-8 w-[1px] bg-slate-200"></div>
             <div class="relative cursor-pointer text-slate-400 hover:text-blue-600 transition-colors" title="Thông báo">
                 <i class="far fa-bell text-xl"></i>
                 <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full border-2 border-white"></span>
+            </div>
+            <div class="h-8 w-[1px] bg-slate-200"></div>
+            <div class="flex items-center gap-3 bg-slate-50 p-1.5 pr-4 rounded-full border border-slate-100 hover:bg-slate-100 transition-all cursor-pointer" id="art-user-chip" onclick="sharedToggleUserMenu('art')">
+                <div id="art-avatar" class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm flex-shrink-0"
+                     style="background: linear-gradient(135deg, #3b6fd4, #5b8fe8);">??</div>
+                <span class="text-sm font-bold text-slate-700" id="art-greeting">Hi, ...</span>
+            </div>
+            <div id="art-user-menu" class="hidden absolute top-[72px] right-8 z-50 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden py-1">
+                <div class="px-4 py-3 border-b border-slate-100">
+                    <p class="text-xs text-slate-400 font-medium">Đăng nhập với tư cách</p>
+                    <p class="text-sm font-bold text-slate-800 mt-0.5 truncate" id="art-fullname-menu">—</p>
+                    <p class="text-xs text-blue-500 font-semibold mt-0.5" id="art-role-menu">—</p>
+                </div>
+                <a href="/demo" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                    <i class="fas fa-home w-4 text-slate-400"></i> Về trang chủ
+                </a>
+                <button onclick="rfLogout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
+                    <i class="fas fa-sign-out-alt w-4"></i> Đăng xuất
+                </button>
             </div>
         </div>
     </header>
@@ -1309,6 +1341,32 @@
         <div>
             <h1 class="text-2xl font-bold text-slate-800">Cập nhật loại phòng</h1>
             <p class="text-xs text-slate-500 font-medium">Dashboard / Room Types / Update</p>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="h-8 w-[1px] bg-slate-200"></div>
+            <div class="relative cursor-pointer text-slate-400 hover:text-blue-600 transition-colors" title="Thông báo">
+                <i class="far fa-bell text-xl"></i>
+                <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full border-2 border-white"></span>
+            </div>
+            <div class="h-8 w-[1px] bg-slate-200"></div>
+            <div class="flex items-center gap-3 bg-slate-50 p-1.5 pr-4 rounded-full border border-slate-100 hover:bg-slate-100 transition-all cursor-pointer" id="urt-user-chip" onclick="sharedToggleUserMenu('urt')">
+                <div id="urt-avatar" class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm flex-shrink-0"
+                     style="background: linear-gradient(135deg, #3b6fd4, #5b8fe8);">??</div>
+                <span class="text-sm font-bold text-slate-700" id="urt-greeting">Hi, ...</span>
+            </div>
+            <div id="urt-user-menu" class="hidden absolute top-[72px] right-8 z-50 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden py-1">
+                <div class="px-4 py-3 border-b border-slate-100">
+                    <p class="text-xs text-slate-400 font-medium">Đăng nhập với tư cách</p>
+                    <p class="text-sm font-bold text-slate-800 mt-0.5 truncate" id="urt-fullname-menu">—</p>
+                    <p class="text-xs text-blue-500 font-semibold mt-0.5" id="urt-role-menu">—</p>
+                </div>
+                <a href="/demo" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                    <i class="fas fa-home w-4 text-slate-400"></i> Về trang chủ
+                </a>
+                <button onclick="rfLogout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
+                    <i class="fas fa-sign-out-alt w-4"></i> Đăng xuất
+                </button>
+            </div>
         </div>
     </header>
 
@@ -1834,16 +1892,16 @@
         <div class="glass-card rounded-2xl p-5 flex items-center gap-4 flex-wrap">
             <!-- Tab chọn loại -->
             <div class="flex gap-1 bg-slate-100 p-1 rounded-xl">
-                <button class="rv-tab active" id="rv-tab-day"   onclick="rvSetTab('day')">
+                <button class="rv-tab active" id="rv-tab-day"   onclick="rvSetTab('day');rvLoad()">
                     <i class="fas fa-calendar-day text-xs mr-1"></i> Ngày
                 </button>
-                <button class="rv-tab" id="rv-tab-month" onclick="rvSetTab('month')">
+                <button class="rv-tab" id="rv-tab-month" onclick="rvSetTab('month');rvLoad()">
                     <i class="fas fa-calendar-alt text-xs mr-1"></i> Tháng
                 </button>
-                <button class="rv-tab" id="rv-tab-quarter" onclick="rvSetTab('quarter')">
+                <button class="rv-tab" id="rv-tab-quarter" onclick="rvSetTab('quarter');rvLoad()">
                     <i class="fas fa-layer-group text-xs mr-1"></i> Quý
                 </button>
-                <button class="rv-tab" id="rv-tab-year"  onclick="rvSetTab('year')">
+                <button class="rv-tab" id="rv-tab-year"  onclick="rvSetTab('year');rvLoad()">
                     <i class="fas fa-calendar text-xs mr-1"></i> Năm
                 </button>
             </div>
@@ -1852,6 +1910,7 @@
             <div id="rv-year-wrap" class="flex items-center gap-2">
                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Năm</label>
                 <input type="number" id="rv-input-year" value="2025" min="2020" max="2030"
+                       onchange="rvLoad()"
                        class="w-24 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-blue-400 transition-all text-center">
             </div>
 
@@ -1859,15 +1918,15 @@
             <div id="rv-date-range-wrap" class="hidden flex items-center gap-2">
                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Từ</label>
                 <input type="date" id="rv-date-from"
+                       onchange="rvLoad()"
                        class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 outline-none focus:border-blue-400 transition-all">
                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">đến</label>
                 <input type="date" id="rv-date-to"
+                       onchange="rvLoad()"
                        class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 outline-none focus:border-blue-400 transition-all">
             </div>
 
-            <button onclick="rvLoad()" class="ml-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-all flex items-center gap-2 shadow-sm shadow-blue-200">
-                <i class="fas fa-search"></i> Xem thống kê
-            </button>
+
         </div>
 
         <!-- ── SUMMARY CARDS ── -->
@@ -1919,7 +1978,7 @@
                 <canvas id="rv-chart"></canvas>
                 <div id="rv-chart-empty" class="hidden absolute inset-0 flex flex-col items-center justify-center text-slate-400">
                     <i class="fas fa-chart-area text-4xl mb-3 opacity-30"></i>
-                    <p class="font-semibold text-sm">Chưa có dữ liệu — hãy bấm "Xem thống kê"</p>
+                    <p class="font-semibold text-sm">Chưa có dữ liệu cho kỳ đã chọn</p>
                 </div>
                 <div id="rv-chart-loading" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-white/80">
                     <i class="fas fa-spinner fa-spin text-2xl text-blue-400 mb-2"></i>
@@ -1948,7 +2007,7 @@
                     <tr>
                         <td colspan="4" class="px-5 py-12 text-center text-slate-400">
                             <i class="fas fa-chart-pie text-3xl mb-3 block opacity-30"></i>
-                            <span class="text-sm">Chọn bộ lọc và bấm "Xem thống kê"</span>
+                            <span class="text-sm">Đang chờ dữ liệu...</span>
                         </td>
                     </tr>
                     </tbody>
@@ -1961,9 +2020,51 @@
 
 <!-- ===== MAIN: SERVICE ROOM ===== -->
 <main id="view-service" class="flex-1 flex-col overflow-y-auto relative" style="display:none;">
+
+    <!-- Sticky header đồng bộ với các tab khác -->
+    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-24 border-b border-slate-200 flex items-center justify-between px-10">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Service Room</h1>
+            <p class="text-xs text-slate-500 font-medium">Dashboard / Rooms / Service</p>
+            <p class="text-xs font-semibold mt-0.5 flex items-center gap-1.5" style="color:#2563eb;">
+                <i class="fas fa-map-marker-alt" style="font-size:10px;"></i>
+                <span id="sv-branch-text">—</span>
+            </p>
+        </div>
+        <div class="flex items-center gap-4">
+            <button onclick="svReload()" class="flex items-center gap-2 px-5 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl font-semibold text-sm transition-all">
+                <i class="fas fa-sync-alt"></i> Tải lại
+            </button>
+            <div class="h-8 w-[1px] bg-slate-200"></div>
+            <div class="relative cursor-pointer text-slate-400 hover:text-blue-600 transition-colors" title="Thông báo">
+                <i class="far fa-bell text-xl"></i>
+                <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full border-2 border-white"></span>
+            </div>
+            <div class="h-8 w-[1px] bg-slate-200"></div>
+            <div class="flex items-center gap-3 bg-slate-50 p-1.5 pr-4 rounded-full border border-slate-100 hover:bg-slate-100 transition-all cursor-pointer" id="sv-user-chip" onclick="sharedToggleUserMenu('sv')">
+                <div id="sv-avatar" class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm flex-shrink-0"
+                     style="background: linear-gradient(135deg, #3b6fd4, #5b8fe8);">??</div>
+                <span class="text-sm font-bold text-slate-700" id="sv-greeting">Hi, ...</span>
+            </div>
+            <div id="sv-user-menu" class="hidden absolute top-[72px] right-8 z-50 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden py-1">
+                <div class="px-4 py-3 border-b border-slate-100">
+                    <p class="text-xs text-slate-400 font-medium">Đăng nhập với tư cách</p>
+                    <p class="text-sm font-bold text-slate-800 mt-0.5 truncate" id="sv-fullname-menu">—</p>
+                    <p class="text-xs text-blue-500 font-semibold mt-0.5" id="sv-role-menu">—</p>
+                </div>
+                <a href="/demo" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                    <i class="fas fa-home w-4 text-slate-400"></i> Về trang chủ
+                </a>
+                <button onclick="rfLogout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
+                    <i class="fas fa-sign-out-alt w-4"></i> Đăng xuất
+                </button>
+            </div>
+        </div>
+    </header>
+
     <div style="display:flex; flex-direction:column; gap:1.5rem; padding: 2rem;">
 
-        <!-- Header card -->
+        <!-- Header card (search + action buttons) -->
         <div class="sv-header-card">
             <div class="sv-header-left">
                 <span class="sv-header-icon"><i class="fas fa-concierge-bell"></i></span>
@@ -2272,17 +2373,15 @@
     // Khi chọn loại phòng → cuộn xuống danh sách phòng trống và highlight
     // Auto load khi tab booking được mở
     document.addEventListener('DOMContentLoaded', function() {
-        // Hook vào sự kiện click menu Booking để load roomtypes
+        // Gọi load ngay lập tức vì Booking Room là tab mặc định đầu tiên
+        bkrtLoad();
+
+        // Hook vào sự kiện click menu Booking để reload nếu cần
         const menuBooking = document.getElementById('menuBooking');
         if (menuBooking) {
             menuBooking.addEventListener('click', function() {
                 if (!_bkrtAll.length) bkrtLoad();
             });
-        }
-        // Load luôn nếu booking đang visible
-        const viewBooking = document.getElementById('view-booking');
-        if (viewBooking && (viewBooking.style.display !== 'none' && viewBooking.classList.contains('flex'))) {
-            bkrtLoad();
         }
     });
 </script>
@@ -2302,10 +2401,40 @@
             name = localStorage.getItem('workBranch') || '';
         }
         if (!name) return;
-        ['work-branch-text'].forEach(id => {
+        ['work-branch-text', 'rs-branch-text', 'ci-branch-text', 'co-branch-text', 'sv-branch-text'].forEach(id => {
             const el = document.getElementById(id);
             if (el) el.textContent = name;
         });
+    })();
+</script>
+
+<script>
+    // ===== POPULATE HEADER CHO CÁC TAB MỚI (sv, art, urt) =====
+    // Đảm bảo greeting/avatar/fullname được fill đúng ngay cả khi header.js
+    // chưa liệt kê các prefix này
+    (function populateNewHeaders() {
+        const prefixes = ['sv', 'art', 'urt'];
+        function fill() {
+            const fullName = localStorage.getItem('fullName') || '';
+            const role     = localStorage.getItem('userRole') || '';
+            const initials = fullName.split(' ').filter(Boolean).slice(-2).map(w => w[0]).join('').toUpperCase() || '??';
+            const hiText   = fullName ? 'Hi, ' + fullName.split(' ').pop() + '!' : 'Hi, ...';
+            prefixes.forEach(function(p) {
+                const avatar   = document.getElementById(p + '-avatar');
+                const greeting = document.getElementById(p + '-greeting');
+                const fullEl   = document.getElementById(p + '-fullname-menu');
+                const roleEl   = document.getElementById(p + '-role-menu');
+                if (avatar)   { avatar.textContent = initials; }
+                if (greeting) { greeting.textContent = hiText; }
+                if (fullEl)   { fullEl.textContent = fullName || '—'; }
+                if (roleEl)   { roleEl.textContent = role || '—'; }
+            });
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', fill);
+        } else {
+            fill();
+        }
     })();
 </script>
 <script th:src="@{/js/toast.js}"></script>

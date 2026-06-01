@@ -33,11 +33,11 @@ public interface BookingRespository extends JpaRepository<Booking,Long> {
 
 
     // danh sách checkin ngày hôm nay
-    @Query("SELECT b FROM Booking b JOIN FETCH b.room r JOIN FETCH r.roomType WHERE (b.CheckInDate IS NULL AND b.enventCheckinDate <= CURRENT_DATE) ORDER BY b.enventCheckinDate DESC")
-    List<Booking> findBookingsNullOrBeforeToday();
+    @Query("SELECT b FROM Booking b JOIN FETCH b.room r JOIN FETCH r.roomType WHERE b.CheckInDate IS NULL AND b.enventCheckinDate <= CURRENT_DATE AND r.workBranch = :workBranch ORDER BY b.enventCheckinDate DESC")
+    List<Booking> findBookingsNullOrBeforeToday(@Param("workBranch") String workBranch);
     // danh sach caanf check out
-    @Query("SELECT b FROM Booking b JOIN FETCH b.room r JOIN FETCH r.roomType LEFT JOIN FETCH b.customer WHERE b.CheckOutDate IS NULL AND b.CheckInDate IS NOT NULL ORDER BY b.enventCheckinDate ASC")
-    List<Booking> findBookingsCheckOutIsNull();
+    @Query("SELECT b FROM Booking b JOIN FETCH b.room r JOIN FETCH r.roomType LEFT JOIN FETCH b.customer WHERE b.CheckOutDate IS NULL AND b.CheckInDate IS NOT NULL AND r.workBranch = :workBranch ORDER BY b.enventCheckinDate ASC")
+    List<Booking> findBookingsCheckOutIsNull(@Param("workBranch") String workBranch);
 
     // lấy booking kèm room và roomType để tránh LazyInitializationException
     @Query("SELECT b FROM Booking b JOIN FETCH b.room r JOIN FETCH r.roomType WHERE b.id = :id")

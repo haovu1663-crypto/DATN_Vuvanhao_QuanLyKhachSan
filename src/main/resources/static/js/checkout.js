@@ -24,9 +24,10 @@ async function coLoadBookings() {
 
     try {
         const token = localStorage.getItem('accessToken');
+        const workBranch = localStorage.getItem('workBranch') || '';
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 8000);
-        const res = await fetch('/api/v1/booking/checkout', {
+        const res = await fetch('/api/v1/booking/checkout?workBranch=' + encodeURIComponent(workBranch), {
             signal: controller.signal,
             headers: token ? { Authorization: 'Bearer ' + token } : {}
         });

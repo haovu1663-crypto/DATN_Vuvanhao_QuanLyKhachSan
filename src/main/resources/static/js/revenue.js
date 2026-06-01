@@ -274,3 +274,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const yearEl = document.getElementById('rv-input-year');
     if (yearEl) yearEl.value = new Date().getFullYear();
 });
+
+// Auto-load khi sidebar chuyển sang tab Revenue
+(function () {
+    const _origSwitch = window.switchToView;
+    if (typeof _origSwitch === 'function') {
+        window.switchToView = function (view) {
+            _origSwitch(view);
+            if (view === 'revenue') rvLoad();
+        };
+    }
+    // Fallback: hook vào menu click
+    document.addEventListener('DOMContentLoaded', function () {
+        const menuRevenue = document.getElementById('menuRevenue');
+        if (menuRevenue) {
+            menuRevenue.addEventListener('click', function () { rvLoad(); });
+        }
+    });
+})();

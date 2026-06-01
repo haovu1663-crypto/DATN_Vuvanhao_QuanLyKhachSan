@@ -153,8 +153,8 @@ public class BookingService implements IBookingService {
 
 
     @Override
-    public List<CheckInRespone> CheckIn() {
-        List<Booking> checkIn = bookingRespository.findBookingsNullOrBeforeToday();
+    public List<CheckInRespone> CheckIn(String workBranch) {
+        List<Booking> checkIn = bookingRespository.findBookingsNullOrBeforeToday(workBranch);
         List<CheckInRespone> checkInRespones =  checkIn.stream().map(
                 n->{
                     CheckInRespone checkInRespone = new CheckInRespone();
@@ -182,8 +182,8 @@ public class BookingService implements IBookingService {
     }
 
     @Override
-    public List<CheckOutBookingRespone> CheckOut() {
-        List<Booking> checkIn = bookingRespository.findBookingsCheckOutIsNull();
+    public List<CheckOutBookingRespone> CheckOut(String workBranch) {
+        List<Booking> checkIn = bookingRespository.findBookingsCheckOutIsNull(workBranch);
         List<CheckOutBookingRespone> checkOutRespones =  checkIn.stream().map(
                 n->{
                     CheckOutBookingRespone checkOutRespone = new CheckOutBookingRespone();
@@ -207,7 +207,9 @@ public class BookingService implements IBookingService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy booking"));
         booking.setCheckOutDate(LocalDateTime.now());
         booking.setStatusBooking(StatusBooking.CHECKED_OUT);
-
+        Room  room = roomRespository.findById(booking.getRoom().getId()).orElse(null);
+        room.setStatus(StatusRoom.CLEANING);
+        roomRespository.save(room);
         // --- Tiền phòng ---
         long daysBetween = ChronoUnit.DAYS.between(booking.getEnventCheckinDate(), booking.getEnventCheckoutDate());
         double roomAmount = booking.getRoom().getRoomType().getPrice() * daysBetween;

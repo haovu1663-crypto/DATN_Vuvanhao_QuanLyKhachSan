@@ -46,6 +46,9 @@ public class CustomerService implements ICustomerService {
         if (customerRespository.existsByUsername(customer.getUsername())) {
             throw  new DataConfickException("userName này đã được sử dụng ");
         }
+        if(employeeRepository.existsByUserName(customer.getUsername())){
+            throw  new DataConfickException("userName này đã được sử dụng ");
+        }
         return customerRespository.save(customer);
     }
 

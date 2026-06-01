@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import re.quanlykhachsan.dto.request.RoomRequest;
 import re.quanlykhachsan.dto.response.RoomRespone;
+import re.quanlykhachsan.dto.response.RoomRestatusRespone;
 import re.quanlykhachsan.dto.response.SoPhongRequest;
 import re.quanlykhachsan.entity.Room;
 import re.quanlykhachsan.entity.RoomType;
@@ -119,25 +120,22 @@ public class RoomService implements IRoomService {
     @Override
     public RoomRespone getRoomById(Long id) throws ResourceNotFoundException {
         Room room = roomRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("không tìm thấy phòng có id này"));
-       RoomRespone roomRespone= modelMapper.map(room, RoomRespone.class);
-       roomRespone.setType_room_id(room.getRoomType().getId());
+        RoomRespone roomRespone= modelMapper.map(room, RoomRespone.class);
+        roomRespone.setType_room_id(room.getRoomType().getId());
         return roomRespone;
     }
 
     @Override
-    public List<RoomRespone> getListRoomByStatusClear() {
+    @Transactional
+    public List<RoomRestatusRespone> getListRoomByStatusClear(String workBranch) {
 
         // Lấy danh sách các phòng có trạng thái AVAILABLE[cite: 2]
-        List<Room> rooms = roomRepository.findByStatus(StatusRoom.CLEANING);
+        List<Room> rooms = roomRepository.findByWorkBranchAndStatus(workBranch,StatusRoom.CLEANING);
 
         return rooms.stream().map(room -> {
             // Map các field cơ bản (name, price, status)
-            RoomRespone response = modelMapper.map(room, RoomRespone.class);
-
-            // Trích xuất id từ RoomType của thực thể Room sang type_room_id của DTO[cite: 1, 2, 3]
-            if (room.getRoomType() != null) {
-                response.setType_room_id(room.getRoomType().getId());
-            }
+            RoomRestatusRespone response = modelMapper.map(room, RoomRestatusRespone.class);
+            response.setImages(room.getRoomType().getImages());
 
             return response;
         }).collect(Collectors.toList());
@@ -184,11 +182,11 @@ public class RoomService implements IRoomService {
             return response;
         }).collect(Collectors.toList());
     }
-     public void updateStatusCurrentToChecked(Long roomId) throws ResourceNotFoundException {
+    public void updateStatusCurrentToChecked(Long roomId) throws ResourceNotFoundException {
         Room room = roomRepository.findById(roomId).orElseThrow(()->new ResourceNotFoundException("không c "));
         room.setStatus(StatusRoom.CHECKED);
         roomRepository.save(room);
-     }
+    }
 
     @Override
     public List<RoomRespone> getListRoomByStatusCheckIn() {
@@ -231,7 +229,7 @@ public class RoomService implements IRoomService {
 
     @Override
     public List<SoPhongRequest> getListSoPhong(String workBranch, Long roomtypeId, LocalDate checkIn, LocalDate checkOut) {
-       List<Room> rooms = roomRepository.findAvailableRooms(workBranch, roomtypeId, checkIn, checkOut);
+        List<Room> rooms = roomRepository.findAvailableRooms(workBranch, roomtypeId, checkIn, checkOut);
         List<SoPhongRequest> soPhongRequests = rooms.stream()
                 .map(room -> {
                     SoPhongRequest request = new SoPhongRequest();

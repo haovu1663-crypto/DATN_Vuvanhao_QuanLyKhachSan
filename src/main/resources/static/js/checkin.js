@@ -16,7 +16,9 @@ async function ciLoadBookings() {
         const token = localStorage.getItem('accessToken');
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 8000);
-        const res = await fetch('/api/v1/booking/checkin', {
+        const workBranch = localStorage.getItem('workBranch') || '';
+        if (!workBranch) throw new Error('Không tìm thấy chi nhánh. Vui lòng đăng nhập lại!');
+        const res = await fetch('/api/v1/booking/checkin?workBranch=' + encodeURIComponent(workBranch), {
             signal: controller.signal,
             headers: token ? { Authorization: 'Bearer ' + token } : {}
         });

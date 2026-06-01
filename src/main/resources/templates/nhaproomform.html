@@ -1,2400 +1,542 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Khách Sạn | Admin</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-
-    <link rel="stylesheet" th:href="@{/roomform.css}">
+    <title>StayViet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/header.css}">
 </head>
-<body class="bg-[#f8fafc] flex h-screen overflow-hidden text-slate-900">
+<body>
 
-<!-- ===== SIDEBAR ===== -->
-<aside class="w-72 bg-slate-950 text-slate-400 flex flex-col shadow-2xl z-20">
-    <div class="p-8 border-b border-slate-900">
-        <div class="flex items-center gap-3">
-            <div class="bg-blue-600 p-2 rounded-xl shadow-lg shadow-blue-500/20">
-                <i class="fas fa-hotel text-white text-xl"></i>
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+<header>
+    <a class="logo" href="#">
+        <div class="logo-icon">🏨</div>
+        <span class="logo-text">Stay<span>Viet</span></span>
+    </a>
+    <div class="header-auth">
+
+        <button class="btn-login" id="btnLogin" onclick="showLogin()">Đăng nhập</button>
+        <button class="btn-register" id="btnRegister" onclick="showRegister()">Đăng ký</button>
+
+        <!-- Thông tin user (hiện sau khi đăng nhập) -->
+        <div class="user-info" id="userInfo" style="display:none;">
+            <div class="user-avatar" id="userAvatar">?</div>
+            <span class="user-fullname" id="userFullname"></span>
+        </div>
+
+        <div class="menu-wrap" id="menuWrap" style="display:none;">
+            <button class="btn-menu" id="btnMenu" onclick="toggleMenu()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <line x1="3" y1="6"  x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+                Menu
+            </button>
+
+            <div class="menu-dropdown" id="menuDropdown" onclick="event.stopPropagation()">
+                <div class="menu-section-title">Chuyến đi</div>
+                <button class="menu-item" onclick="menuAction('dat-phong')"><span class="menu-icon">🛏️</span>Đặt phòng</button>
+                <button class="menu-item" onclick="menuAction('lich-su')"><span class="menu-icon">🕐</span>Lịch sử đặt phòng</button>
+                <button class="menu-item" onclick="menuAction('yeu-thich')"><span class="menu-icon">❤️</span>Yêu thích</button>
+                <hr class="menu-divider">
+                <div class="menu-section-title">Quản lý</div>
+                <button class="menu-item" id="menu-quan-ly-phong" onclick="menuAction('quan-ly-phong')"><span class="menu-icon">🏨</span>Quản lý phòng</button>
+                <button class="menu-item" onclick="menuAction('ho-tro')"><span class="menu-icon">💬</span>Hỗ trợ & Trợ giúp</button>
+                <hr class="menu-divider">
+                <button class="menu-item danger" onclick="handleLogout()"><span class="menu-icon">🚪</span>Đăng xuất</button>
             </div>
-            <span class="text-white text-xl font-bold tracking-tight">GrandHotel</span>
         </div>
     </div>
+</header>
 
-    <nav class="flex-1 mt-8 px-6 space-y-3">
-        <p class="text-[10px] uppercase font-bold tracking-widest text-slate-600 mb-4 ml-2">Main Menu</p>
-        <a href="javascript:void(0)" id="menuAdd" class="sidebar-item active-menu flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
-            <i class="fas fa-plus-circle text-lg"></i> Add Room
-        </a>
-        <a href="javascript:void(0)" id="menuUpdate" class="sidebar-item flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
-            <i class="fas fa-edit text-lg"></i> Update Room
-        </a>
-        <a href="#" id="menuResetStatus" class="sidebar-item flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
-            <i class="fas fa-sync-alt text-lg"></i> Reset Status
-        </a>
-        <a href="#" id="menuBooking" class="sidebar-item flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
-            <i class="fas fa-calendar-check text-lg"></i> Booking Room
-        </a>
-        <a href="#" id="menuCheckIn" class="sidebar-item flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
-            <i class="fas fa-door-open text-lg"></i> Check In Room
-        </a>
-        <!-- ===== NÚT CHECK OUT (thêm mới ngay dưới Check In) ===== -->
-        <a href="#" id="menuCheckOut" class="sidebar-item flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
-            <i class="fas fa-door-closed text-lg"></i> Check Out Room
-        </a>
-
-        <p class="text-[10px] uppercase font-bold tracking-widest text-slate-600 mt-6 mb-4 ml-2">Room Types</p>
-        <a href="javascript:void(0)" id="menuAddRoomType" class="sidebar-item flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold">
-            <i class="fas fa-layer-group text-lg"></i> Add Room Type
-        </a>
-    </nav>
-
-    <div class="p-6">
-        <button class="sidebar-item w-full flex items-center gap-4 p-3.5 rounded-xl text-sm font-semibold text-red-400 hover:bg-red-500/10">
-            <i class="fas fa-sign-out-alt text-lg"></i> Log out
+<div class="search-bar-wrapper">
+    <div class="search-bar" id="searchBar">
+        <div class="search-field" id="fieldDest" onclick="toggleDropdown('dest')">
+            <span class="field-label">📍 Điểm đến</span>
+            <span class="field-value placeholder" id="destVal">Chọn điểm đến</span>
+            <div class="dropdown-dest" id="dropDest" onclick="event.stopPropagation()">
+                <div class="dest-search">
+                    <input type="text" placeholder="🔍  Tìm điểm đến..." id="destSearch" oninput="filterDest(this.value)">
+                </div>
+                <div id="destList"></div>
+            </div>
+        </div>
+        <div class="search-field" id="fieldDate" onclick="toggleDropdown('date')">
+            <span class="field-label">📅 Nhận / Trả phòng</span>
+            <span class="field-value placeholder" id="dateVal">Chọn ngày</span>
+            <div class="datepicker-popup" id="dropDate" onclick="event.stopPropagation()">
+                <div class="cal-header">
+                    <button class="cal-nav-btn" onclick="changeMonth(-1)">&#8249;</button>
+                    <div style="display:flex;gap:60px;font-size:13px;color:var(--gray);" id="calMonthLabels"></div>
+                    <button class="cal-nav-btn" onclick="changeMonth(1)">&#8250;</button>
+                </div>
+                <div class="cal-months" id="calMonths"></div>
+                <div class="cal-shortcuts">
+                    <button class="cal-shortcut" onclick="setShortcut(0)">📅 Tối nay</button>
+                    <button class="cal-shortcut" onclick="setShortcut(1)">🌙 Tối mai</button>
+                    <button class="cal-shortcut" onclick="setShortcutWeekend(0)">🏖️ Cuối tuần này</button>
+                    <button class="cal-shortcut" onclick="setShortcutWeekend(1)">✨ Cuối tuần tới</button>
+                </div>
+            </div>
+        </div>
+        <div class="search-field" id="fieldGuests" onclick="toggleDropdown('guests')" style="border-right:none;">
+            <span class="field-label">👥 Số khách & Phòng</span>
+            <span class="field-value" id="guestsVal">2 khách, 1 phòng</span>
+            <div class="guests-popup" id="dropGuests" onclick="event.stopPropagation()">
+                <div class="guest-row">
+                    <div class="guest-info"><div class="guest-label">Người lớn</div><div class="guest-sub">Từ 18 tuổi trở lên</div></div>
+                    <div class="counter">
+                        <button class="counter-btn" id="adultMinus" onclick="changeCount('adults',-1)">−</button>
+                        <span class="counter-val" id="adultVal">2</span>
+                        <button class="counter-btn" onclick="changeCount('adults',1)">+</button>
+                    </div>
+                </div>
+                <div class="guest-row">
+                    <div class="guest-info"><div class="guest-label">Trẻ em</div><div class="guest-sub">Dưới 18 tuổi</div></div>
+                    <div class="counter">
+                        <button class="counter-btn" id="childMinus" onclick="changeCount('children',-1)">−</button>
+                        <span class="counter-val" id="childVal">0</span>
+                        <button class="counter-btn" onclick="changeCount('children',1)">+</button>
+                    </div>
+                </div>
+                <div class="guest-row">
+                    <div class="guest-info"><div class="guest-label">Phòng</div></div>
+                    <div class="counter">
+                        <button class="counter-btn" id="roomMinus" onclick="changeCount('rooms',-1)">−</button>
+                        <span class="counter-val" id="roomVal">1</span>
+                        <button class="counter-btn" onclick="changeCount('rooms',1)">+</button>
+                    </div>
+                </div>
+                <div class="pet-row">
+                    <div class="guest-info"><div class="guest-label">Cho phép mang thú cưng</div><div class="guest-sub">Chỉ hiển thị nơi lưu trú cho phép thú cưng</div></div>
+                    <div class="toggle-switch" id="petToggle" onclick="togglePet()" style="margin-left:12px;"></div>
+                </div>
+                <div class="guests-footer">
+                    <button class="btn-reset" onclick="resetGuests()">Chọn lại</button>
+                    <button class="btn-apply" onclick="applyGuests()">Áp dụng</button>
+                </div>
+            </div>
+        </div>
+        <button class="search-btn" onclick="doSearch()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
         </button>
     </div>
-</aside>
+</div>
 
-<!-- ===== MAIN: ADD / UPDATE FORM ===== -->
-<main id="view-form" class="flex-1 flex flex-col overflow-y-auto relative">
+<nav class="middle-nav">
+    <button class="btn-nav active" onclick="setActive(this)">🏠 Trang chủ</button>
+    <button class="btn-nav" onclick="setActive(this)">🏊 Hồ bơi</button>
+    <button class="btn-nav" onclick="setActive(this)">🍽️ Nhà hàng</button>
+    <button class="btn-nav" onclick="setActive(this)">🌿 Spa & Thư giãn</button>
+    <button class="btn-nav" onclick="setActive(this)">📞 Liên hệ</button>
+</nav>
 
-    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-20 border-b border-slate-200 flex items-center justify-between px-10">
+<!-- ===== DANH SÁCH PHÒNG ===== -->
+<section id="room-section" style="max-width:1100px;margin:32px auto;padding:0 5%;">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
         <div>
-            <h1 class="text-2xl font-bold text-slate-800">Add New Room</h1>
-            <p class="text-xs text-slate-500 font-medium">Dashboard / Rooms / Create</p>
+            <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--navy);margin:0 0 4px;">Phòng đang trống</h2>
+            <p id="room-count-text" style="font-size:13px;color:var(--gray);margin:0;">Đang tải danh sách phòng...</p>
         </div>
-        <div class="flex items-center gap-6">
-            <div class="relative cursor-pointer text-slate-400 hover:text-blue-600 transition-colors" title="Thông báo">
-                <i class="far fa-bell text-xl"></i>
-                <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full border-2 border-white"></span>
-            </div>
-            <div class="h-10 w-[1px] bg-slate-200"></div>
-            <div class="flex items-center gap-3 bg-slate-50 p-1.5 pr-4 rounded-full border border-slate-100 hover:bg-slate-100 transition-all cursor-pointer" id="rf-user-chip" onclick="rfToggleUserMenu()">
-                <div id="rf-avatar" class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm flex-shrink-0"
-                     style="background: linear-gradient(135deg, #3b6fd4, #5b8fe8);">??</div>
-                <span class="text-sm font-bold text-slate-700" id="rf-greeting">Hi, ...</span>
-            </div>
-            <div id="rf-user-menu" class="hidden absolute top-[72px] right-8 z-50 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden py-1">
-                <div class="px-4 py-3 border-b border-slate-100">
-                    <p class="text-xs text-slate-400 font-medium">Đăng nhập với tư cách</p>
-                    <p class="text-sm font-bold text-slate-800 mt-0.5 truncate" id="rf-fullname-menu">—</p>
-                    <p class="text-xs text-blue-500 font-semibold mt-0.5" id="rf-role-menu">—</p>
-                </div>
-                <a href="/demo" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
-                    <i class="fas fa-home w-4 text-slate-400"></i> Về trang chủ
-                </a>
-                <button onclick="rfLogout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
-                    <i class="fas fa-sign-out-alt w-4"></i> Đăng xuất
-                </button>
-            </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div id="type-filter-wrap" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+            <select id="room-sort" onchange="sortAndRender()" style="font-family:'DM Sans',sans-serif;font-size:13px;padding:7px 12px;border:1.5px solid var(--border);border-radius:20px;background:var(--white);color:var(--navy);cursor:pointer;outline:none;">
+                <option value="price_asc">Giá tăng dần</option>
+                <option value="price_desc">Giá giảm dần</option>
+                <option value="name_asc">Tên A → Z</option>
+            </select>
         </div>
-    </header>
+    </div>
 
-    <div class="p-10 max-w-5xl mx-auto w-full">
-        <div class="glass-card rounded-[2rem] shadow-2xl shadow-slate-200/50 p-10">
-            <form id="addRoomForm" enctype="multipart/form-data" class="space-y-8">
-                <input type="hidden" name="id" id="roomId">
-                <div id="searchSection" class="hidden mb-10 pb-8 border-b border-slate-100">
-                    <label class="text-[13px] font-bold text-blue-600 uppercase tracking-wider mb-3 block">Tìm kiếm phòng theo ID</label>
-                    <div class="flex gap-4">
-                        <div class="relative flex-1">
-                            <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                            <input type="number" id="inputSearchId" placeholder="Nhập ID phòng..."
-                                   class="input-focus w-full pl-14 pr-5 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none text-slate-700 font-medium">
+    <div id="room-skeleton" style="display:flex;flex-direction:column;gap:14px;">
+        <div style="height:160px;border-radius:16px;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;"></div>
+        <div style="height:160px;border-radius:16px;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;"></div>
+        <div style="height:160px;border-radius:16px;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;"></div>
+    </div>
+
+    <div id="room-grid" style="display:none;flex-direction:column;gap:14px;"></div>
+
+    <div id="room-empty" style="display:none;text-align:center;padding:60px 0;">
+        <div style="font-size:48px;margin-bottom:12px;">🏨</div>
+        <p style="font-size:16px;font-weight:600;color:var(--navy);margin:0 0 6px;">Không có phòng trống</p>
+        <p style="font-size:13px;color:var(--gray);">Hiện tại tất cả phòng đang được sử dụng. Vui lòng thử lại sau.</p>
+    </div>
+    <div id="room-error" style="display:none;text-align:center;padding:60px 0;">
+        <div style="font-size:48px;margin-bottom:12px;">⚠️</div>
+        <p style="font-size:16px;font-weight:600;color:#dc2626;margin:0 0 6px;">Không thể tải danh sách phòng</p>
+        <p id="room-error-msg" style="font-size:13px;color:var(--gray);"></p>
+        <button onclick="loadRooms()" style="margin-top:14px;padding:10px 24px;background:var(--navy);color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Thử lại</button>
+    </div>
+
+    <!-- ===== MODAL THANH TOÁN ===== -->
+    <div class="modal-overlay" id="modal-payment-overlay" onclick="handlePaymentOverlayClick(event)">
+        <div id="payment-section">
+            <div class="reg-card">
+                <div class="reg-banner" style="background: linear-gradient(135deg, #1e3a8a 0%, #172554 100%);">
+                    <button class="reg-close" onclick="hidePaymentModal()">✕</button>
+                    <h2>Thanh toán tiền cọc</h2>
+                    <p>Vui lòng chuyển khoản để hoàn tất đặt phòng</p>
+                </div>
+                <div class="reg-body" style="padding: 24px 30px;">
+
+                    <div class="pay-qr-box">
+                        <!-- Ảnh QR giả định, bạn có thể thay bằng API tạo QR thực tế (như VietQR) sau -->
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=DemoThanhToan&bgcolor=ffffff" alt="QR Code" class="pay-qr-img">
+                        <div style="font-size: 13px; font-weight: 600; color: var(--navy);">Quét mã QR qua ứng dụng Ngân hàng</div>
+                    </div>
+
+                    <div>
+                        <div class="pay-info-row">
+                            <span class="pay-info-label">Ngân hàng</span>
+                            <span class="pay-info-val">Vietcombank (VCB)</span>
                         </div>
-                        <button type="button" onclick="fetchRoomDetail()" class="px-8 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold transition-all flex items-center gap-2">
-                            <i class="fas fa-download"></i> Tải dữ liệu
-                        </button>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="col-span-2">
-                        <label class="text-[13px] font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block">Room Name</label>
-                        <input type="text" name="name" required
-                               class="input-focus w-full px-5 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none text-slate-700 font-medium placeholder:text-slate-400"
-                               placeholder="e.g. Royal Suite 702">
-                    </div>
-
-                    <div class="col-span-2">
-                        <label class="text-[13px] font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block">
-                            <i class="fas fa-map-marker-alt text-blue-400 mr-1"></i> Chi Nhánh Làm Việc
-                        </label>
-                        <div class="relative">
-                            <div class="absolute left-5 top-1/2 -translate-y-1/2 w-8 h-8 bg-blue-50 text-blue-500 rounded-lg flex items-center justify-center pointer-events-none">
-                                <i class="fas fa-building text-sm"></i>
+                        <div class="pay-info-row">
+                            <span class="pay-info-label">Chủ tài khoản</span>
+                            <span class="pay-info-val">NGUYEN VAN A</span>
+                        </div>
+                        <div class="pay-info-row">
+                            <span class="pay-info-label">Số tài khoản</span>
+                            <div style="display: flex; align-items: center;">
+                                <span class="pay-info-val" id="pay-stk">1234567890</span>
+                                <button class="btn-copy" onclick="copyText('pay-stk')" title="Sao chép">📋</button>
                             </div>
-                            <select id="workBranchSelect" name="workBranch" required
-                                    class="input-focus w-full pl-16 pr-12 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none text-slate-700 font-medium appearance-none cursor-pointer">
-                                <option value="">-- Chọn chi nhánh --</option>
-                                <option value="Số 1 đường Nguyễn Chí Thanh, Hà Nội">Số 1 đường Nguyễn Chí Thanh, Hà Nội</option>
-                                <option value="Số 2 Lê Đại Hành, Hà Nội">Số 2 Lê Đại Hành, Hà Nội</option>
-                                <option value="Số 3 đường Lê Lợi, Ninh Bình">Số 3 đường Lê Lợi, Ninh Bình</option>
-                                <option value="Số 4 Trần Quốc Nghiễn, Hạ Long">Số 4 Trần Quốc Nghiễn, Hạ Long</option>
-                            </select>
-                            <i class="fas fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
+                        </div>
+                        <div class="pay-info-row">
+                            <span class="pay-info-label">Số tiền cần chuyển</span>
+                            <div style="display: flex; align-items: center;">
+                                <span class="pay-info-val highlight" id="pay-amount">—</span>
+                                <button class="btn-copy" onclick="copyText('pay-amount')" title="Sao chép">📋</button>
+                            </div>
+                        </div>
+                        <div class="pay-info-row">
+                            <span class="pay-info-label">Nội dung chuyển khoản</span>
+                            <div style="display: flex; align-items: center;">
+                                <span class="pay-info-val" id="pay-content">STAYVIET Demo</span>
+                                <button class="btn-copy" onclick="copyText('pay-content')" title="Sao chép">📋</button>
+                            </div>
                         </div>
                     </div>
 
-                    <div>
-                        <label class="text-[13px] font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block">Current Status</label>
-                        <div class="relative">
-                            <select name="status" class="input-focus w-full px-5 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none text-slate-700 font-medium appearance-none cursor-pointer">
-                                <option value="AVAILABLE">Available</option>
-                                <option value="CURRENTLY_TENANT">Currently Tenant</option>
-                                <option value="MAINTENANCE">Maintenance</option>
-                                <option value="CLEANING">Cleaning</option>
-                            </select>
-                            <i class="fas fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
+                    <div class="pay-guide">
+                        Sau khi chuyển khoản thành công, hệ thống sẽ tự động xác nhận trong vòng 1-3 phút.
+                    </div>
+
+                    <hr class="reg-divider" style="margin: 20px 0;">
+
+                    <button class="btn-submit-reg" style="background: linear-gradient(135deg, #16a34a, #15803d);" onclick="confirmPaymentPaid()">
+                        ✅ &nbsp;Tôi đã chuyển khoản
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<style>
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .rc { display:flex; background:var(--white); border:1.5px solid var(--border); border-radius:16px; overflow:hidden; transition:border-color .2s, box-shadow .2s; }
+    .rc:hover { border-color:#b0bcd4; box-shadow:0 4px 24px rgba(26,39,68,0.10); }
+    .rc-img { width:220px; min-width:220px; background:#f0f2f8; display:flex; align-items:center; justify-content:center; flex-direction:column; color:#b0b8cc; font-size:13px; position:relative; overflow:hidden; }
+    .rc-img img { width:100%; height:100%; object-fit:cover; display:block; }
+    .rc-img-ph { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; height:100%; width:100%; min-height:160px; }
+    .rc-body { flex:1; padding:18px 22px 16px; display:flex; flex-direction:column; gap:3px; min-width:0; }
+    .rc-type { font-size:11px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--gold); }
+    .rc-name { font-family:'Playfair Display',serif; font-size:18px; font-weight:500; color:var(--navy); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin:0; }
+    .rc-id   { font-size:11px; color:var(--gray); margin-top:1px; }
+    .rc-badge { font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; display:inline-block; margin-top:6px; }
+    .rc-badge.available   { background:#dcfce7; color:#166534; }
+    .rc-badge.occupied    { background:#fee2e2; color:#991b1b; }
+    .rc-badge.maintenance { background:#fef9c3; color:#854d0e; }
+    .rc-footer { display:flex; align-items:flex-end; justify-content:space-between; margin-top:auto; padding-top:12px; border-top:1px solid var(--border); }
+    .rc-price-night { font-size:11px; color:var(--gray); }
+    .rc-price { font-size:21px; font-weight:700; color:var(--navy); line-height:1.2; }
+    .rc-btn-group { display:flex; gap:8px; }
+    .rc-btn-outline { font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; padding:8px 14px; border-radius:10px; border:1.5px solid var(--border); background:var(--white); color:var(--navy); cursor:pointer; transition:all .15s; }
+    .rc-btn-outline:hover { background:#f0f4ff; border-color:#b0bcd4; }
+    .rc-btn-book { font-family:'DM Sans',sans-serif; font-size:13px; font-weight:700; padding:8px 18px; border-radius:10px; border:none; background:var(--navy); color:#fff; cursor:pointer; transition:all .15s; }
+    .rc-btn-book:hover { background:#2d4a8a; }
+    .type-chip { font-size:12px; font-weight:500; padding:6px 14px; border-radius:20px; border:1.5px solid var(--border); background:var(--white); color:var(--gray); cursor:pointer; transition:all .15s; font-family:'DM Sans',sans-serif; }
+    .type-chip:hover { border-color:var(--navy); color:var(--navy); }
+    .type-chip.active { background:var(--navy); color:#fff; border-color:var(--navy); }
+</style>
+
+<!-- MODAL ĐĂNG KÝ (ĐÃ BỎ CCCD) -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+    <div id="register-section">
+        <div class="reg-card">
+            <div class="reg-banner">
+                <button class="reg-close" onclick="hideRegister()">✕</button>
+                <h2>Tạo tài khoản</h2>
+                <p>Tham gia StayViet để khám phá hàng nghìn điểm lưu trú tuyệt vời</p>
+            </div>
+            <div class="reg-body">
+                <div class="reg-field">
+                    <label class="reg-label">Họ và tên</label>
+                    <div class="reg-input-wrap">
+                        <span class="reg-input-icon">👤</span>
+                        <!-- Thêm id để JS lấy dữ liệu -->
+                        <input class="reg-input" id="reg-fullname" type="text" placeholder="Nguyễn Văn A">
+                    </div>
+                </div>
+
+                <div class="reg-field">
+                    <label class="reg-label">Địa chỉ Email</label>
+                    <div class="reg-email-wrap">
+                        <div class="reg-input-wrap">
+                            <span class="reg-input-icon">✉️</span>
+                            <input class="reg-input" id="reg-email" type="email" placeholder="example@email.com">
+                        </div>
+                        <div>
+                            <button class="btn-send-otp" id="btn-reg-send-otp" onclick="regSendOtp()">Gửi mã<br>xác nhận</button>
                         </div>
                     </div>
+                    <!-- OTP INPUT SECTION -->
+                    <div class="reg-otp-section" id="reg-otp-section">
+                        <div class="reg-otp-label">📩 Nhập mã 4 số vừa gửi đến email của bạn</div>
+                        <div class="reg-otp-inputs">
+                            <input class="reg-otp-digit" id="reg-otp-0" type="text" inputmode="numeric" maxlength="1" oninput="regOtpInput(0)" onkeydown="regOtpKey(event,0)">
+                            <input class="reg-otp-digit" id="reg-otp-1" type="text" inputmode="numeric" maxlength="1" oninput="regOtpInput(1)" onkeydown="regOtpKey(event,1)">
+                            <input class="reg-otp-digit" id="reg-otp-2" type="text" inputmode="numeric" maxlength="1" oninput="regOtpInput(2)" onkeydown="regOtpKey(event,2)">
+                            <input class="reg-otp-digit" id="reg-otp-3" type="text" inputmode="numeric" maxlength="1" oninput="regOtpInput(3)" onkeydown="regOtpKey(event,3)">
+                        </div>
+                        <div class="reg-otp-status" id="reg-otp-status"></div>
+                        <span class="reg-otp-resend" id="reg-otp-resend"></span>
+                    </div>
+                </div>
 
-                    <div>
-                        <label class="text-[13px] font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block">Room Category</label>
-                        <div class="relative">
-                            <select id="roomTypeSelect" name="type_room_id" required
-                                    class="input-focus w-full px-5 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none text-slate-700 font-medium appearance-none cursor-pointer">
-                                <option value="">Đang tải danh sách...</option>
-                            </select>
-                            <i class="fas fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
+                <div class="reg-row">
+                    <div class="reg-field">
+                        <label class="reg-label">Số điện thoại</label>
+                        <div class="reg-input-wrap">
+                            <span class="reg-input-icon">📱</span>
+                            <input class="reg-input" id="reg-phone" type="tel" placeholder="0912 345 678" maxlength="11">
                         </div>
                     </div>
-
-                    <div class="col-span-2">
-                        <label class="text-[13px] font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block">Price per Night</label>
-                        <div class="relative group">
-                            <div class="absolute left-5 top-1/2 -translate-y-1/2 w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center font-bold">₫</div>
-                            <input type="text" id="priceDisplay" required
-                                   class="input-focus w-full pl-16 pr-5 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none text-slate-700 font-bold text-xl"
-                                   placeholder="0"
-                                   oninput="formatCurrency(this)">
-                            <input type="hidden" id="priceOriginal" name="price">
+                    <div class="reg-field">
+                        <label class="reg-label">Tên đăng nhập</label>
+                        <div class="reg-input-wrap">
+                            <span class="reg-input-icon">🔖</span>
+                            <input class="reg-input" id="reg-username" type="text" placeholder="nguyenvana123">
                         </div>
                     </div>
                 </div>
 
-                <div class="pt-4">
-                    <label class="text-[13px] font-bold text-slate-500 uppercase tracking-wider ml-1 mb-3 block">Room Gallery</label>
-                    <div class="relative border-2 border-dashed border-slate-200 rounded-[1.5rem] p-12 text-center hover:border-blue-400 hover:bg-blue-50/20 transition-all cursor-pointer group"
-                         onclick="document.getElementById('file-upload').click()">
-                        <input id="file-upload" name="images" type="file" class="hidden" multiple accept="image/*" onchange="handleFiles(this.files)">
-                        <div class="w-16 h-16 bg-blue-600/10 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                            <i class="fas fa-images text-2xl"></i>
-                        </div>
-                        <h3 class="text-lg font-bold text-slate-700">Drop your images here</h3>
+                <div class="reg-field">
+                    <label class="reg-label">Mật khẩu</label>
+                    <div class="reg-input-wrap">
+                        <span class="reg-input-icon">🔒</span>
+                        <input class="reg-input" id="reg-password" type="password" placeholder="Tối thiểu 8 ký tự">
                     </div>
-                    <div id="preview-grid" class="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-5"></div>
-                </div>
-
-                <div class="flex items-center justify-end gap-5 pt-10">
-                    <button type="reset" id="btnReset" onclick="clearPreview()"
-                            class="px-8 py-4 rounded-2xl font-bold text-slate-500 hover:bg-slate-100 transition-all uppercase text-xs tracking-widest">
-                        Reset Form
-                    </button>
-                    <button type="button" id="btnDelete" onclick="handleDelete()"
-                            class="hidden px-10 py-4 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-2xl font-bold transition-all uppercase text-xs tracking-widest flex items-center gap-3">
-                        <i class="fas fa-trash"></i> Delete
-                    </button>
-                    <button type="submit" id="btnSubmit"
-                            class="px-10 py-4 bg-slate-900 hover:bg-blue-600 text-white rounded-2xl font-bold shadow-xl shadow-slate-200 transition-all active:scale-95 uppercase text-xs tracking-widest flex items-center gap-3">
-                        <span id="submitText">Save Room</span>
-                        <i id="submitIcon" class="fas fa-arrow-right text-[10px]"></i>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</main>
-
-<!-- ===== VIEW RESET STATUS ===== -->
-<main id="view-reset-status" class="flex-1 flex-col overflow-y-auto relative">
-    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-20 border-b border-slate-200 flex items-center justify-between px-10">
-        <div>
-            <h1 class="text-2xl font-bold text-slate-800">Reset Status Phòng</h1>
-            <p class="text-xs text-slate-500 font-medium">Dashboard / Rooms / Reset Status</p>
-        </div>
-        <div class="flex items-center gap-4">
-            <button onclick="rsReload()" class="flex items-center gap-2 px-5 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl font-semibold text-sm transition-all">
-                <i class="fas fa-sync-alt"></i> Tải lại
-            </button>
-            <div class="h-8 w-[1px] bg-slate-200"></div>
-            <div class="relative cursor-pointer text-slate-400 hover:text-blue-600 transition-colors" title="Thông báo">
-                <i class="far fa-bell text-xl"></i>
-                <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full border-2 border-white"></span>
-            </div>
-            <div class="h-8 w-[1px] bg-slate-200"></div>
-            <div class="flex items-center gap-3 bg-slate-50 p-1.5 pr-4 rounded-full border border-slate-100 hover:bg-slate-100 transition-all cursor-pointer" id="rs-user-chip" onclick="sharedToggleUserMenu('rs')">
-                <div id="rs-avatar" class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm flex-shrink-0"
-                     style="background: linear-gradient(135deg, #3b6fd4, #5b8fe8);">??</div>
-                <span class="text-sm font-bold text-slate-700" id="rs-greeting">Hi, ...</span>
-            </div>
-            <div id="rs-user-menu" class="hidden absolute top-[72px] right-8 z-50 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden py-1">
-                <div class="px-4 py-3 border-b border-slate-100">
-                    <p class="text-xs text-slate-400 font-medium">Đăng nhập với tư cách</p>
-                    <p class="text-sm font-bold text-slate-800 mt-0.5 truncate" id="rs-fullname-menu">—</p>
-                    <p class="text-xs text-blue-500 font-semibold mt-0.5" id="rs-role-menu">—</p>
-                </div>
-                <a href="/demo" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
-                    <i class="fas fa-home w-4 text-slate-400"></i> Về trang chủ
-                </a>
-                <button onclick="rfLogout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
-                    <i class="fas fa-sign-out-alt w-4"></i> Đăng xuất
-                </button>
-            </div>
-        </div>
-    </header>
-    <div class="p-10 w-full">
-        <div class="glass-card rounded-[2rem] shadow-2xl shadow-slate-200/50 p-8">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <h2 class="text-lg font-bold text-slate-700">Danh sách phòng</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Chọn trạng thái mới cho từng phòng rồi bấm <b>Lưu</b></p>
-                </div>
-                <span class="text-xs bg-blue-50 text-blue-600 font-semibold px-3 py-1.5 rounded-full" id="rs-count"></span>
-            </div>
-            <div class="rs-grid" id="rs-grid">
-                <div class="rs-loading">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    Đang tải danh sách phòng...
-                </div>
-            </div>
-        </div>
-    </div>
-</main>
-
-<!-- ===== CHECK IN VIEW ===== -->
-<main id="view-checkin" class="flex-1 flex flex-col overflow-y-auto relative">
-    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-20 border-b border-slate-200 flex items-center justify-between px-10">
-        <div>
-            <h1 class="text-2xl font-bold text-slate-800">Check In Room</h1>
-            <p class="text-xs text-slate-500 font-medium">Dashboard / Rooms / Check In</p>
-        </div>
-        <div class="flex items-center gap-4">
-            <button onclick="ciReload()" class="flex items-center gap-2 px-5 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl font-semibold text-sm transition-all">
-                <i class="fas fa-sync-alt"></i> Tải lại
-            </button>
-            <div class="h-8 w-[1px] bg-slate-200"></div>
-            <div class="relative cursor-pointer text-slate-400 hover:text-blue-600 transition-colors" title="Thông báo">
-                <i class="far fa-bell text-xl"></i>
-                <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full border-2 border-white"></span>
-            </div>
-            <div class="h-8 w-[1px] bg-slate-200"></div>
-            <div class="flex items-center gap-3 bg-slate-50 p-1.5 pr-4 rounded-full border border-slate-100 hover:bg-slate-100 transition-all cursor-pointer" id="ci-user-chip" onclick="sharedToggleUserMenu('ci')">
-                <div id="ci-avatar" class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm flex-shrink-0"
-                     style="background: linear-gradient(135deg, #3b6fd4, #5b8fe8);">??</div>
-                <span class="text-sm font-bold text-slate-700" id="ci-greeting">Hi, ...</span>
-            </div>
-            <div id="ci-user-menu" class="hidden absolute top-[72px] right-8 z-50 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden py-1">
-                <div class="px-4 py-3 border-b border-slate-100">
-                    <p class="text-xs text-slate-400 font-medium">Đăng nhập với tư cách</p>
-                    <p class="text-sm font-bold text-slate-800 mt-0.5 truncate" id="ci-fullname-menu">—</p>
-                    <p class="text-xs text-blue-500 font-semibold mt-0.5" id="ci-role-menu">—</p>
-                </div>
-                <a href="/demo" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
-                    <i class="fas fa-home w-4 text-slate-400"></i> Về trang chủ
-                </a>
-                <button onclick="rfLogout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
-                    <i class="fas fa-sign-out-alt w-4"></i> Đăng xuất
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <div class="p-10 w-full flex flex-col gap-6">
-        <div class="glass-card rounded-2xl shadow-lg shadow-slate-200/50 px-6 py-5">
-            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">
-                <i class="fas fa-search mr-1 text-blue-400"></i> Tìm kiếm theo Gmail khách đặt phòng
-            </p>
-            <div class="flex gap-3">
-                <div class="relative flex-1">
-                    <div class="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center pointer-events-none">
-                        <i class="fab fa-google text-red-400 text-sm"></i>
+                    <div class="pw-strength">
+                        <div class="pw-bar"></div><div class="pw-bar"></div><div class="pw-bar"></div><div class="pw-bar"></div>
                     </div>
-                    <input
-                            id="ci-search-input"
-                            type="email"
-                            placeholder="Nhập gmail khách đặt phòng..."
-                            autocomplete="off"
-                            oninput="ciOnSearchInput()"
-                            onkeydown="if(event.key==='Enter') ciSearch()"
-                            class="w-full pl-14 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 placeholder:text-slate-400 outline-none transition-all focus:border-blue-400 focus:bg-white focus:shadow-[0_0_0_4px_rgba(59,130,246,0.08)]"
-                    >
-                    <button id="ci-search-clear" onclick="ciClearSearch()"
-                            class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-500 text-xs flex items-center justify-center transition-all">
-                        <i class="fas fa-times"></i>
-                    </button>
+                    <div class="pw-hint">Nhập mật khẩu để xem độ mạnh</div>
                 </div>
-                <button onclick="ciSearch()"
-                        class="flex items-center gap-2 px-6 py-3.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-xl font-semibold text-sm transition-all shadow-md shadow-blue-200 whitespace-nowrap">
-                    <i class="fas fa-search"></i> Tìm kiếm
-                </button>
-            </div>
-            <div id="ci-search-hint" class="mt-3 hidden">
-                <span class="inline-flex items-center gap-2 text-xs bg-blue-50 text-blue-600 font-semibold px-3 py-1.5 rounded-full">
-                    <i class="fas fa-filter"></i>
-                    <span id="ci-search-hint-text"></span>
-                    <button onclick="ciClearSearch()" class="ml-1 text-blue-400 hover:text-blue-600">✕</button>
-                </span>
-            </div>
-        </div>
 
-        <div class="glass-card rounded-[2rem] shadow-2xl shadow-slate-200/50 p-8">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <h2 class="text-lg font-bold text-slate-700">Danh sách phòng chờ Check In</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Các phòng hiện đang ở trạng thái <b>Currently Tenant</b></p>
-                </div>
-                <span class="text-xs bg-red-50 text-red-500 font-semibold px-3 py-1.5 rounded-full" id="ci-count"></span>
-            </div>
-            <div class="rs-grid" id="ci-grid">
-                <div class="rs-loading">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    Đang tải danh sách phòng...
-                </div>
-            </div>
-        </div>
-    </div>
-</main>
-
-<!-- ===== CHECK OUT VIEW (MỚI) ===== -->
-<main id="view-checkout" class="flex-1 flex flex-col overflow-y-auto relative">
-    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-20 border-b border-slate-200 flex items-center justify-between px-10">
-        <div>
-            <h1 class="text-2xl font-bold text-slate-800">Check Out Room</h1>
-            <p class="text-xs text-slate-500 font-medium">Dashboard / Rooms / Check Out</p>
-        </div>
-        <div class="flex items-center gap-4">
-            <button onclick="coReload()" class="flex items-center gap-2 px-5 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-600 rounded-xl font-semibold text-sm transition-all">
-                <i class="fas fa-sync-alt"></i> Tải lại
-            </button>
-            <div class="h-8 w-[1px] bg-slate-200"></div>
-            <div class="relative cursor-pointer text-slate-400 hover:text-blue-600 transition-colors" title="Thông báo">
-                <i class="far fa-bell text-xl"></i>
-                <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full border-2 border-white"></span>
-            </div>
-            <div class="h-8 w-[1px] bg-slate-200"></div>
-            <div class="flex items-center gap-3 bg-slate-50 p-1.5 pr-4 rounded-full border border-slate-100 hover:bg-slate-100 transition-all cursor-pointer" id="co-user-chip" onclick="sharedToggleUserMenu('co')">
-                <div id="co-avatar" class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm flex-shrink-0"
-                     style="background: linear-gradient(135deg, #3b6fd4, #5b8fe8);">??</div>
-                <span class="text-sm font-bold text-slate-700" id="co-greeting">Hi, ...</span>
-            </div>
-            <div id="co-user-menu" class="hidden absolute top-[72px] right-8 z-50 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden py-1">
-                <div class="px-4 py-3 border-b border-slate-100">
-                    <p class="text-xs text-slate-400 font-medium">Đăng nhập với tư cách</p>
-                    <p class="text-sm font-bold text-slate-800 mt-0.5 truncate" id="co-fullname-menu">—</p>
-                    <p class="text-xs text-blue-500 font-semibold mt-0.5" id="co-role-menu">—</p>
-                </div>
-                <a href="/demo" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
-                    <i class="fas fa-home w-4 text-slate-400"></i> Về trang chủ
-                </a>
-                <button onclick="rfLogout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
-                    <i class="fas fa-sign-out-alt w-4"></i> Đăng xuất
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <div class="p-10 w-full flex flex-col gap-6">
-
-        <!-- Thanh tìm kiếm gmail -->
-        <div class="glass-card rounded-2xl shadow-lg shadow-slate-200/50 px-6 py-5">
-            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">
-                <i class="fas fa-search mr-1 text-amber-400"></i> Tìm kiếm theo Gmail khách đã Check In
-            </p>
-            <div class="flex gap-3">
-                <div class="relative flex-1">
-                    <div class="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center pointer-events-none">
-                        <i class="fab fa-google text-amber-400 text-sm"></i>
-                    </div>
-                    <input
-                            id="co-search-input"
-                            type="email"
-                            placeholder="Nhập gmail khách đã check in..."
-                            autocomplete="off"
-                            oninput="coOnSearchInput()"
-                            onkeydown="if(event.key==='Enter') coSearch()"
-                            class="w-full pl-14 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 placeholder:text-slate-400 outline-none transition-all focus:border-amber-400 focus:bg-white focus:shadow-[0_0_0_4px_rgba(217,119,6,0.08)]"
-                    >
-                    <button id="co-search-clear" onclick="coClearSearch()"
-                            class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-500 text-xs flex items-center justify-center transition-all">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <button onclick="coSearch()"
-                        class="flex items-center gap-2 px-6 py-3.5 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white rounded-xl font-semibold text-sm transition-all shadow-md shadow-amber-200 whitespace-nowrap">
-                    <i class="fas fa-search"></i> Tìm kiếm
-                </button>
-            </div>
-            <div id="co-search-hint" class="mt-3 hidden">
-                <span class="inline-flex items-center gap-2 text-xs bg-amber-50 text-amber-600 font-semibold px-3 py-1.5 rounded-full">
-                    <i class="fas fa-filter"></i>
-                    <span id="co-search-hint-text"></span>
-                    <button onclick="coClearSearch()" class="ml-1 text-amber-400 hover:text-amber-600">✕</button>
-                </span>
-            </div>
-        </div>
-
-        <!-- Danh sách phòng -->
-        <div class="glass-card rounded-[2rem] shadow-2xl shadow-slate-200/50 p-8">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <h2 class="text-lg font-bold text-slate-700">Danh sách phòng chờ Check Out</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Các phòng hiện đang ở trạng thái <b>Checked In</b></p>
-                </div>
-                <span class="text-xs bg-amber-50 text-amber-600 font-semibold px-3 py-1.5 rounded-full" id="co-count"></span>
-            </div>
-            <div class="rs-grid" id="co-grid">
-                <div class="rs-loading">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    Đang tải danh sách phòng...
-                </div>
-            </div>
-        </div>
-    </div>
-</main>
-
-
-<!-- ===== BOOKING VIEW ===== -->
-<main id="view-booking" class="flex-1 flex-col overflow-y-auto relative">
-    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-20 border-b border-slate-200 flex items-center justify-between px-10">
-        <div>
-            <h1 class="text-2xl font-bold text-slate-800">Booking Room</h1>
-            <p class="text-xs text-slate-500 font-medium">Dashboard / Rooms / Booking</p>
-        </div>
-        <div class="flex items-center gap-4">
-            <button onclick="bkReload()" class="flex items-center gap-2 px-5 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl font-semibold text-sm transition-all">
-                <i class="fas fa-sync-alt"></i> Tải lại
-            </button>
-            <div class="h-8 w-[1px] bg-slate-200"></div>
-            <div class="relative cursor-pointer text-slate-400 hover:text-blue-600 transition-colors" title="Thông báo">
-                <i class="far fa-bell text-xl"></i>
-                <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full border-2 border-white"></span>
-            </div>
-            <div class="h-8 w-[1px] bg-slate-200"></div>
-            <div class="flex items-center gap-3 bg-slate-50 p-1.5 pr-4 rounded-full border border-slate-100 hover:bg-slate-100 transition-all cursor-pointer" id="bk-user-chip" onclick="sharedToggleUserMenu('bk')">
-                <div id="bk-avatar" class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm flex-shrink-0"
-                     style="background: linear-gradient(135deg, #3b6fd4, #5b8fe8);">??</div>
-                <span class="text-sm font-bold text-slate-700" id="bk-greeting">Hi, ...</span>
-            </div>
-            <div id="bk-user-menu" class="hidden absolute top-[72px] right-8 z-50 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden py-1">
-                <div class="px-4 py-3 border-b border-slate-100">
-                    <p class="text-xs text-slate-400 font-medium">Đăng nhập với tư cách</p>
-                    <p class="text-sm font-bold text-slate-800 mt-0.5 truncate" id="bk-fullname-menu">—</p>
-                    <p class="text-xs text-blue-500 font-semibold mt-0.5" id="bk-role-menu">—</p>
-                </div>
-                <a href="/demo" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
-                    <i class="fas fa-home w-4 text-slate-400"></i> Về trang chủ
-                </a>
-                <button onclick="rfLogout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
-                    <i class="fas fa-sign-out-alt w-4"></i> Đăng xuất
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <div class="p-10 w-full flex flex-col gap-6">
-        <!-- Thanh tìm kiếm -->
-        <div class="glass-card rounded-2xl shadow-lg shadow-slate-200/50 px-6 py-5">
-            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">
-                <i class="fas fa-tag mr-1 text-blue-400"></i> Tìm kiếm theo giá phòng (±50.000 ₫)
-            </p>
-            <div class="flex gap-3 items-center">
-                <div class="relative flex-1">
-                    <div class="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center pointer-events-none">
-                        <span class="text-blue-500 font-bold text-sm">₫</span>
-                    </div>
-                    <input
-                            id="bk-search-input"
-                            type="text"
-                            inputmode="numeric"
-                            placeholder="Nhập giá mong muốn... vd: 500000"
-                            autocomplete="off"
-                            oninput="bkOnSearch()"
-                            class="w-full pl-14 pr-10 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 placeholder:text-slate-400 outline-none transition-all focus:border-blue-400 focus:bg-white focus:shadow-[0_0_0_4px_rgba(59,130,246,0.08)]"
-                    >
-                    <button id="bk-search-clear" onclick="bkClearSearch()"
-                            class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-500 text-xs flex items-center justify-center transition-all">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div id="bk-price-hint" class="hidden text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-2 rounded-xl whitespace-nowrap border border-blue-100"></div>
-            </div>
-        </div>
-
-        <!-- Danh sách phòng -->
-        <div class="glass-card rounded-[2rem] shadow-2xl shadow-slate-200/50 p-8">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <h2 class="text-lg font-bold text-slate-700">Danh sách phòng trống</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Các phòng đang ở trạng thái <b>Available</b> – sẵn sàng đặt</p>
-                </div>
-                <span class="text-xs bg-green-50 text-green-600 font-semibold px-3 py-1.5 rounded-full" id="bk-count"></span>
-            </div>
-            <div class="bk-grid" id="bk-grid">
-                <div class="rs-loading">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    Đang tải danh sách phòng...
-                </div>
-            </div>
-        </div>
-    </div>
-</main>
-
-<!-- ===== VIEW ADD ROOM TYPE ===== -->
-<main id="view-add-room-type" class="flex-1 flex-col overflow-y-auto relative">
-    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-20 border-b border-slate-200 flex items-center justify-between px-10">
-        <div>
-            <h1 class="text-2xl font-bold text-slate-800">Thêm loại phòng mới</h1>
-            <p class="text-xs text-slate-500 font-medium">Dashboard / Room Types / Create</p>
-        </div>
-        <div class="flex items-center gap-6">
-            <div class="relative cursor-pointer text-slate-400 hover:text-blue-600 transition-colors" title="Thông báo">
-                <i class="far fa-bell text-xl"></i>
-                <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full border-2 border-white"></span>
-            </div>
-        </div>
-    </header>
-
-    <div class="p-8 max-w-2xl mx-auto w-full">
-
-        <!-- THÔNG TIN CƠ BẢN -->
-        <div class="rt-section">
-            <div class="rt-section-title">Thông tin cơ bản</div>
-
-            <div class="rt-two-col" style="margin-bottom:16px;">
-                <div>
-                    <label class="rt-label">Loại phòng <span class="rt-required">*</span></label>
-                    <input id="rt-name" type="text" class="rt-input" placeholder="VD: Deluxe, Suite, Standard..."
-                           oninput="rtCharCount('rt-name','rt-name-count',60)" maxlength="60">
-                    <div class="rt-char-count"><span id="rt-name-count">0</span>/60</div>
-                </div>
-                <div>
-                    <label class="rt-label">Giá mỗi đêm (VNĐ) <span class="rt-required">*</span></label>
-                    <div class="rt-price-wrap">
-                        <span class="rt-price-prefix">₫</span>
-                        <input id="rt-price" type="text" class="rt-input" placeholder="0"
-                               oninput="rtFormatPrice(this)">
-                    </div>
-                </div>
-            </div>
-
-            <div style="margin-bottom:16px;">
-                <label class="rt-label">Nội thất / Tiện nghi <span class="rt-required">*</span></label>
-                <input id="rt-amenities" type="text" class="rt-input" placeholder="VD: TV, Điều hòa, Bồn tắm, Minibar..."
-                       oninput="rtCharCount('rt-amenities','rt-amenities-count',200)" maxlength="200">
-                <div class="rt-char-count"><span id="rt-amenities-count">0</span>/200</div>
-            </div>
-
-            <div>
-                <label class="rt-label">Mô tả</label>
-                <textarea id="rt-description" class="rt-textarea" placeholder="Mô tả chi tiết về loại phòng..."
-                          oninput="rtCharCount('rt-description','rt-desc-count',500)" maxlength="500"></textarea>
-                <div class="rt-char-count"><span id="rt-desc-count">0</span>/500</div>
-            </div>
-        </div>
-
-        <!-- SỨC CHỨA -->
-        <div class="rt-section">
-            <div class="rt-section-title">Sức chứa</div>
-            <div class="rt-capacity-row">
-                <button class="rt-cap-btn" onclick="rtCapChange(-1)" type="button">−</button>
-                <span class="rt-cap-num" id="rt-cap-num">2</span>
-                <button class="rt-cap-btn" onclick="rtCapChange(1)" type="button">+</button>
-                <span class="rt-cap-label">khách (tối đa 15)</span>
-            </div>
-            <input type="hidden" id="rt-capacity" value="2">
-        </div>
-
-        <!-- ẢNH LOẠI PHÒNG -->
-        <div class="rt-section">
-            <div class="rt-section-title">Ảnh loại phòng</div>
-            <div class="rt-upload-zone" onclick="document.getElementById('rt-file-input').click()" id="rt-upload-zone">
-                <input type="file" id="rt-file-input" class="hidden" multiple accept="image/png,image/jpeg,image/webp" onchange="rtHandleFiles(this.files)">
-                <div class="rt-upload-icon"><i class="fas fa-image"></i></div>
-                <div class="rt-upload-text">Nhấn để chọn ảnh hoặc kéo thả vào đây</div>
-                <div class="rt-upload-sub">PNG, JPG, WEBP — tối đa 5 ảnh</div>
-            </div>
-            <div class="rt-preview-grid" id="rt-preview-grid"></div>
-        </div>
-
-        <!-- ACTIONS -->
-        <div class="rt-actions">
-            <button class="rt-btn-cancel" onclick="rtCancel()" type="button">Hủy</button>
-            <button class="rt-btn-save" id="rt-btn-save" onclick="rtSubmit()" type="button">
-                <i class="fas fa-paper-plane"></i> Lưu loại phòng
-            </button>
-        </div>
-
-    </div>
-</main>
-
-<!-- ===== BOOKING MODAL ===== -->
-<div id="bk-modal-overlay">
-    <div id="bk-modal-box">
-        <div class="bk-modal-banner">
-            <button class="bk-modal-close" onclick="bkModalClose()">✕</button>
-            <div style="font-size:32px;margin-bottom:8px;">🛎️</div>
-            <div class="bk-modal-banner-title">Đặt phòng Offline</div>
-            <div class="bk-modal-banner-sub">Nhân viên điền thông tin khách hàng trực tiếp</div>
-        </div>
-        <div class="bk-modal-body">
-            <!-- Thông tin phòng -->
-            <div class="bk-modal-room-info">
-                <div class="bk-modal-room-icon">🏨</div>
-                <div>
-                    <div class="bk-modal-room-name" id="bk-modal-room-name">—</div>
-                    <div class="bk-modal-room-price" id="bk-modal-room-price">—</div>
-                </div>
-            </div>
-
-            <!-- Họ tên & Số điện thoại -->
-            <div class="bk-modal-row">
-                <div>
-                    <label class="bk-modal-label">Họ và tên khách hàng</label>
-                    <input type="text" id="bk-customer-name" class="bk-modal-input" placeholder="Nguyễn Văn A..." style="margin-bottom:0;">
-                </div>
-                <div>
-                    <label class="bk-modal-label">Số điện thoại</label>
-                    <input type="tel" id="bk-customer-phone" class="bk-modal-input" placeholder="0912 345 678..." style="margin-bottom:0;">
-                </div>
-            </div>
-            <div style="height:14px;"></div>
-            <!-- Ngày nhận & trả dự kiến -->
-            <div class="bk-modal-row">
-                <div>
-                    <label class="bk-modal-label">Ngày nhận phòng dự kiến</label>
-                    <input type="date" id="bk-checkin-date" class="bk-modal-input" style="margin-bottom:0;" onchange="bkUpdateSummary()">
-                </div>
-                <div>
-                    <label class="bk-modal-label">Ngày trả phòng dự kiến</label>
-                    <input type="date" id="bk-checkout-date" class="bk-modal-input" style="margin-bottom:0;" onchange="bkUpdateSummary()">
-                </div>
-            </div>
-
-            <!-- Bảng tóm tắt chi phí (hiện khi đủ 2 ngày) -->
-            <div id="bk-summary" style="display:none;margin-top:14px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:14px;padding:14px 16px;">
-                <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Tóm tắt chi phí</div>
-                <div style="display:flex;flex-direction:column;gap:7px;">
-                    <div style="display:flex;justify-content:space-between;font-size:12px;">
-                        <span style="color:#64748b;" id="bk-sum-desc">—</span>
-                        <span style="font-weight:600;color:#1e293b;" id="bk-sum-room">—</span>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;font-size:12px;">
-                        <span style="color:#64748b;">Phí dịch vụ (5%)</span>
-                        <span style="font-weight:600;color:#1e293b;" id="bk-sum-fee">—</span>
-                    </div>
-                    <div style="height:1px;background:#e2e8f0;margin:2px 0;"></div>
-                    <div style="display:flex;justify-content:space-between;font-size:13px;">
-                        <span style="font-weight:700;color:#1e293b;">Tổng tiền</span>
-                        <span style="font-weight:800;color:#1e293b;" id="bk-sum-total">—</span>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;font-size:12px;background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:10px;padding:8px 10px;margin-top:2px;">
-                        <span style="font-weight:700;color:#92400e;">💰 Tiền cọc (30%)</span>
-                        <span style="font-weight:800;color:#b45309;" id="bk-sum-deposit">—</span>
-                    </div>
-                    <div style="display:flex;justify-content:space-between;font-size:12px;">
-                        <span style="color:#64748b;">Còn lại thanh toán khi check-out</span>
-                        <span style="font-weight:600;color:#2563eb;" id="bk-sum-remain">—</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bk-modal-actions" style="margin-top:20px;">
-                <button class="bk-modal-cancel" onclick="bkModalClose()">Huỷ bỏ</button>
-                <button class="bk-modal-confirm" id="bk-modal-confirm-btn" onclick="bkSubmitBooking()">
-                    <i class="fas fa-calendar-check"></i> Xác nhận đặt phòng
-                </button>
+                <hr class="reg-divider">
+                <!-- Thêm onclick để gọi hàm gửi dữ liệu -->
+                <button class="btn-submit-reg" id="btn-reg-submit" onclick="submitRegister()" disabled style="opacity:0.5;cursor:not-allowed;">🔒 &nbsp;Xác nhận email để tạo tài khoản</button>
+                <p class="reg-footer-note">Đã có tài khoản? <a href="#" onclick="hideRegister(); showLogin(); return false;">Đăng nhập ngay</a></p>
             </div>
         </div>
     </div>
 </div>
 
-
-<div id="rs-confirm-overlay">
-    <div id="rs-confirm-box">
-        <div class="rs-confirm-icon">✅</div>
-        <div class="rs-confirm-title">Xác nhận chuyển trạng thái</div>
-        <div class="rs-confirm-desc">
-            Bạn có chắc chắn phòng đã sẵn sàng cho thuê chưa?<br>
-            Hành động này sẽ chuyển phòng về trạng thái <strong>Available</strong>.
-        </div>
-        <div class="rs-confirm-actions">
-            <button class="rs-confirm-cancel" onclick="rsConfirmClose()">Huỷ bỏ</button>
-            <button class="rs-confirm-ok" id="rs-confirm-ok-btn">Xác nhận</button>
-        </div>
-    </div>
-</div>
-
-<!-- ===== CI CONFIRM MODAL ===== -->
-<div id="ci-confirm-overlay">
-    <div id="ci-confirm-box">
-        <div class="ci-confirm-header">
-            <div class="ci-confirm-icon-wrap">🚪</div>
-            <div class="ci-confirm-title">Xác nhận Check In</div>
-            <div class="ci-confirm-subtitle">Vui lòng kiểm tra thông tin trước khi xác nhận</div>
-        </div>
-        <div class="ci-confirm-details">
-            <div class="ci-confirm-row">
-                <span class="ci-confirm-label"><i class="fas fa-door-open"></i> Phòng</span>
-                <span class="ci-confirm-value" id="ci-confirm-room">—</span>
+<!-- MODAL ĐĂNG NHẬP -->
+<div class="modal-overlay" id="modal-login-overlay" onclick="handleLoginOverlayClick(event)">
+    <div id="login-section">
+        <div class="reg-card">
+            <div class="reg-banner">
+                <button class="reg-close" onclick="hideLogin()">✕</button>
+                <h2>Chào mừng trở lại</h2>
+                <p>Đăng nhập để tiếp tục hành trình khám phá cùng StayViet</p>
             </div>
-            <div style="height:1px;background:#e2e8f0;margin:2px 0;"></div>
-            <div class="ci-confirm-row">
-                <span class="ci-confirm-label"><i class="fab fa-google"></i> Email</span>
-                <span class="ci-confirm-value" id="ci-confirm-email">—</span>
-            </div>
-            <div style="height:1px;background:#e2e8f0;margin:2px 0;"></div>
-            <div class="ci-confirm-row">
-                <span class="ci-confirm-label"><i class="fas fa-user-tie"></i> Nhân viên</span>
-                <span class="ci-confirm-value" id="ci-confirm-employee">—</span>
-            </div>
-        </div>
-        <div class="ci-confirm-actions">
-            <button class="ci-confirm-cancel" onclick="ciConfirmClose()">Huỷ bỏ</button>
-            <button class="ci-confirm-ok" id="ci-confirm-ok-btn">
-                <i class="fas fa-check-circle"></i> Xác nhận Check In
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- ===== CO CONFIRM MODAL (MỚI) ===== -->
-<div id="co-confirm-overlay">
-    <div id="co-confirm-box">
-        <div class="ci-confirm-header">
-            <div class="co-confirm-icon-wrap">🏁</div>
-            <div class="ci-confirm-title">Xác nhận Check Out</div>
-            <div class="ci-confirm-subtitle">Vui lòng kiểm tra thông tin trước khi xác nhận</div>
-        </div>
-        <div class="ci-confirm-details">
-            <div class="ci-confirm-row">
-                <span class="ci-confirm-label"><i class="fas fa-door-closed"></i> Phòng</span>
-                <span class="ci-confirm-value" id="co-confirm-room">—</span>
-            </div>
-            <div style="height:1px;background:#e2e8f0;margin:2px 0;"></div>
-            <div class="ci-confirm-row">
-                <span class="ci-confirm-label"><i class="fab fa-google"></i> Email</span>
-                <span class="ci-confirm-value" id="co-confirm-email">—</span>
-            </div>
-            <div style="height:1px;background:#e2e8f0;margin:2px 0;"></div>
-            <div class="ci-confirm-row">
-                <span class="ci-confirm-label"><i class="fas fa-user-tie"></i> Nhân viên</span>
-                <span class="ci-confirm-value" id="co-confirm-employee">—</span>
-            </div>
-        </div>
-        <div class="ci-confirm-actions">
-            <button class="ci-confirm-cancel" onclick="coConfirmClose()">Huỷ bỏ</button>
-            <button class="co-confirm-ok" id="co-confirm-ok-btn">
-                <i class="fas fa-check-circle"></i> Xác nhận Check Out
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- ===== CHECKOUT PAYMENT MODAL ===== -->
-<div id="co-payment-overlay">
-    <div id="co-payment-box">
-        <!-- Banner -->
-        <div class="co-pay-banner">
-            <button class="co-pay-close" onclick="coPayClose()">✕</button>
-            <div style="font-size:36px;margin-bottom:10px;" id="co-pay-banner-icon">💳</div>
-            <div class="co-pay-banner-title" id="co-pay-banner-title-txt">Thanh toán Check Out</div>
-            <div class="co-pay-banner-sub" id="co-pay-banner-sub">Chọn phương thức thanh toán phù hợp</div>
-        </div>
-
-        <!-- ===== BƯỚC 1: CHỌN PHƯƠNG THỨC ===== -->
-        <div id="co-pay-step-method" class="co-pay-method-step">
-            <!-- Tổng tiền -->
-            <div class="co-pay-total-box" style="margin-bottom:20px;">
-                <div>
-                    <div class="co-pay-total-label">Số tiền cần thanh toán</div>
-                    <div style="font-size:11px;color:#b45309;margin-top:2px;font-weight:500;" id="co-pay-amount-label-sub">Sau khi trừ tiền cọc</div>
-                </div>
-                <div class="co-pay-total-amount" id="co-pay-amount">—</div>
-            </div>
-
-            <!-- Ô nhập tiền cọc (chỉ hiện khi đặt phòng offline) -->
-            <div id="bk-deposit-amount-row" style="display:none;margin-bottom:18px;">
-                <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Số tiền đặt cọc (₫)</label>
-                <input type="number" id="bk-deposit-amount-input" min="0" step="10000"
-                       placeholder="Nhập số tiền cọc..."
-                       style="width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:12px;font-size:14px;font-family:inherit;color:#1e293b;background:#f8fafc;outline:none;box-sizing:border-box;"
-                       oninput="const v=parseFloat(this.value)||0; document.getElementById('co-pay-amount').textContent=new Intl.NumberFormat('vi-VN').format(v)+' ₫';">
-            </div>
-
-            <div class="co-pay-method-title">Chọn phương thức thanh toán</div>
-            <div class="co-pay-method-sub">Khách hàng muốn thanh toán bằng hình thức nào?</div>
-
-            <div class="co-pay-method-cards">
-                <div class="co-pay-method-card" onclick="coPaySelectMethod('BANK_TRANSFER')">
-                    <div class="co-pay-method-icon bank">🏦</div>
-                    <div>
-                        <div class="co-pay-method-name">Chuyển khoản ngân hàng</div>
-                        <div class="co-pay-method-desc">Hiển thị mã QR & thông tin tài khoản</div>
-                    </div>
-                    <i class="fas fa-chevron-right co-pay-method-arrow"></i>
-                </div>
-                <div class="co-pay-method-card" onclick="coPaySelectMethod('CASH')">
-                    <div class="co-pay-method-icon cash">💵</div>
-                    <div>
-                        <div class="co-pay-method-name">Tiền mặt</div>
-                        <div class="co-pay-method-desc">Thu tiền mặt trực tiếp tại quầy lễ tân</div>
-                    </div>
-                    <i class="fas fa-chevron-right co-pay-method-arrow"></i>
-                </div>
-                <div class="co-pay-method-card" onclick="coPaySelectMethod('CREDIT_CARD')">
-                    <div class="co-pay-method-icon" style="background:linear-gradient(135deg,#ede9fe,#ddd6fe);">💳</div>
-                    <div>
-                        <div class="co-pay-method-name">Thẻ tín dụng / Thẻ ATM</div>
-                        <div class="co-pay-method-desc">Quẹt thẻ qua máy POS tại quầy</div>
-                    </div>
-                    <i class="fas fa-chevron-right co-pay-method-arrow"></i>
-                </div>
-            </div>
-
-            <div style="margin-top:18px;">
-                <button class="co-pay-btn-cancel" style="width:100%;" onclick="coPayClose()">Huỷ bỏ</button>
-            </div>
-        </div>
-
-        <!-- ===== BƯỚC 2A: CHUYỂN KHOẢN (QR) ===== -->
-        <div id="co-pay-step-bank" class="co-pay-body" style="display:none;">
-            <button class="co-pay-back-btn" onclick="coPayGoBack()">
-                <i class="fas fa-arrow-left"></i> Quay lại chọn phương thức
-            </button>
-
-            <!-- QR Code -->
-            <div class="co-pay-qr-box">
-                <img id="co-pay-qr-img"
-                     src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=StayViet&bgcolor=ffffff"
-                     alt="QR Code thanh toán" class="co-pay-qr-img">
-                <div class="co-pay-qr-hint">📱 Quét mã QR qua ứng dụng Ngân hàng</div>
-            </div>
-
-            <!-- Thông tin tài khoản -->
-            <div>
-                <div class="co-pay-info-row">
-                    <span class="co-pay-info-label">Ngân hàng</span>
-                    <span class="co-pay-info-val">Vietcombank (VCB)</span>
-                </div>
-                <div class="co-pay-info-row">
-                    <span class="co-pay-info-label">Chủ tài khoản</span>
-                    <span class="co-pay-info-val">NGUYEN VAN A</span>
-                </div>
-                <div class="co-pay-info-row">
-                    <span class="co-pay-info-label">Số tài khoản</span>
-                    <div style="display:flex;align-items:center;">
-                        <span class="co-pay-info-val" id="co-pay-stk">1234567890</span>
-                        <button class="co-pay-copy-btn" onclick="coPayCopy('co-pay-stk')" title="Sao chép STK">📋</button>
+            <div class="reg-body">
+                <div class="reg-field">
+                    <label class="reg-label">Tên đăng nhập</label>
+                    <div class="reg-input-wrap">
+                        <span class="reg-input-icon">🔖</span>
+                        <input class="reg-input" id="login-username" type="text" placeholder="nguyenvana123">
                     </div>
                 </div>
-                <div class="co-pay-info-row">
-                    <span class="co-pay-info-label">Số tiền</span>
-                    <div style="display:flex;align-items:center;">
-                        <span class="co-pay-info-val highlight" id="co-pay-amount-copy">—</span>
-                        <button class="co-pay-copy-btn" onclick="coPayCopy('co-pay-amount-copy')" title="Sao chép số tiền">📋</button>
+
+                <div class="reg-field">
+                    <label class="reg-label">Mật khẩu</label>
+                    <div class="reg-input-wrap">
+                        <span class="reg-input-icon">🔒</span>
+                        <input class="reg-input" id="login-password" type="password" placeholder="••••••••">
+                    </div>
+                    <div style="text-align: right; margin-top: 8px;">
+                        <a href="#" style="font-size: 12px; color: var(--blue); text-decoration: none; font-weight: 500;">Quên mật khẩu?</a>
                     </div>
                 </div>
-                <div class="co-pay-info-row">
-                    <span class="co-pay-info-label">Nội dung CK</span>
-                    <div style="display:flex;align-items:center;">
-                        <span class="co-pay-info-val" id="co-pay-content">STAYVIET CHECKOUT</span>
-                        <button class="co-pay-copy-btn" onclick="coPayCopy('co-pay-content')" title="Sao chép nội dung">📋</button>
-                    </div>
-                </div>
-                <div class="co-pay-info-row">
-                    <span class="co-pay-info-label">Phương thức</span>
-                    <span class="co-pay-info-val" style="color:#3b82f6;">🏦 Chuyển khoản ngân hàng</span>
-                </div>
-            </div>
 
-            <div class="co-pay-guide">
-                ⏳ Sau khi chuyển khoản thành công, hệ thống sẽ tự động xác nhận trong vòng 1–3 phút.<br>
-                Giữ lại biên lai chuyển khoản để đối chiếu nếu cần.
-            </div>
-
-            <div class="co-pay-actions">
-                <button class="co-pay-btn-cancel" onclick="coPayClose()">Bỏ qua</button>
-                <button class="co-pay-btn-confirm" id="co-pay-confirm-btn" onclick="coPayConfirm()">
-                    <i class="fas fa-check-circle"></i> Tôi đã chuyển khoản
-                </button>
-            </div>
-        </div>
-
-        <!-- ===== BƯỚC 2B: TIỀN MẶT / THẺ ===== -->
-        <div id="co-pay-step-cash" style="padding:24px 28px 28px;display:none;">
-            <button class="co-pay-back-btn" onclick="coPayGoBack()">
-                <i class="fas fa-arrow-left"></i> Quay lại chọn phương thức
-            </button>
-
-            <!-- Số tiền nổi bật -->
-            <div class="co-pay-cash-box">
-                <div class="co-pay-cash-icon" id="co-cash-icon">💵</div>
-                <div class="co-pay-cash-label" id="co-cash-method-label">Thanh toán tiền mặt</div>
-                <div class="co-pay-cash-amount" id="co-cash-amount-display">—</div>
-                <div class="co-pay-cash-note">Số tiền nhân viên cần thu từ khách</div>
-            </div>
-
-            <!-- Thông tin giao dịch -->
-            <div class="co-pay-cash-info">
-                <div class="co-pay-cash-info-row">
-                    <span class="co-pay-cash-info-label">Phương thức</span>
-                    <span class="co-pay-cash-info-val" id="co-cash-method-val">—</span>
-                </div>
-                <div class="co-pay-cash-info-row">
-                    <span class="co-pay-cash-info-label">Trạng thái</span>
-                    <span class="co-pay-cash-info-val" style="color:#16a34a;">✅ Đã thu tiền tại quầy</span>
-                </div>
-                <div class="co-pay-cash-info-row">
-                    <span class="co-pay-cash-info-label">Ghi chú</span>
-                    <span class="co-pay-cash-info-val" style="color:#64748b;font-size:12px;">Nhấn xác nhận để lưu giao dịch</span>
-                </div>
-            </div>
-
-            <div class="co-pay-actions">
-                <button class="co-pay-btn-cancel" onclick="coPayClose()">Huỷ bỏ</button>
-                <button class="co-pay-btn-confirm" id="co-pay-cash-confirm-btn" onclick="coPayCashConfirm()" style="background:linear-gradient(135deg,#16a34a,#15803d);box-shadow:0 4px 14px rgba(22,163,74,0.25);">
-                    <i class="fas fa-check-circle"></i> Xác nhận đã thu tiền
-                </button>
+                <hr class="reg-divider">
+                <button class="btn-submit-reg" onclick="submitLogin()">🚀 &nbsp;Đăng nhập ngay</button>
+                <p class="reg-footer-note">Chưa có tài khoản? <a href="#" onclick="hideLogin(); showRegister(); return false;">Đăng ký miễn phí</a></p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- ===== TOAST CONTAINER ===== -->
-<div id="toast-container"></div>
-
-
-<!-- ==================== SCRIPTS ==================== -->
-<script>
-    // ===== PRICE FORMAT =====
-    function formatCurrency(input) {
-        let value = input.value.replace(/\D/g, "");
-        if (value !== "") {
-            input.value = new Intl.NumberFormat('de-DE').format(value);
-            document.getElementById('priceOriginal').value = value;
-        } else {
-            document.getElementById('priceOriginal').value = "";
-        }
-    }
-    document.querySelector('button[type="reset"]').addEventListener('click', () => {
-        document.getElementById('priceOriginal').value = "";
-    });
-</script>
-
-<script>
-    // ===== IMAGE PREVIEW =====
-    let selectedFiles = [];
-
-    function handleFiles(files) {
-        const previewGrid = document.getElementById('preview-grid');
-        for (const file of files) {
-            if (!file.type.startsWith('image/')) continue;
-            const fileIndex = selectedFiles.length;
-            selectedFiles.push(file);
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const div = document.createElement('div');
-                div.className = 'preview-card relative aspect-[4/3] rounded-[1.25rem] overflow-hidden border-2 border-white shadow-md ring-1 ring-slate-100';
-                div.dataset.fileIndex = fileIndex;
-                div.innerHTML = `
-                    <img src="${e.target.result}" class="h-full w-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity flex items-end p-3">
-                        <span class="text-[10px] text-white font-bold truncate">${file.name}</span>
-                    </div>
-                    <button type="button" onclick="removeNewImage(this, ${fileIndex})"
-                        class="absolute top-2 right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs font-bold flex items-center justify-center shadow-lg transition-all"
-                        style="opacity:1;">✕</button>
-                `;
-                previewGrid.appendChild(div);
-            }
-            reader.readAsDataURL(file);
-        }
-        syncFileInput();
-    }
-
-    function removeNewImage(btn, fileIndex) {
-        btn.closest('.preview-card').remove();
-        selectedFiles[fileIndex] = null;
-        syncFileInput();
-    }
-
-    function removeCloudinaryImage(btn, url) {
-        btn.closest('.preview-card').remove();
-    }
-
-    function syncFileInput() {
-        const fileInput = document.getElementById('file-upload');
-        const activeFiles = selectedFiles.filter(f => f !== null);
-        const dt = new DataTransfer();
-        activeFiles.forEach(f => dt.items.add(f));
-        fileInput.files = dt.files;
-    }
-
-    function clearPreview() {
-        document.getElementById('preview-grid').innerHTML = '';
-        selectedFiles = [];
-        document.getElementById('file-upload').value = '';
-    }
-</script>
-
-<script>
-    // ===== ROOM TYPES =====
-    document.addEventListener("DOMContentLoaded", function() {
-        fetchRoomTypes();
-    });
-
-    async function fetchRoomTypes() {
-        const selectElement = document.getElementById('roomTypeSelect');
-        const token = localStorage.getItem('accessToken');
-        try {
-            const response = await fetch('/api/v1/roomtypes', {
-                headers: token ? { 'Authorization': 'Bearer ' + token } : {}
-            });
-            if (!response.ok) throw new Error('HTTP ' + response.status);
-            const result = await response.json();
-            const roomTypes = Array.isArray(result.data) ? result.data : Array.isArray(result) ? result : null;
-            if (!roomTypes || roomTypes.length === 0) {
-                selectElement.innerHTML = '<option value="">Chưa có loại phòng</option>';
-                return;
-            }
-            selectElement.innerHTML = '<option value="">-- Chọn loại phòng --</option>';
-            roomTypes.forEach(type => {
-                const opt = document.createElement('option');
-                opt.value = type.id;
-                opt.textContent = type.type + (type.capacity ? ' (tối đa ' + type.capacity + ' người)' : '');
-                selectElement.appendChild(opt);
-            });
-            return roomTypes;
-        } catch (error) {
-            console.error('[fetchRoomTypes] Lỗi:', error.message);
-            selectElement.innerHTML = '<option value="">Lỗi tải dữ liệu</option>';
-            return [];
-        }
-    }
-</script>
-
-<script>
-    // ===== FETCH ROOM DETAIL =====
-    async function fetchRoomDetail() {
-        const idInput = document.getElementById('inputSearchId');
-        const roomId = idInput ? idInput.value.trim() : '';
-        if (!roomId) { showToast('warning', 'Thiếu thông tin', 'Vui lòng nhập ID phòng!'); if (idInput) idInput.focus(); return; }
-        const token = localStorage.getItem('accessToken');
-        const btn = document.querySelector('[onclick="fetchRoomDetail()"]');
-        const originalHtml = btn ? btn.innerHTML : '';
-        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải...'; }
-        try {
-            const res = await fetch('/api/v1/rooms/id?id=' + roomId, { headers: token ? { 'Authorization': 'Bearer ' + token } : {} });
-            if (res.status === 404) throw new Error('Không tìm thấy phòng có ID: ' + roomId);
-            if (!res.ok) throw new Error('Lỗi server: ' + res.status);
-            const json = await res.json();
-            const room = json.data || json;
-            const roomIdEl = document.getElementById('roomId');
-            if (roomIdEl) roomIdEl.value = room.id || roomId;
-            const nameInput = document.querySelector('input[name="name"]');
-            if (nameInput) nameInput.value = room.name || '';
-            const statusSelect = document.querySelector('select[name="status"]');
-            if (statusSelect && room.status) statusSelect.value = room.status;
-            const typeSelect = document.getElementById('roomTypeSelect');
-            const typeId = room.type_room_id || room.roomType?.id || room.roomTypeId || null;
-            if (typeSelect && typeId) {
-                if (typeSelect.options.length <= 1) await fetchRoomTypes();
-                typeSelect.value = String(typeId);
-            }
-            if (room.price != null) {
-                const priceDisplay = document.getElementById('priceDisplay');
-                const priceOriginal = document.getElementById('priceOriginal');
-                if (priceDisplay) priceDisplay.value = new Intl.NumberFormat('vi-VN').format(room.price);
-                if (priceOriginal) priceOriginal.value = room.price;
-            }
-            const previewGrid = document.getElementById('preview-grid');
-            if (previewGrid) {
-                if (Array.isArray(room.images) && room.images.length > 0) {
-                    previewGrid.innerHTML = room.images.map((url, i) => `
-                        <div class="preview-card relative rounded-2xl overflow-hidden border border-slate-200 shadow-sm group aspect-square">
-                            <img src="${url}" alt="Ảnh ${i+1}" class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                            <button type="button" onclick="removeCloudinaryImage(this, '${url}')"
-                                class="absolute top-2 right-2 w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs font-bold shadow-lg transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">✕</button>
-                        </div>`).join('');
-                } else {
-                    previewGrid.innerHTML = '<p class="text-slate-400 text-sm col-span-4">Phòng này chưa có ảnh</p>';
-                }
-            }
-            const workBranchSelect = document.getElementById('workBranchSelect');
-            if (workBranchSelect && room.workBranch) { workBranchSelect.value = room.workBranch; }
-            showToast('success', 'Tải thành công', 'Đã tải dữ liệu phòng #' + roomId);
-        } catch (err) {
-            showToast('error', 'Thất bại', err.message || 'Không thể tải dữ liệu phòng');
-        } finally {
-            if (btn) { btn.disabled = false; btn.innerHTML = originalHtml; }
-        }
-    }
-</script>
-
-<script>
-    // ===== FORM SUBMIT =====
-    document.getElementById('addRoomForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const form = e.target;
-        const formData = new FormData(form);
-        const roomId = document.getElementById('roomId')?.value?.trim();
-        const isUpdate = !!roomId;
-
-        // Validate workBranch
-        const workBranchVal = document.getElementById('workBranchSelect')?.value;
-        if (!workBranchVal) {
-            showToast('warning', 'Thiếu thông tin', 'Vui lòng chọn chi nhánh làm việc!');
-            document.getElementById('workBranchSelect')?.focus();
-            return;
-        }
-        const submitBtn = form.querySelector('button[type="submit"]');
-        const originalBtnText = submitBtn.innerHTML;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = isUpdate ? '<i class="fas fa-spinner fa-spin"></i> <span>Updating...</span>' : '<i class="fas fa-spinner fa-spin"></i> <span>Saving...</span>';
-        try {
-            const url = isUpdate ? `/api/v1/rooms/update/${roomId}` : '/api/v1/rooms';
-            const method = isUpdate ? 'PUT' : 'POST';
-            const token = localStorage.getItem('accessToken');
-            const headers = {};
-            if (token) headers['Authorization'] = 'Bearer ' + token;
-            const response = await fetch(url, { method, headers, body: formData });
-            const result = await response.json().catch(() => ({}));
-            if (response.ok) {
-                showToast('success', isUpdate ? 'Cập nhật thành công!' : 'Thêm phòng thành công!', '');
-                if (!isUpdate) { form.reset(); clearPreview(); document.getElementById('priceOriginal').value = ''; }
-            } else {
-                showToast('error', 'Lỗi', result.message || (isUpdate ? 'Không thể cập nhật phòng' : 'Không thể lưu phòng'));
-            }
-        } catch (error) {
-            showToast('error', 'Lỗi kết nối', 'Không thể kết nối đến Server!');
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalBtnText;
-        }
-    });
-</script>
-
-<script>
-    // ===== SWITCH ADD / UPDATE FORM =====
-    const btnReset = document.getElementById('btnReset');
-    const btnDelete = document.getElementById('btnDelete');
-    const submitText = document.getElementById('submitText');
-    const submitIcon = document.getElementById('submitIcon');
-    const searchSection = document.getElementById('searchSection');
-
-    document.getElementById('menuUpdate').addEventListener('click', function() {
-        searchSection.classList.remove('hidden');
-        btnDelete.classList.remove('hidden');
-        btnReset.classList.add('hidden');
-        submitText.innerText = "Update Room";
-        submitIcon.className = "fas fa-sync-alt text-[10px]";
-        document.getElementById('addRoomForm').reset();
-    });
-
-    document.getElementById('menuAdd').addEventListener('click', function() {
-        searchSection.classList.add('hidden');
-        btnDelete.classList.add('hidden');
-        btnReset.classList.remove('hidden');
-        submitText.innerText = "Save Room";
-        submitIcon.className = "fas fa-arrow-right text-[10px]";
-        document.getElementById('roomId').value = "";
-        document.getElementById('addRoomForm').reset();
-    });
-</script>
-
-<script>
-    // ===== HEADER USER INFO =====
-    (function initRoomFormHeader() {
-        const fullName = localStorage.getItem('fullName') || '';
-        const role = localStorage.getItem('userRole') || '';
-        const token = localStorage.getItem('accessToken');
-        if (!token || !fullName) { window.location.href = '/demo'; return; }
-        const parts = fullName.trim().split(' ');
-        const shortName = parts[parts.length - 1];
-        const initials = parts.length >= 2 ? (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase() : fullName.trim().substring(0, 2).toUpperCase();
-        const avatarEl = document.getElementById('rf-avatar');
-        const greetingEl = document.getElementById('rf-greeting');
-        const fullNameEl = document.getElementById('rf-fullname-menu');
-        const roleEl = document.getElementById('rf-role-menu');
-        if (avatarEl) avatarEl.textContent = initials;
-        if (greetingEl) greetingEl.textContent = 'Hi, ' + shortName + '!';
-        if (fullNameEl) fullNameEl.textContent = fullName;
-        const roleLabel = { 'ROLE_ADMIN': 'Quản trị viên', 'ROLE_MANAGER': 'Quản lý', 'ROLE_USER': 'Khách hàng' };
-        if (roleEl) roleEl.textContent = roleLabel[role] || role || 'Nhân viên';
-    })();
-
-    function rfToggleUserMenu() {
-        document.getElementById('rf-user-menu').classList.toggle('hidden');
-    }
-    document.addEventListener('click', function(e) {
-        const chip = document.getElementById('rf-user-chip');
-        const menu = document.getElementById('rf-user-menu');
-        if (menu && chip && !chip.contains(e.target) && !menu.contains(e.target)) menu.classList.add('hidden');
-    });
-    function rfLogout() {
-        ['accessToken','userId','fullName','userRole','expirationDate'].forEach(k => localStorage.removeItem(k));
-        window.location.href = '/demo';
-    }
-
-    // ===== SHARED USER CHIP FOR ALL TABS =====
-    (function sharedInitAllUserChips() {
-        const fullName = localStorage.getItem('fullName') || '';
-        const role = localStorage.getItem('userRole') || '';
-        const parts = fullName.trim().split(' ');
-        const shortName = parts[parts.length - 1] || '...';
-        const initials = parts.length >= 2
-            ? (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase()
-            : (fullName.trim().substring(0, 2).toUpperCase() || '??');
-        const roleLabel = { 'ROLE_ADMIN': 'Quản trị viên', 'ROLE_MANAGER': 'Quản lý', 'ROLE_USER': 'Khách hàng' };
-        const roleText = roleLabel[role] || role || 'Nhân viên';
-
-        ['rs', 'ci', 'co', 'bk'].forEach(function(prefix) {
-            const avatarEl    = document.getElementById(prefix + '-avatar');
-            const greetingEl  = document.getElementById(prefix + '-greeting');
-            const fullNameEl  = document.getElementById(prefix + '-fullname-menu');
-            const roleEl      = document.getElementById(prefix + '-role-menu');
-            if (avatarEl)   avatarEl.textContent   = initials;
-            if (greetingEl) greetingEl.textContent = 'Hi, ' + shortName + '!';
-            if (fullNameEl) fullNameEl.textContent  = fullName || '—';
-            if (roleEl)     roleEl.textContent      = roleText;
-        });
-    })();
-
-    function sharedToggleUserMenu(prefix) {
-        const menu = document.getElementById(prefix + '-user-menu');
-        if (!menu) return;
-        const wasHidden = menu.classList.contains('hidden');
-        // Close all open menus first
-        ['rs', 'ci', 'co', 'bk', 'rf'].forEach(function(p) {
-            const m = document.getElementById(p + '-user-menu');
-            if (m) m.classList.add('hidden');
-        });
-        if (wasHidden) menu.classList.remove('hidden');
-    }
-
-    document.addEventListener('click', function(e) {
-        ['rs', 'ci', 'co', 'bk'].forEach(function(prefix) {
-            const chip = document.getElementById(prefix + '-user-chip');
-            const menu = document.getElementById(prefix + '-user-menu');
-            if (menu && chip && !chip.contains(e.target) && !menu.contains(e.target)) {
-                menu.classList.add('hidden');
-            }
-        });
-    });
-</script>
-
-<script>
-    // ===== TOAST SYSTEM =====
-    function showToast(type, title, message, duration = 4000) {
-        const icons = {
-            success: '<i class="fas fa-check-circle"></i>',
-            error:   '<i class="fas fa-times-circle"></i>',
-            warning: '<i class="fas fa-exclamation-triangle"></i>',
-            info:    '<i class="fas fa-info-circle"></i>',
-        };
-        const labels = { success: 'Thành công', error: 'Thất bại', warning: 'Cảnh báo', info: 'Thông tin' };
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
-        toast.innerHTML = `
-            <div class="toast-icon">${icons[type]}</div>
-            <div class="toast-content">
-                <div class="toast-title">${title || labels[type]}</div>
-                ${message ? `<div class="toast-msg">${message}</div>` : ''}
+<!-- ===== MODAL CHỌN PHÒNG ===== -->
+<div class="modal-overlay" id="modal-room-picker-overlay" onclick="if(event.target===this)hideRoomPicker()" style="display:none;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:20px;max-width:520px;width:95%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(26,39,68,0.18);">
+        <div style="background:linear-gradient(135deg,#1a2744,#2d4a8a);padding:24px 28px 20px;border-radius:20px 20px 0 0;position:relative;">
+            <button onclick="hideRoomPicker()" style="position:absolute;top:14px;right:16px;background:rgba(255,255,255,0.15);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;">✕</button>
+            <h2 style="color:#fff;font-family:'Playfair Display',serif;margin:0 0 4px;font-size:20px;">Chọn phòng</h2>
+            <p id="room-picker-subtitle" style="color:rgba(255,255,255,0.75);font-size:13px;margin:0;"></p>
+        </div>
+        <div style="padding:20px 24px;">
+            <div id="room-picker-list" style="display:flex;flex-direction:column;gap:10px;min-height:80px;">
+                <div style="text-align:center;color:#aaa;padding:20px;font-size:13px;">Đang tải...</div>
             </div>
-            <button class="toast-close" onclick="dismissToast(this.closest('.toast'))"><i class="fas fa-times"></i></button>
-            <div class="toast-bar" style="animation-duration:${duration}ms;"></div>
-        `;
-        container.appendChild(toast);
-        const timer = setTimeout(() => dismissToast(toast), duration);
-        toast._timer = timer;
-    }
-
-    function dismissToast(toast) {
-        if (!toast || toast._dismissed) return;
-        toast._dismissed = true;
-        clearTimeout(toast._timer);
-        toast.classList.add('toast-exit');
-        toast.addEventListener('animationend', () => toast.remove(), { once: true });
-    }
-</script>
-
-<script>
-    // ===== SWITCH VIEWS =====
-    const _menuMap = {
-        'form':         'menuAdd',
-        'update':       'menuUpdate',
-        'reset':        'menuResetStatus',
-        'checkin':      'menuCheckIn',
-        'checkout':     'menuCheckOut',
-        'booking':      'menuBooking',
-        'add-room-type':'menuAddRoomType',
-    };
-
-    function setActiveMenu(view) {
-        Object.entries(_menuMap).forEach(([v, id]) => {
-            const el = document.getElementById(id);
-            if (!el) return;
-            if (v === view) {
-                el.classList.add('active-menu');
-            } else {
-                el.classList.remove('active-menu');
-            }
-        });
-    }
-
-    function switchToView(view) {
-        document.getElementById('view-form').style.display          = (view === 'form' || view === 'update') ? '' : 'none';
-        document.getElementById('view-reset-status').style.display  = view === 'reset'    ? 'flex' : 'none';
-        document.getElementById('view-checkin').style.display       = view === 'checkin'  ? 'flex' : 'none';
-        document.getElementById('view-checkout').style.display      = view === 'checkout' ? 'flex' : 'none';
-        document.getElementById('view-booking').style.display       = view === 'booking'       ? 'flex' : 'none';
-        document.getElementById('view-add-room-type').style.display = view === 'add-room-type' ? 'flex' : 'none';
-        setActiveMenu(view);
-    }
-
-    document.getElementById('menuResetStatus').addEventListener('click', function(e) {
-        e.preventDefault(); switchToView('reset'); rsLoadRooms();
-    });
-    document.getElementById('menuCheckIn').addEventListener('click', function(e) {
-        e.preventDefault(); switchToView('checkin'); ciLoadRooms();
-    });
-    // ===== MỚI: Check Out menu =====
-    document.getElementById('menuCheckOut').addEventListener('click', function(e) {
-        e.preventDefault(); switchToView('checkout'); coLoadRooms();
-    });
-    document.getElementById('menuBooking').addEventListener('click', function(e) {
-        e.preventDefault(); switchToView('booking'); bkLoadRooms();
-    });
-    document.getElementById('menuAddRoomType').addEventListener('click', function(e) {
-        e.preventDefault(); switchToView('add-room-type');
-    });
-
-    document.getElementById('menuAdd').addEventListener('click', function(e) {
-        e.preventDefault(); switchToView('form');
-    });
-    document.getElementById('menuUpdate').addEventListener('click', function(e) {
-        e.preventDefault(); switchToView('update');
-    }, true);
-</script>
-
-<script>
-    // ===== RESET STATUS LOGIC =====
-    function rsReload() { rsLoadRooms(); }
-
-    async function rsLoadRooms() {
-        const grid = document.getElementById('rs-grid');
-        const countEl = document.getElementById('rs-count');
-        grid.innerHTML = '<div class="rs-loading"><i class="fas fa-spinner fa-spin"></i>Đang tải...</div>';
-        countEl.textContent = '';
-        try {
-            const token = localStorage.getItem('accessToken');
-            const res = await fetch('/api/v1/rooms/status/clear', { headers: token ? { Authorization: 'Bearer ' + token } : {} });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const json = await res.json();
-            const rooms = Array.isArray(json) ? json : (json.data || []);
-            if (!rooms.length) { grid.innerHTML = '<div class="rs-empty">📭 Không có phòng nào.</div>'; return; }
-            countEl.textContent = rooms.length + ' phòng';
-            grid.innerHTML = rooms.map(r => rsRenderCard(r)).join('');
-        } catch (err) {
-            grid.innerHTML = '<div class="rs-empty" style="color:#ef4444;">⚠️ Lỗi tải phòng: ' + err.message + '</div>';
-        }
-    }
-
-    function rsRenderCard(r) {
-        const imgHtml = (r.images && r.images.length > 0) ? `<img class="rs-card-img" src="${r.images[0]}" alt="${r.name || ''}" loading="lazy">` : `<div class="rs-card-img-ph">🏨</div>`;
-        const price = r.price ? new Intl.NumberFormat('vi-VN').format(r.price) + ' ₫' : '—';
-        return `<div class="rs-card">${imgHtml}<div class="rs-card-body">
-            <div class="rs-card-name">${r.name || 'Phòng #' + r.id}</div>
-            <div class="rs-card-price">${price} / đêm</div>
-            <span class="rs-badge maintenance">🧹 Đang dọn dẹp</span>
-            <button class="rs-btn-save" onclick="rsSave(${r.id},this)"><i class="fas fa-check-circle"></i> Chuyển về Available</button>
-        </div></div>`;
-    }
-
-    let _rsConfirmCallback = null;
-    function rsConfirmOpen(callback) {
-        _rsConfirmCallback = callback;
-        document.getElementById('rs-confirm-overlay').classList.add('active');
-        document.getElementById('rs-confirm-ok-btn').onclick = function () { const cb = _rsConfirmCallback; rsConfirmClose(); if (cb) cb(); };
-    }
-    function rsConfirmClose() {
-        document.getElementById('rs-confirm-overlay').classList.remove('active');
-        _rsConfirmCallback = null;
-    }
-    document.getElementById('rs-confirm-overlay').addEventListener('click', function(e) { if (e.target === this) rsConfirmClose(); });
-
-    async function rsSave(roomId, btn) {
-        rsConfirmOpen(async () => {
-            const token = localStorage.getItem('accessToken');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
-            try {
-                const res = await fetch(`/api/v1/rooms/status/cleartoavilble/${roomId}`, { method: 'POST', headers: token ? { Authorization: 'Bearer ' + token } : {} });
-                if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || 'Thất bại'); }
-                btn.innerHTML = '<i class="fas fa-check"></i> Đã chuyển AVAILABLE!';
-                btn.style.background = 'linear-gradient(135deg,#16a34a,#15803d)';
-                showToast('success', 'Cập nhật thành công', 'Phòng đã chuyển về trạng thái Available.');
-                setTimeout(() => {
-                    btn.closest('.rs-card').remove();
-                    const remaining = document.querySelectorAll('#rs-grid .rs-card').length;
-                    const countEl = document.getElementById('rs-count');
-                    if (countEl) countEl.textContent = remaining + ' phòng';
-                    if (remaining === 0) document.getElementById('rs-grid').innerHTML = '<div class="rs-empty">✅ Không còn phòng nào cần dọn dẹp.</div>';
-                }, 1500);
-            } catch (err) {
-                showToast('error', 'Cập nhật thất bại', err.message);
-                btn.innerHTML = '<i class="fas fa-check-circle"></i> Chuyển về Available';
-                btn.style.background = '';
-                btn.disabled = false;
-            }
-        });
-    }
-</script>
-
-<script>
-    // ===== CHECK IN LOGIC =====
-    let _ciAllRooms = [];
-
-    function ciReload() { ciClearSearch(); ciLoadRooms(); }
-
-    async function ciLoadRooms() {
-        const grid = document.getElementById('ci-grid');
-        const countEl = document.getElementById('ci-count');
-        grid.innerHTML = '<div class="rs-loading"><i class="fas fa-spinner fa-spin"></i>Đang tải...</div>';
-        countEl.textContent = '';
-        try {
-            const token = localStorage.getItem('accessToken');
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 8000);
-            const res = await fetch('/api/v1/rooms/status/curently', { signal: controller.signal, headers: token ? { Authorization: 'Bearer ' + token } : {} });
-            clearTimeout(timeout);
-            if (!res.ok) { const errText = await res.text(); throw new Error(`HTTP ${res.status} - ${errText}`); }
-            const json = await res.json();
-            _ciAllRooms = Array.isArray(json) ? json : (json.data || []);
-            ciRenderGrid(_ciAllRooms);
-        } catch (err) {
-            const msg = err.name === 'AbortError' ? 'Request timeout — server không phản hồi sau 8 giây' : err.message;
-            document.getElementById('ci-grid').innerHTML = `<div class="rs-empty" style="color:#ef4444;">⚠️ Lỗi: ${msg}</div>`;
-        }
-    }
-
-    function ciRenderGrid(rooms) {
-        const grid = document.getElementById('ci-grid');
-        const countEl = document.getElementById('ci-count');
-        if (!rooms.length) {
-            const keyword = document.getElementById('ci-search-input').value.trim();
-            grid.innerHTML = keyword ? `<div class="rs-empty">🔍 Không tìm thấy phòng nào với gmail <b>${keyword}</b>.</div>` : '<div class="rs-empty">📭 Không có phòng nào chờ Check In.</div>';
-            countEl.textContent = ''; return;
-        }
-        countEl.textContent = rooms.length + ' phòng';
-        grid.innerHTML = rooms.map(r => ciRenderCard(r)).join('');
-    }
-
-    function ciOnSearchInput() {
-        const val = document.getElementById('ci-search-input').value.trim();
-        document.getElementById('ci-search-clear').classList.toggle('hidden', !val);
-    }
-
-    async function ciSearch() {
-        const input = document.getElementById('ci-search-input');
-        const email = input.value.trim();
-        const hint = document.getElementById('ci-search-hint');
-        const hintTxt = document.getElementById('ci-search-hint-text');
-        const grid = document.getElementById('ci-grid');
-        const countEl = document.getElementById('ci-count');
-        if (!email) { ciClearSearch(); return; }
-        grid.innerHTML = '<div class="rs-loading"><i class="fas fa-spinner fa-spin"></i> Đang tìm kiếm...</div>';
-        countEl.textContent = '';
-        try {
-            const token = localStorage.getItem('accessToken');
-            const res = await fetch('/api/v1/rooms/customer/' + encodeURIComponent(email), { headers: token ? { 'Authorization': 'Bearer ' + token } : {} });
-            if (res.status === 404) { ciRenderGrid([]); hint.classList.remove('hidden'); hintTxt.textContent = `Không tìm thấy phòng nào cho "${email}"`; return; }
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const json = await res.json();
-            const rooms = Array.isArray(json) ? json : (json.data || []);
-            hint.classList.remove('hidden');
-            hintTxt.textContent = `Kết quả cho "${email}" — ${rooms.length} phòng`;
-            ciRenderGrid(rooms);
-        } catch (err) {
-            grid.innerHTML = `<div class="rs-empty" style="color:#ef4444;">⚠️ Lỗi: ${err.message}</div>`;
-            countEl.textContent = '';
-        }
-    }
-
-    function ciClearSearch() {
-        document.getElementById('ci-search-input').value = '';
-        document.getElementById('ci-search-clear').classList.add('hidden');
-        document.getElementById('ci-search-hint').classList.add('hidden');
-        ciRenderGrid(_ciAllRooms);
-    }
-
-    function ciRenderCard(r) {
-        const imgHtml = (r.images && r.images.length > 0) ? `<img class="rs-card-img" src="${r.images[0]}" alt="${r.name || ''}" loading="lazy">` : `<div class="rs-card-img-ph">🏨</div>`;
-        const price = r.price ? new Intl.NumberFormat('vi-VN').format(r.price) + ' ₫' : '—';
-        const email = r.guestEmail || r.email || r.customerEmail || '';
-        const emailHtml = email ? `<div style="font-size:11px;color:#64748b;margin-bottom:7px;display:flex;align-items:center;gap:5px;overflow:hidden;"><i class="fab fa-google" style="color:#ea4335;flex-shrink:0;"></i><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${email}">${email}</span></div>` : '';
-        return `<div class="rs-card">${imgHtml}<div class="rs-card-body">
-            <div class="rs-card-name">${r.name || 'Phòng #' + r.id}</div>
-            <div class="rs-card-price">${price} / đêm</div>
-            ${emailHtml}
-            <span class="rs-badge currently">🕐 Chờ Check In</span>
-            <button class="rs-btn-save" style="background:linear-gradient(135deg,#ef4444,#dc2626);" onclick="ciCheckIn(${r.id}, this)">
-                <i class="fas fa-door-open"></i> Check In
-            </button>
-        </div></div>`;
-    }
-
-    async function ciCheckIn(roomId, btn) {
-        const email = document.getElementById('ci-search-input').value.trim();
-        const employeeId = localStorage.getItem('userId');
-        const token = localStorage.getItem('accessToken');
-        if (!email) { showToast('warning', 'Thiếu thông tin', 'Vui lòng nhập email khách hàng vào ô tìm kiếm trước khi Check In!'); document.getElementById('ci-search-input').focus(); return; }
-        if (!employeeId) { showToast('error', 'Chưa đăng nhập', 'Không tìm thấy thông tin nhân viên. Vui lòng đăng nhập lại!'); return; }
-        ciConfirmOpen(roomId, email, employeeId, async () => {
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
-            try {
-                const params = new URLSearchParams();
-                params.append('email', email);
-                params.append('roomId', roomId);
-                const res = await fetch(`/api/v1/booking/checkin/${employeeId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', ...(token ? { 'Authorization': 'Bearer ' + token } : {}) },
-                    body: params
-                });
-                if (!res.ok) {
-                    const contentType = res.headers.get('content-type') || '';
-                    let msg = `Lỗi ${res.status}`;
-                    if (contentType.includes('application/json')) { const errJson = await res.json(); msg = errJson.message || errJson.data?.message || JSON.stringify(errJson); }
-                    else { msg = await res.text() || msg; }
-                    throw new Error(msg);
-                }
-                showToast('success', 'Check In thành công!', `Phòng #${roomId} — ${email}`);
-                btn.innerHTML = '<i class="fas fa-check"></i> Đã Check In!';
-                btn.style.background = 'linear-gradient(135deg,#16a34a,#15803d)';
-                setTimeout(() => {
-                    btn.closest('.rs-card').remove();
-                    const remaining = document.querySelectorAll('#ci-grid .rs-card').length;
-                    const countEl = document.getElementById('ci-count');
-                    if (countEl) countEl.textContent = remaining + ' phòng';
-                    if (remaining === 0) document.getElementById('ci-grid').innerHTML = '<div class="rs-empty">✅ Không còn phòng nào cần Check In.</div>';
-                }, 1500);
-            } catch (err) {
-                showToast('error', 'Check In thất bại', err.message);
-                btn.innerHTML = '<i class="fas fa-door-open"></i> Check In';
-                btn.style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
-                btn.disabled = false;
-            }
-        });
-    }
-
-    // CI Confirm modal
-    let _ciConfirmCallback = null;
-    function ciConfirmOpen(roomId, email, employeeId, callback) {
-        _ciConfirmCallback = callback;
-        document.getElementById('ci-confirm-room').textContent = 'Phòng #' + roomId;
-        document.getElementById('ci-confirm-email').textContent = email;
-        document.getElementById('ci-confirm-employee').textContent = 'ID: ' + employeeId;
-        document.getElementById('ci-confirm-overlay').classList.add('active');
-        document.getElementById('ci-confirm-ok-btn').onclick = function () { const cb = _ciConfirmCallback; ciConfirmClose(); if (cb) cb(); };
-    }
-    function ciConfirmClose() {
-        document.getElementById('ci-confirm-overlay').classList.remove('active');
-        _ciConfirmCallback = null;
-    }
-    document.getElementById('ci-confirm-overlay').addEventListener('click', function(e) { if (e.target === this) ciConfirmClose(); });
-</script>
-
-<script>
-    // ===== CHECK OUT LOGIC (MỚI) =====
-    let _coAllRooms = [];
-
-    function coReload() { coClearSearch(); coLoadRooms(); }
-
-    async function coLoadRooms() {
-        const grid = document.getElementById('co-grid');
-        const countEl = document.getElementById('co-count');
-        grid.innerHTML = '<div class="rs-loading"><i class="fas fa-spinner fa-spin"></i>Đang tải...</div>';
-        countEl.textContent = '';
-        try {
-            const token = localStorage.getItem('accessToken');
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 8000);
-            // API lấy danh sách phòng đã check in chờ check out
-            const res = await fetch('/api/v1/rooms/status/checkin', {
-                signal: controller.signal,
-                headers: token ? { Authorization: 'Bearer ' + token } : {}
-            });
-            clearTimeout(timeout);
-            if (!res.ok) { const errText = await res.text(); throw new Error(`HTTP ${res.status} - ${errText}`); }
-            const json = await res.json();
-            _coAllRooms = Array.isArray(json) ? json : (json.data || []);
-            coRenderGrid(_coAllRooms);
-        } catch (err) {
-            const msg = err.name === 'AbortError' ? 'Request timeout — server không phản hồi sau 8 giây' : err.message;
-            document.getElementById('co-grid').innerHTML = `<div class="rs-empty" style="color:#ef4444;">⚠️ Lỗi: ${msg}</div>`;
-        }
-    }
-
-    function coRenderGrid(rooms) {
-        const grid = document.getElementById('co-grid');
-        const countEl = document.getElementById('co-count');
-        if (!rooms.length) {
-            const keyword = document.getElementById('co-search-input').value.trim();
-            grid.innerHTML = keyword ? `<div class="rs-empty">🔍 Không tìm thấy phòng nào với gmail <b>${keyword}</b>.</div>` : '<div class="rs-empty">📭 Không có phòng nào chờ Check Out.</div>';
-            countEl.textContent = ''; return;
-        }
-        countEl.textContent = rooms.length + ' phòng';
-        grid.innerHTML = rooms.map(r => coRenderCard(r)).join('');
-    }
-
-    function coOnSearchInput() {
-        const val = document.getElementById('co-search-input').value.trim();
-        document.getElementById('co-search-clear').classList.toggle('hidden', !val);
-    }
-
-    async function coSearch() {
-        const input = document.getElementById('co-search-input');
-        const email = input.value.trim();
-        const hint = document.getElementById('co-search-hint');
-        const hintTxt = document.getElementById('co-search-hint-text');
-        const grid = document.getElementById('co-grid');
-        const countEl = document.getElementById('co-count');
-        if (!email) { coClearSearch(); return; }
-        grid.innerHTML = '<div class="rs-loading"><i class="fas fa-spinner fa-spin"></i> Đang tìm kiếm...</div>';
-        countEl.textContent = '';
-        try {
-            const token = localStorage.getItem('accessToken');
-            // API tìm phòng theo email khách đã check in chờ check out
-            const res = await fetch('/api/v1/rooms/customer/checkedin/' + encodeURIComponent(email), {
-                headers: token ? { 'Authorization': 'Bearer ' + token } : {}
-            });
-            if (res.status === 404) { coRenderGrid([]); hint.classList.remove('hidden'); hintTxt.textContent = `Không tìm thấy phòng nào cho "${email}"`; return; }
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const json = await res.json();
-            const rooms = Array.isArray(json) ? json : (json.data || []);
-            hint.classList.remove('hidden');
-            hintTxt.textContent = `Kết quả cho "${email}" — ${rooms.length} phòng`;
-            coRenderGrid(rooms);
-        } catch (err) {
-            grid.innerHTML = `<div class="rs-empty" style="color:#ef4444;">⚠️ Lỗi: ${err.message}</div>`;
-            countEl.textContent = '';
-        }
-    }
-
-    function coClearSearch() {
-        document.getElementById('co-search-input').value = '';
-        document.getElementById('co-search-clear').classList.add('hidden');
-        document.getElementById('co-search-hint').classList.add('hidden');
-        coRenderGrid(_coAllRooms);
-    }
-
-    function coRenderCard(r) {
-        const imgHtml = (r.images && r.images.length > 0) ? `<img class="rs-card-img" src="${r.images[0]}" alt="${r.name || ''}" loading="lazy">` : `<div class="rs-card-img-ph">🏨</div>`;
-        const price = r.price ? new Intl.NumberFormat('vi-VN').format(r.price) + ' ₫' : '—';
-        const email = r.guestEmail || r.email || r.customerEmail || '';
-        const emailHtml = email ? `<div style="font-size:11px;color:#64748b;margin-bottom:7px;display:flex;align-items:center;gap:5px;overflow:hidden;"><i class="fab fa-google" style="color:#ea4335;flex-shrink:0;"></i><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${email}">${email}</span></div>` : '';
-        return `<div class="rs-card">${imgHtml}<div class="rs-card-body">
-            <div class="rs-card-name">${r.name || 'Phòng #' + r.id}</div>
-            <div class="rs-card-price">${price} / đêm</div>
-            ${emailHtml}
-            <span class="rs-badge checked-in">✅ Đang ở</span>
-            <button class="rs-btn-save" style="background:linear-gradient(135deg,#d97706,#b45309);" onclick="coCheckOut(${r.id}, this)">
-                <i class="fas fa-door-closed"></i> Check Out
-            </button>
-        </div></div>`;
-    }
-
-    async function coCheckOut(roomId, btn) {
-        const email = document.getElementById('co-search-input').value.trim();
-        const employeeId = localStorage.getItem('userId');
-        const token = localStorage.getItem('accessToken');
-        if (!email) {
-            showToast('warning', 'Thiếu thông tin', 'Vui lòng nhập email khách hàng vào ô tìm kiếm trước khi Check Out!');
-            document.getElementById('co-search-input').focus();
-            return;
-        }
-        if (!employeeId) {
-            showToast('error', 'Chưa đăng nhập', 'Không tìm thấy thông tin nhân viên. Vui lòng đăng nhập lại!');
-            return;
-        }
-        coConfirmOpen(roomId, email, employeeId, async () => {
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
-            try {
-                const params = new URLSearchParams();
-                params.append('email', email);
-                params.append('roomId', roomId);
-                const res = await fetch(`/api/v1/booking/checkout/${employeeId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', ...(token ? { 'Authorization': 'Bearer ' + token } : {}) },
-                    body: params
-                });
-
-                // Doc body MOT LAN DUY NHAT — response stream chi doc duoc 1 lan
-                const contentType = res.headers.get('content-type') || '';
-                let checkoutData = { id: null, price: 0 };
-                if (contentType.includes('application/json')) {
-                    const rawBody = await res.json();
-                    if (!res.ok) {
-                        throw new Error(rawBody.message || rawBody.data?.message || JSON.stringify(rawBody));
-                    }
-                    // CheckOutRespone: { id: Long, Price: Double }
-                    // Lombok @Getter tren field "Price" co the serialize thanh "price" hoac "Price"
-                    // -> xu ly ca 2 truong hop
-                    const payload = rawBody.data ?? rawBody;
-                    checkoutData = {
-                        id:    payload.id    ?? null,
-                        price: payload.price ?? payload.Price ?? 0
-                    };
-                } else {
-                    const rawText = await res.text();
-                    if (!res.ok) throw new Error(rawText || `Loi ${res.status}`);
-                }
-
-                btn.innerHTML = '<i class="fas fa-check"></i> Da Check Out!';
-                btn.style.background = 'linear-gradient(135deg,#16a34a,#15803d)';
-                showToast('success', 'Check Out thanh cong!', `Phong #${roomId} — ${email}`);
-
-                // Hien thi modal thanh toan voi du lieu tu CheckOutRespone
-                coPayOpen(checkoutData, roomId);
-
-                setTimeout(() => {
-                    btn.closest('.rs-card').remove();
-                    const remaining = document.querySelectorAll('#co-grid .rs-card').length;
-                    const countEl = document.getElementById('co-count');
-                    if (countEl) countEl.textContent = remaining + ' phong';
-                    if (remaining === 0) document.getElementById('co-grid').innerHTML = '<div class="rs-empty">Khong con phong nao can Check Out.</div>';
-                }, 1500);
-            } catch (err) {
-                showToast('error', 'Check Out that bai', err.message);
-                btn.innerHTML = '<i class="fas fa-door-closed"></i> Check Out';
-                btn.style.background = 'linear-gradient(135deg,#d97706,#b45309)';
-                btn.disabled = false;
-            }
-        });
-    }
-
-    // ===== CHECKOUT PAYMENT MODAL LOGIC =====
-    let _coPayState     = { bookingId: null, amount: 0, method: null };
-    let _bkDepositState = { bookingId: null, roomName: '', amount: 0, method: null };
-    window._bkDepositMode = false;
-
-    function coPayOpen(checkoutData, roomId) {
-        console.log('[coPayOpen] checkoutData raw =', JSON.stringify(checkoutData));
-        window._bkDepositMode = false;
-
-        _coPayState.bookingId = checkoutData.id ?? null;
-        const rawAmount = checkoutData.price ?? checkoutData.Price ?? checkoutData['Price'] ?? 0;
-        _coPayState.amount = rawAmount;
-        _coPayState.method = null;
-
-        console.log('[coPayOpen] bookingId =', _coPayState.bookingId, '| amount =', _coPayState.amount);
-
-        const fmtVnd = n => new Intl.NumberFormat('vi-VN').format(Math.max(0, Math.round(n))) + ' ₫';
-        const amountStr = fmtVnd(rawAmount);
-
-        // Reset banner về checkout
-        document.getElementById('co-pay-banner-icon').textContent = '💳';
-        document.getElementById('co-pay-banner-title-txt').textContent = 'Thanh toán Check Out';
-        document.getElementById('co-pay-amount-label-sub').textContent = 'Sau khi trừ tiền cọc';
-        // Ẩn ô nhập cọc
-        document.getElementById('bk-deposit-amount-row').style.display = 'none';
-
-        // Điền số tiền vào bước 1 (chọn phương thức)
-        document.getElementById('co-pay-amount').textContent = amountStr;
-
-        // Reset về bước 1
-        _coPayShowStep('method');
-
-        // Hiện overlay
-        document.getElementById('co-payment-overlay').classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function _coPayShowStep(step) {
-        document.getElementById('co-pay-step-method').style.display = step === 'method' ? 'block' : 'none';
-        document.getElementById('co-pay-step-bank').style.display   = step === 'bank'   ? 'block' : 'none';
-        document.getElementById('co-pay-step-cash').style.display   = step === 'cash'   ? 'block' : 'none';
-
-        // Chỉ cập nhật banner-sub khi KHÔNG ở chế độ deposit (deposit tự set banner-sub riêng)
-        if (!window._bkDepositMode) {
-            const sub = document.getElementById('co-pay-banner-sub');
-            if (step === 'method') sub.textContent = 'Chọn phương thức thanh toán phù hợp';
-            else if (step === 'bank') sub.textContent = 'Thanh toán qua chuyển khoản ngân hàng';
-            else sub.textContent = 'Xác nhận thu tiền tại quầy lễ tân';
-        }
-    }
-
-    function coPaySelectMethod(method) {
-        const isDeposit = window._bkDepositMode;
-        const state     = isDeposit ? _bkDepositState : _coPayState;
-        state.method    = method;
-
-        const fmtVnd   = n => new Intl.NumberFormat('vi-VN').format(Math.max(0, Math.round(n))) + ' ₫';
-        const amount   = state.amount;
-        const amountStr = fmtVnd(amount);
-        const prefix   = isDeposit ? 'DC' : 'CO';
-
-        if (method === 'BANK_TRANSFER') {
-            const randomCode = Math.floor(10000 + Math.random() * 90000);
-            const content = `STAYVIET ${prefix}${randomCode}`;
-            document.getElementById('co-pay-amount-copy').textContent = amountStr;
-            document.getElementById('co-pay-content').textContent = content;
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=VIETQR+STK+1234567890+VCB+${Math.round(Math.max(0,amount))}+${content}&bgcolor=ffffff`;
-            document.getElementById('co-pay-qr-img').src = qrUrl;
-            const confirmBtn = document.getElementById('co-pay-confirm-btn');
-            confirmBtn.disabled = false;
-            confirmBtn.innerHTML = isDeposit
-                ? '<i class="fas fa-check-circle"></i> Đã nhận cọc qua chuyển khoản'
-                : '<i class="fas fa-check-circle"></i> Tôi đã chuyển khoản';
-            _coPayShowStep('bank');
-        } else {
-            const isCash = method === 'CASH';
-            document.getElementById('co-cash-icon').textContent         = isCash ? '💵' : '💳';
-            document.getElementById('co-cash-method-label').textContent = isDeposit
-                ? (isCash ? 'Thu tiền cọc tiền mặt' : 'Thu tiền cọc qua thẻ (POS)')
-                : (isCash ? 'Thanh toán tiền mặt'   : 'Thanh toán thẻ (POS)');
-            document.getElementById('co-cash-method-val').textContent   = isCash ? '💵 Tiền mặt' : '💳 Thẻ tín dụng / ATM';
-            document.getElementById('co-cash-amount-display').textContent = amountStr;
-            const cashBtn = document.getElementById('co-pay-cash-confirm-btn');
-            cashBtn.disabled = false;
-            cashBtn.innerHTML = isDeposit
-                ? '<i class="fas fa-check-circle"></i> Xác nhận đã thu tiền cọc'
-                : '<i class="fas fa-check-circle"></i> Xác nhận đã thu tiền';
-            _coPayShowStep('cash');
-        }
-    }
-
-    function coPayGoBack() {
-        _coPayShowStep('method');
-        _coPayState.method = null;
-    }
-
-    function coPayClose() {
-        if (window._bkDepositMode) {
-            bkDepositClose();
-            return;
-        }
-        document.getElementById('co-payment-overlay').classList.remove('active');
-        document.body.style.overflow = '';
-    }
-
-    function coPayCopy(elementId) {
-        const raw = document.getElementById(elementId).innerText.replace(/[₫\s]/g, '').trim();
-        navigator.clipboard.writeText(raw).then(() => {
-            showToast('info', 'Đã sao chép!', raw);
-        }).catch(() => {
-            showToast('warning', 'Không thể sao chép', 'Vui lòng sao chép thủ công.');
-        });
-    }
-
-    // Xác nhận chuyển khoản
-    async function coPayConfirm() {
-        const isDeposit = window._bkDepositMode;
-        const state     = isDeposit ? _bkDepositState : _coPayState;
-        const apiUrl    = isDeposit ? '/api/v1/payment/deposit/employee' : '/api/v1/payment/thanhtoan';
-
-        if (!state.bookingId) {
-            showToast('error', 'Lỗi', 'Không tìm thấy thông tin đặt phòng. Vui lòng thử lại.');
-            return;
-        }
-        const confirmBtn = document.getElementById('co-pay-confirm-btn');
-        confirmBtn.disabled = true;
-        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xác nhận...';
-
-        const token = localStorage.getItem('accessToken');
-        const params = new URLSearchParams();
-        params.append('booking_id', String(state.bookingId));
-        params.append('amount',     String(state.amount));
-        params.append('method_booking', 'BANK_TRANSFER');
-
-        try {
-            const res = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded', ...(token ? { Authorization: 'Bearer ' + token } : {}) },
-                body: params
-            });
-            if (!res.ok) { const t = await res.text().catch(() => ''); throw new Error(t || `Lỗi ${res.status}`); }
-            const msg = await res.text();
-            coPayClose();
-            showToast('success', isDeposit ? '💰 Đặt cọc thành công!' : '🎉 Thanh toán thành công!', msg || 'Giao dịch đã được ghi nhận.');
-            if (!isDeposit) _coPayState = { bookingId: null, amount: 0, method: null };
-        } catch (err) {
-            showToast('error', isDeposit ? 'Đặt cọc thất bại' : 'Thanh toán thất bại', err.message || 'Có lỗi xảy ra.');
-            confirmBtn.disabled = false;
-            confirmBtn.innerHTML = isDeposit
-                ? '<i class="fas fa-check-circle"></i> Đã nhận cọc qua chuyển khoản'
-                : '<i class="fas fa-check-circle"></i> Tôi đã chuyển khoản';
-        }
-    }
-
-    // Xác nhận tiền mặt / thẻ
-    async function coPayCashConfirm() {
-        const isDeposit = window._bkDepositMode;
-        const state     = isDeposit ? _bkDepositState : _coPayState;
-        const apiUrl    = isDeposit ? '/api/v1/payment/deposit/employee' : '/api/v1/payment/thanhtoan';
-
-        if (!state.bookingId) {
-            showToast('error', 'Lỗi', 'Không tìm thấy thông tin đặt phòng. Vui lòng thử lại.');
-            return;
-        }
-        const cashBtn = document.getElementById('co-pay-cash-confirm-btn');
-        cashBtn.disabled = true;
-        cashBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
-
-        const token = localStorage.getItem('accessToken');
-        const params = new URLSearchParams();
-        params.append('booking_id',     String(state.bookingId));
-        params.append('amount',         String(state.amount));
-        params.append('method_booking', state.method);
-
-        try {
-            const res = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded', ...(token ? { Authorization: 'Bearer ' + token } : {}) },
-                body: params
-            });
-            if (!res.ok) { const t = await res.text().catch(() => ''); throw new Error(t || `Lỗi ${res.status}`); }
-            const msg = await res.text();
-            coPayClose();
-            showToast('success', isDeposit ? '💰 Đặt cọc thành công!' : '🎉 Thanh toán thành công!', msg || 'Giao dịch đã được ghi nhận.');
-            if (!isDeposit) _coPayState = { bookingId: null, amount: 0, method: null };
-        } catch (err) {
-            showToast('error', isDeposit ? 'Đặt cọc thất bại' : 'Thanh toán thất bại', err.message || 'Có lỗi xảy ra.');
-            cashBtn.disabled = false;
-            cashBtn.innerHTML = isDeposit
-                ? '<i class="fas fa-check-circle"></i> Xác nhận đã thu tiền cọc'
-                : '<i class="fas fa-check-circle"></i> Xác nhận đã thu tiền';
-        }
-    }
-
-    // Đóng modal khi click overlay
-    document.getElementById('co-payment-overlay').addEventListener('click', function(e) {
-        if (e.target === this) coPayClose();
-    });
-
-    // CO Confirm modal
-    let _coConfirmCallback = null;
-    function coConfirmOpen(roomId, email, employeeId, callback) {
-        _coConfirmCallback = callback;
-        document.getElementById('co-confirm-room').textContent = 'Phòng #' + roomId;
-        document.getElementById('co-confirm-email').textContent = email;
-        document.getElementById('co-confirm-employee').textContent = 'ID: ' + employeeId;
-        document.getElementById('co-confirm-overlay').classList.add('active');
-        document.getElementById('co-confirm-ok-btn').onclick = function () { const cb = _coConfirmCallback; coConfirmClose(); if (cb) cb(); };
-    }
-    function coConfirmClose() {
-        document.getElementById('co-confirm-overlay').classList.remove('active');
-        _coConfirmCallback = null;
-    }
-    document.getElementById('co-confirm-overlay').addEventListener('click', function(e) { if (e.target === this) coConfirmClose(); });
-</script>
-
-<script>
-    // ===== BOOKING ROOM LOGIC =====
-    let _bkAllRooms = [];
-    let _bkSelectedRoom = null;
-
-    function bkReload() { bkLoadRooms(); }
-
-    async function bkLoadRooms() {
-        const grid = document.getElementById('bk-grid');
-        const countEl = document.getElementById('bk-count');
-        document.getElementById('bk-search-input').value = '';
-        document.getElementById('bk-search-clear').classList.add('hidden');
-        document.getElementById('bk-price-hint').classList.add('hidden');
-        grid.innerHTML = '<div class="rs-loading"><i class="fas fa-spinner fa-spin"></i>Đang tải danh sách phòng...</div>';
-        countEl.textContent = '';
-        try {
-            const token = localStorage.getItem('accessToken');
-            const res = await fetch('/api/v1/rooms/status', {
-                headers: token ? { Authorization: 'Bearer ' + token } : {}
-            });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const json = await res.json();
-            _bkAllRooms = Array.isArray(json) ? json : (json.data || []);
-            bkRenderGrid(_bkAllRooms);
-        } catch (err) {
-            grid.innerHTML = '<div class="rs-empty" style="color:#ef4444;">⚠️ Lỗi tải phòng: ' + err.message + '</div>';
-        }
-    }
-
-    function bkRenderGrid(rooms) {
-        const grid = document.getElementById('bk-grid');
-        const countEl = document.getElementById('bk-count');
-        if (!rooms.length) {
-            grid.innerHTML = '<div class="rs-empty">📭 Không có phòng nào khả dụng.</div>';
-            countEl.textContent = '0 phòng';
-            return;
-        }
-        countEl.textContent = rooms.length + ' phòng';
-        grid.innerHTML = rooms.map(r => bkRenderCard(r)).join('');
-    }
-
-    function bkRenderCard(r) {
-        const fmtPrice = n => new Intl.NumberFormat('vi-VN').format(n) + ' ₫/đêm';
-        const imgHtml = (r.images && r.images.length > 0)
-            ? `<img class="bk-card-img" src="${r.images[0]}" alt="${r.name||''}" loading="lazy">`
-            : `<div class="bk-card-img-ph">🏨</div>`;
-        const roomType = r.roomType?.type || r.type || '';
-        return `
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL ĐẶT PHÒNG ===== -->
+<div id="modal-booking-overlay" onclick="handleBookingOverlayClick(event)">
+    <div id="booking-section">
         <div class="bk-card">
-            ${imgHtml}
-            <div class="bk-card-body">
-                <div class="bk-card-name" title="${r.name||''}">${r.name || 'Phòng #' + r.id}</div>
-                ${roomType ? `<div class="bk-card-type"><i class="fas fa-tag" style="font-size:10px;"></i> ${roomType}</div>` : ''}
-                <div class="bk-card-price">${fmtPrice(r.price || 0)}</div>
-                <span class="bk-badge-available"><i class="fas fa-circle" style="font-size:7px;"></i> Available</span>
-                <button class="bk-btn-booking" onclick="bkOpenModal(${JSON.stringify(r).replace(/"/g, '&quot;')})">
-                    <i class="fas fa-calendar-plus"></i> Booking
+            <!-- Banner -->
+            <div class="bk-banner">
+                <button class="bk-close" onclick="hideBooking()">✕</button>
+                <h2>Đặt phòng</h2>
+                <p>Hoàn tất thông tin bên dưới để xác nhận đặt phòng</p>
+                <div class="bk-room-info">
+                    <div class="bk-room-icon">🛏️</div>
+                    <div>
+                        <div class="bk-room-name" id="bk-room-name">—</div>
+                        <div class="bk-room-type" id="bk-room-type">—</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bk-body">
+
+                <!-- Ngày lấy từ thanh tìm kiếm -->
+                <div id="bk-date-info" style="background:#f0f4ff;border-radius:12px;padding:12px 16px;display:flex;gap:24px;margin-bottom:4px;">
+                    <div>
+                        <div style="font-size:11px;color:var(--gray);margin-bottom:2px;">🏠 Nhận phòng</div>
+                        <div id="bk-val-checkin" style="font-size:14px;font-weight:600;color:var(--navy);">—</div>
+                    </div>
+                    <div style="border-left:1.5px solid var(--border);"></div>
+                    <div>
+                        <div style="font-size:11px;color:var(--gray);margin-bottom:2px;">🚪 Trả phòng</div>
+                        <div id="bk-val-checkout" style="font-size:14px;font-weight:600;color:var(--navy);">—</div>
+                    </div>
+                    <div style="border-left:1.5px solid var(--border);"></div>
+                    <div>
+                        <div style="font-size:11px;color:var(--gray);margin-bottom:2px;">🌙 Số đêm</div>
+                        <div id="bk-nights-badge" style="font-size:14px;font-weight:600;color:var(--navy);">—</div>
+                    </div>
+                </div>
+
+                <!-- Email xác nhận -->
+                <label class="bk-label">✉️ Email xác nhận đặt phòng</label>
+                <div class="bk-email-wrap">
+                    <div class="bk-email-input-wrap">
+                        <span class="bk-email-icon">✉️</span>
+                        <input class="bk-email-input" id="bk-email" type="email" placeholder="example@email.com" oninput="bkOnEmailInput()">
+                    </div>
+                    <button class="btn-send-otp-bk" id="btn-bk-send-otp" onclick="bkSendOtp()" disabled>
+                        Gửi mã<br>xác nhận
+                    </button>
+                </div>
+                <div class="bk-otp-hint" id="bk-otp-hint"></div>
+
+                <!-- OTP 4 SỐ BOOKING -->
+                <div class="reg-otp-section" id="bk-otp-section">
+                    <div class="reg-otp-label">📩 Nhập mã 4 số vừa gửi đến email của bạn</div>
+                    <div class="reg-otp-inputs">
+                        <input class="reg-otp-digit" id="bk-otp-0" type="text" inputmode="numeric" maxlength="1" oninput="bkOtpInput(0)" onkeydown="bkOtpKey(event,0)">
+                        <input class="reg-otp-digit" id="bk-otp-1" type="text" inputmode="numeric" maxlength="1" oninput="bkOtpInput(1)" onkeydown="bkOtpKey(event,1)">
+                        <input class="reg-otp-digit" id="bk-otp-2" type="text" inputmode="numeric" maxlength="1" oninput="bkOtpInput(2)" onkeydown="bkOtpKey(event,2)">
+                        <input class="reg-otp-digit" id="bk-otp-3" type="text" inputmode="numeric" maxlength="1" oninput="bkOtpInput(3)" onkeydown="bkOtpKey(event,3)">
+                    </div>
+                    <div class="reg-otp-status" id="bk-otp-status"></div>
+                    <span class="reg-otp-resend" id="bk-otp-resend"></span>
+                </div>
+
+                <!-- Ghi chú -->
+                <label class="bk-label">📝 Yêu cầu đặc biệt (tùy chọn)</label>
+                <textarea class="bk-textarea" id="bk-notes" rows="3" placeholder="Ví dụ: phòng tầng cao, giường đôi, đến muộn..."></textarea>
+
+                <!-- Tóm tắt giá -->
+                <div class="bk-summary" id="bk-summary" style="display:none;">
+                    <div class="bk-summary-title">Tóm tắt chi phí</div>
+                    <div class="bk-sum-row"><span id="bk-sum-desc">—</span><span id="bk-sum-room">—</span></div>
+                    <div class="bk-sum-row"><span>Phí dịch vụ (5%)</span><span id="bk-sum-fee">—</span></div>
+                    <div class="bk-sum-row" style="color:var(--gray);font-size:13px;"><span>Tổng cộng</span><span id="bk-sum-total">—</span></div>
+                    <div class="bk-sum-row total">
+                        <span>💳 Tiền cọc thanh toán <span style="font-size:11px;font-weight:500;color:var(--gold);background:#fff8e1;padding:2px 7px;border-radius:20px;margin-left:4px;">30%</span></span>
+                        <span id="bk-sum-deposit" style="color:#e67e00;">—</span>
+                    </div>
+                    <div style="font-size:11px;color:var(--gray);margin-top:6px;line-height:1.5;">
+                        💡 Phần còn lại (<span id="bk-sum-remain">—</span>) sẽ thanh toán khi nhận phòng.
+                    </div>
+                </div>
+
+                <button class="btn-submit-booking" id="btn-submit-booking" onclick="submitBooking()" disabled>
+                    Chọn ngày để đặt phòng
                 </button>
             </div>
-        </div>`;
-    }
+        </div>
+    </div>
+</div>
 
-    function bkOnSearch() {
-        const raw = document.getElementById('bk-search-input').value.replace(/\D/g, '').trim();
-        const clearBtn  = document.getElementById('bk-search-clear');
-        const hintEl    = document.getElementById('bk-price-hint');
-        clearBtn.classList.toggle('hidden', !raw);
+<!-- ===== MODAL LỊCH SỬ ĐẶT PHÒNG ===== -->
+<div id="bh-backdrop" onclick="handleBHBackdropClick(event)">
+    <div class="bh-drawer">
 
-        if (!raw) {
-            hintEl.classList.add('hidden');
-            bkRenderGrid(_bkAllRooms);
-            return;
-        }
+        <div class="bh-drawer-header">
+            <div class="bh-header-top">
+                <div>
+                    <div class="bh-header-title">Lịch Sử Đặt Phòng</div>
+                    <div class="bh-header-subtitle" id="bh-customerLabel">Đang tải...</div>
+                </div>
+                <button class="bh-close-btn" onclick="closeBookingHistory()">✕</button>
+            </div>
+            <div class="bh-tabs">
+                <button class="bh-tab-btn active" data-tab="checkout" onclick="switchTabBH('checkout', this)">
+                    <span class="bh-tab-dot"></span>Đã Trả Phòng
+                </button>
+                <button class="bh-tab-btn" data-tab="checkin" onclick="switchTabBH('checkin', this)">
+                    <span class="bh-tab-dot"></span>Đang Ở
+                </button>
+                <button class="bh-tab-btn" data-tab="pending" onclick="switchTabBH('pending', this)">
+                    <span class="bh-tab-dot"></span>Chờ Xác Nhận
+                </button>
+            </div>
+        </div>
 
-        const target = Number(raw);
-        const DELTA  = 50000;
-        const lo = target - DELTA;
-        const hi = target + DELTA;
+        <div class="bh-drawer-body" id="bh-drawerBody">
+            <div class="bh-state-box">
+                <div class="bh-spinner"></div>
+                <div class="bh-state-text">Đang tải dữ liệu...</div>
+            </div>
+        </div>
 
-        const filtered = _bkAllRooms.filter(r => {
-            const p = Number(r.price || 0);
-            return p >= lo && p <= hi;
-        });
+    </div>
+</div>
 
-        const fmt = n => new Intl.NumberFormat('vi-VN').format(n);
-        hintEl.textContent = fmt(lo) + ' ₫ – ' + fmt(hi) + ' ₫';
-        hintEl.classList.remove('hidden');
-
-        bkRenderGrid(filtered);
-    }
-
-    function bkClearSearch() {
-        document.getElementById('bk-search-input').value = '';
-        document.getElementById('bk-search-clear').classList.add('hidden');
-        document.getElementById('bk-price-hint').classList.add('hidden');
-        document.getElementById('bk-price-hint').classList.add('hidden');
-        bkRenderGrid(_bkAllRooms);
-    }
-
-    function bkOpenModal(room) {
-        _bkSelectedRoom = room;
-        const fmtPrice = n => new Intl.NumberFormat('vi-VN').format(n) + ' ₫/đêm';
-        document.getElementById('bk-modal-room-name').textContent = room.name || 'Phòng #' + room.id;
-        document.getElementById('bk-modal-room-price').textContent = fmtPrice(room.price || 0);
-        document.getElementById('bk-customer-name').value = '';
-        document.getElementById('bk-customer-phone').value = '';
-        document.getElementById('bk-checkin-date').value = '';
-        document.getElementById('bk-checkout-date').value = '';
-        document.getElementById('bk-summary').style.display = 'none';
-        const btn = document.getElementById('bk-modal-confirm-btn');
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-calendar-check"></i> Xác nhận đặt phòng';
-        document.getElementById('bk-modal-overlay').classList.add('active');
-        document.body.style.overflow = 'hidden';
-        // Set min date = today
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('bk-checkin-date').min = today;
-        document.getElementById('bk-checkout-date').min = today;
-    }
-
-    function bkUpdateSummary() {
-        const checkin  = document.getElementById('bk-checkin-date').value;
-        const checkout = document.getElementById('bk-checkout-date').value;
-        const summary  = document.getElementById('bk-summary');
-        if (!checkin || !checkout || checkin >= checkout || !_bkSelectedRoom) {
-            summary.style.display = 'none';
-            return;
-        }
-        const nights    = Math.max(1, Math.round((new Date(checkout) - new Date(checkin)) / 86400000));
-        const roomTotal = nights * (_bkSelectedRoom.price || 0);
-        const fee       = Math.round(roomTotal * 0.05);
-        const total     = roomTotal + fee;
-        const deposit   = Math.round(total * 0.30);
-        const remain    = total - deposit;
-        const fmt = n => new Intl.NumberFormat('vi-VN').format(n) + ' ₫';
-        document.getElementById('bk-sum-desc').textContent    = `${_bkSelectedRoom.name || 'Phòng'} × ${nights} đêm`;
-        document.getElementById('bk-sum-room').textContent    = fmt(roomTotal);
-        document.getElementById('bk-sum-fee').textContent     = fmt(fee);
-        document.getElementById('bk-sum-total').textContent   = fmt(total);
-        document.getElementById('bk-sum-deposit').textContent = fmt(deposit);
-        document.getElementById('bk-sum-remain').textContent  = fmt(remain);
-        summary.style.display = 'block';
-    }
-
-    function bkModalClose() {
-        document.getElementById('bk-modal-overlay').classList.remove('active');
-        document.body.style.overflow = '';
-        _bkSelectedRoom = null;
-    }
-
-    async function bkSubmitBooking() {
-        if (!_bkSelectedRoom) return;
-        const customerName  = document.getElementById('bk-customer-name').value.trim();
-        const customerPhone = document.getElementById('bk-customer-phone').value.trim();
-        const checkin    = document.getElementById('bk-checkin-date').value;
-        const checkout   = document.getElementById('bk-checkout-date').value;
-        const employeeId = localStorage.getItem('userId');
-
-        if (!customerName)  { showToast('warning', 'Thiếu thông tin', 'Vui lòng nhập họ tên khách hàng.'); return; }
-        if (!customerPhone) { showToast('warning', 'Thiếu thông tin', 'Vui lòng nhập số điện thoại.'); return; }
-        if (!checkin)    { showToast('warning', 'Thiếu thông tin', 'Vui lòng chọn ngày nhận phòng.'); return; }
-        if (!checkout)   { showToast('warning', 'Thiếu thông tin', 'Vui lòng chọn ngày trả phòng.'); return; }
-        if (checkin >= checkout) { showToast('warning', 'Ngày không hợp lệ', 'Ngày trả phòng phải sau ngày nhận phòng.'); return; }
-        if (!employeeId) { showToast('error', 'Chưa đăng nhập', 'Không tìm thấy thông tin nhân viên. Vui lòng đăng nhập lại!'); return; }
-
-        const btn = document.getElementById('bk-modal-confirm-btn');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
-
-        const token = localStorage.getItem('accessToken');
-        const params = new URLSearchParams();
-        params.append('name', customerName);
-        params.append('phonenumber', customerPhone);
-        params.append('roomId', String(_bkSelectedRoom.id));
-        params.append('enventCheckinDate', checkin);
-        params.append('enventCheckoutDate', checkout);
-        params.append('employeeId', String(employeeId));
-
-        try {
-            const res = await fetch('/api/v1/booking/bookingoffline', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    ...(token ? { Authorization: 'Bearer ' + token } : {})
-                },
-                body: params
-            });
-            if (!res.ok) {
-                const errText = await res.text().catch(() => '');
-                throw new Error(errText || 'Lỗi ' + res.status);
-            }
-            const resData = await res.json().catch(() => null);
-            // ✅ Parse bookingId đúng cách - thử nhiều dạng response wrapper
-            const bookingId = resData?.id
-                ?? resData?.data?.id
-                ?? resData?.bookingId
-                ?? null;
-
-            // ✅ Tính tiền cọc TRƯỚC khi gọi bkModalClose() (sẽ set _bkSelectedRoom = null)
-            const msPerDay  = 86400000;
-            const days      = Math.max(1, Math.round((new Date(checkout) - new Date(checkin)) / msPerDay));
-            const roomTotal = (_bkSelectedRoom?.price || 0) * days;
-            const fee       = Math.round(roomTotal * 0.05);
-            const total     = roomTotal + fee;
-            const deposit   = Math.round(total * 0.30);
-
-            // ✅ Lưu tên phòng trước khi close modal (bkModalClose set _bkSelectedRoom = null)
-            const selectedRoomName = _bkSelectedRoom?.name || 'Phòng #' + _bkSelectedRoom?.id;
-            const selectedRoomRef  = { ..._bkSelectedRoom }; // shallow copy để dùng an toàn
-
-            // ✅ Đóng modal SAU khi đã lưu hết thông tin cần thiết
-            bkModalClose();
-            showToast('success', '🎉 Đặt phòng thành công!', `Phòng ${selectedRoomName} đã được đặt.`);
-            bkLoadRooms();
-
-            // ✅ Dùng biến đã lưu, không dùng _bkSelectedRoom nữa
-            bkDepositOpen(bookingId, selectedRoomName, deposit, days, roomTotal, fee, total);
-        } catch (err) {
-            showToast('error', 'Đặt phòng thất bại', err.message || 'Có lỗi xảy ra.');
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-calendar-check"></i> Xác nhận đặt phòng';
-        }
-    }
-
-    // ===== BOOKING DEPOSIT MODAL LOGIC =====
-
-    function bkDepositOpen(bookingId, roomName, depositAmount, days, roomTotal, fee, total) {
-        _bkDepositState.bookingId = bookingId;
-        _bkDepositState.roomName  = roomName;
-        _bkDepositState.amount    = depositAmount;
-        _bkDepositState.method    = null;
-
-        const fmtVnd = n => new Intl.NumberFormat('vi-VN').format(Math.max(0, Math.round(n))) + ' ₫';
-
-        document.getElementById('co-pay-banner-title-txt').textContent  = 'Đặt cọc phòng';
-        document.getElementById('co-pay-banner-sub').textContent        = 'Chọn phương thức đặt cọc cho khách';
-        document.getElementById('co-pay-amount').textContent            = fmtVnd(depositAmount);
-        document.getElementById('co-pay-amount-label-sub').textContent  = `(${fmtVnd(roomTotal)} + phí 5% ${fmtVnd(fee)}) × 30%`;
-
-        document.getElementById('bk-deposit-amount-row').style.display = 'none';
-        document.getElementById('co-pay-banner-icon').textContent = '💰';
-        window._bkDepositMode = true;
-
-        _coPayShowStep('method');
-        document.getElementById('co-payment-overlay').classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function bkDepositClose() {
-        window._bkDepositMode = false;
-        document.getElementById('bk-deposit-amount-row').style.display = 'none';
-        document.getElementById('co-payment-overlay').classList.remove('active');
-        document.body.style.overflow = '';
-    }
-
-    // ===== END BOOKING DEPOSIT LOGIC =====
-
-    document.getElementById('bk-modal-overlay').addEventListener('click', function(e) {
-        if (e.target === this) bkModalClose();
-    });
-</script>
-
-<script>
-    // ===== ADD ROOM TYPE LOGIC =====
-    let _rtCapacity = 2;
-    let _rtFiles = [];
-
-    function rtCharCount(inputId, countId, max) {
-        const val = document.getElementById(inputId).value;
-        document.getElementById(countId).textContent = val.length;
-    }
-
-    function rtFormatPrice(input) {
-        let raw = input.value.replace(/\D/g, '');
-        input.value = raw ? new Intl.NumberFormat('vi-VN').format(parseInt(raw)) : '';
-        input.dataset.raw = raw;
-    }
-
-    function rtCapChange(delta) {
-        _rtCapacity = Math.max(1, Math.min(15, _rtCapacity + delta));
-        document.getElementById('rt-cap-num').textContent = _rtCapacity;
-        document.getElementById('rt-capacity').value = _rtCapacity;
-    }
-
-    function rtHandleFiles(files) {
-        const MAX = 5;
-        const grid = document.getElementById('rt-preview-grid');
-        Array.from(files).forEach(file => {
-            if (_rtFiles.length >= MAX) return;
-            _rtFiles.push(file);
-            const reader = new FileReader();
-            reader.onload = e => {
-                const idx = _rtFiles.length - 1;
-                const item = document.createElement('div');
-                item.className = 'rt-preview-item';
-                item.innerHTML = `<img src="${e.target.result}"><button class="rt-preview-remove" onclick="rtRemoveFile(${idx})" type="button"><i class="fas fa-times"></i></button>`;
-                grid.appendChild(item);
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-
-    function rtRemoveFile(idx) {
-        _rtFiles.splice(idx, 1);
-        const grid = document.getElementById('rt-preview-grid');
-        grid.innerHTML = '';
-        const copy = [..._rtFiles];
-        _rtFiles = [];
-        copy.forEach(f => {
-            const reader = new FileReader();
-            reader.onload = e => {
-                const i = _rtFiles.length;
-                _rtFiles.push(f);
-                const item = document.createElement('div');
-                item.className = 'rt-preview-item';
-                item.innerHTML = `<img src="${e.target.result}"><button class="rt-preview-remove" onclick="rtRemoveFile(${i})" type="button"><i class="fas fa-times"></i></button>`;
-                grid.appendChild(item);
-            };
-            reader.readAsDataURL(f);
-        });
-    }
-
-    function rtCancel() {
-        switchToView('form');
-    }
-
-    async function rtSubmit() {
-        const name       = document.getElementById('rt-name').value.trim();
-        const amenities  = document.getElementById('rt-amenities').value.trim();
-        const priceRaw   = document.getElementById('rt-price').dataset.raw || document.getElementById('rt-price').value.replace(/\D/g,'');
-        const desc       = document.getElementById('rt-description').value.trim();
-        const capacity   = _rtCapacity;
-
-        if (!name)      { showToast('warning', 'Thiếu thông tin', 'Vui lòng nhập tên loại phòng.'); return; }
-        if (!priceRaw)  { showToast('warning', 'Thiếu thông tin', 'Vui lòng nhập giá mỗi đêm.'); return; }
-        if (!amenities) { showToast('warning', 'Thiếu thông tin', 'Vui lòng nhập nội thất / tiện nghi.'); return; }
-
-        const btn = document.getElementById('rt-btn-save');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
-
-        const token = localStorage.getItem('accessToken');
-        const formData = new FormData();
-        formData.append('name', name);
-        formData.append('price', priceRaw);
-        formData.append('amenities', amenities);
-        formData.append('description', desc);
-        formData.append('capacity', capacity);
-        _rtFiles.forEach((f, i) => formData.append('images', f));
-
-        try {
-            const res = await fetch('/api/v1/room-types', {
-                method: 'POST',
-                headers: token ? { Authorization: 'Bearer ' + token } : {},
-                body: formData
-            });
-            if (!res.ok) {
-                const errText = await res.text().catch(() => '');
-                throw new Error(errText || 'Lỗi ' + res.status);
-            }
-            showToast('success', '✅ Thành công!', `Loại phòng "${name}" đã được tạo.`);
-            rtResetForm();
-            // Reload room type dropdown nếu có
-            if (typeof loadRoomTypes === 'function') loadRoomTypes();
-        } catch (err) {
-            showToast('error', 'Tạo thất bại', err.message || 'Có lỗi xảy ra.');
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Lưu loại phòng';
-        }
-    }
-
-    function rtResetForm() {
-        document.getElementById('rt-name').value = '';
-        document.getElementById('rt-price').value = '';
-        document.getElementById('rt-price').dataset.raw = '';
-        document.getElementById('rt-amenities').value = '';
-        document.getElementById('rt-description').value = '';
-        document.getElementById('rt-name-count').textContent = '0';
-        document.getElementById('rt-amenities-count').textContent = '0';
-        document.getElementById('rt-desc-count').textContent = '0';
-        document.getElementById('rt-preview-grid').innerHTML = '';
-        _rtFiles = [];
-        _rtCapacity = 2;
-        document.getElementById('rt-cap-num').textContent = '2';
-        document.getElementById('rt-capacity').value = '2';
-    }
-
-    // Drag & drop support
-    const rtZone = document.getElementById('rt-upload-zone');
-    rtZone.addEventListener('dragover', e => { e.preventDefault(); rtZone.style.borderColor='#3b82f6'; rtZone.style.background='#eff6ff'; });
-    rtZone.addEventListener('dragleave', () => { rtZone.style.borderColor=''; rtZone.style.background=''; });
-    rtZone.addEventListener('drop', e => {
-        e.preventDefault(); rtZone.style.borderColor=''; rtZone.style.background='';
-        rtHandleFiles(e.dataTransfer.files);
-    });
-</script>
-
-
-
+<script src="/js2/auth.js"></script>
+<script src="/js2/search-bar.js"></script>
+<script src="/js2/register.js"></script>
+<script src="/js2/login.js"></script>
+<script src="/js2/room-listing.js"></script>
+<script src="/js2/booking.js"></script>
+<script src="/js2/story.js"></script>
+<script src="/js2/menu.js"></script>
 </body>
 </html>

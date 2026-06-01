@@ -1,27 +1,32 @@
 // status room
 
-    function rsReload() { rsLoadRooms(); }
+function rsReload() { rsLoadRooms(); }
 
-    async function rsLoadRooms() {
+async function rsLoadRooms() {
     const grid = document.getElementById('rs-grid');
     const countEl = document.getElementById('rs-count');
     grid.innerHTML = '<div class="rs-loading"><i class="fas fa-spinner fa-spin"></i>Đang tải...</div>';
     countEl.textContent = '';
     try {
-    const token = localStorage.getItem('accessToken');
-    const res = await fetch('/api/v1/rooms/status/clear', { headers: token ? { Authorization: 'Bearer ' + token } : {} });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const json = await res.json();
-    const rooms = Array.isArray(json) ? json : (json.data || []);
-    if (!rooms.length) { grid.innerHTML = '<div class="rs-empty">📭 Không có phòng nào.</div>'; return; }
-    countEl.textContent = rooms.length + ' phòng';
-    grid.innerHTML = rooms.map(r => rsRenderCard(r)).join('');
-} catch (err) {
-    grid.innerHTML = '<div class="rs-empty" style="color:#ef4444;">⚠️ Lỗi tải phòng: ' + err.message + '</div>';
-}
+        const token = localStorage.getItem('accessToken');
+        const workBranch = localStorage.getItem('workBranch');
+        if (!workBranch) {
+            grid.innerHTML = '<div class="rs-empty" style="color:#ef4444;">⚠️ Không tìm thấy chi nhánh. Vui lòng đăng nhập lại.</div>';
+            return;
+        }
+        const res = await fetch(`/api/v1/rooms/status/clear?workBranch=${encodeURIComponent(workBranch)}`, { headers: token ? { Authorization: 'Bearer ' + token } : {} });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const json = await res.json();
+        const rooms = Array.isArray(json) ? json : (json.data || []);
+        if (!rooms.length) { grid.innerHTML = '<div class="rs-empty">📭 Không có phòng nào cần dọn dẹp.</div>'; return; }
+        countEl.textContent = rooms.length + ' phòng';
+        grid.innerHTML = rooms.map(r => rsRenderCard(r)).join('');
+    } catch (err) {
+        grid.innerHTML = '<div class="rs-empty" style="color:#ef4444;">⚠️ Lỗi tải phòng: ' + err.message + '</div>';
+    }
 }
 
-    function rsRenderCard(r) {
+function rsRenderCard(r) {
     const imgHtml = (r.images && r.images.length > 0) ? `<img class="rs-card-img" src="${r.images[0]}" alt="${r.name || ''}" loading="lazy">` : `<div class="rs-card-img-ph">🏨</div>`;
     const price = r.price ? new Intl.NumberFormat('vi-VN').format(r.price) + ' ₫' : '—';
     return `<div class="rs-card">${imgHtml}<div class="rs-card-body">
@@ -32,19 +37,19 @@
         </div></div>`;
 }
 
-    let _rsConfirmCallback = null;
-    function rsConfirmOpen(callback) {
+let _rsConfirmCallback = null;
+function rsConfirmOpen(callback) {
     _rsConfirmCallback = callback;
     document.getElementById('rs-confirm-overlay').classList.add('active');
     document.getElementById('rs-confirm-ok-btn').onclick = function () { const cb = _rsConfirmCallback; rsConfirmClose(); if (cb) cb(); };
 }
-    function rsConfirmClose() {
+function rsConfirmClose() {
     document.getElementById('rs-confirm-overlay').classList.remove('active');
     _rsConfirmCallback = null;
 }
-    document.getElementById('rs-confirm-overlay').addEventListener('click', function(e) { if (e.target === this) rsConfirmClose(); });
+document.getElementById('rs-confirm-overlay').addEventListener('click', function(e) { if (e.target === this) rsConfirmClose(); });
 
-    async function rsSave(roomId, btn) {
+async function rsSave(roomId, btn) {
     rsConfirmOpen(async () => {
         const token = localStorage.getItem('accessToken');
         btn.disabled = true;

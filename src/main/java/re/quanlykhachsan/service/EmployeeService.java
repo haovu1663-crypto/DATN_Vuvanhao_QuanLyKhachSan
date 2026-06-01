@@ -6,9 +6,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import re.quanlykhachsan.dto.request.EmployeeRequest;
 import re.quanlykhachsan.dto.response.EmployeeResponse;
+import re.quanlykhachsan.entity.Customer;
 import re.quanlykhachsan.entity.Employee;
 import re.quanlykhachsan.exception.DataConfickException;
 import re.quanlykhachsan.exception.ResourceNotFoundException;
+import re.quanlykhachsan.repository.CustomerRespository;
 import re.quanlykhachsan.repository.EmployeeRepository;
 import re.quanlykhachsan.service.interfac.IEmployeeSevice;
 
@@ -21,6 +23,7 @@ public class EmployeeService implements IEmployeeSevice {
     private final EmployeeRepository employeeRepository;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
+    private final CustomerRespository  customerRespository;
     @Override
     public EmployeeResponse add(EmployeeRequest employeeRequest) throws DataConfickException {
         if (employeeRepository.existsByEmail(employeeRequest.getEmail())) {
@@ -32,6 +35,10 @@ public class EmployeeService implements IEmployeeSevice {
         if (employeeRepository.existsByUserName(employeeRequest.getUserName())) {
             throw new DataConfickException("UserName này đã được sử dụng vui lòng nhập lại ");
         }
+        if(customerRespository.existsByUsername(employeeRequest.getUserName())) {
+            throw new DataConfickException("UserName này đã được sử dụng vui lòng nhập lại ");
+        }
+
         Employee employee = modelMapper.map(employeeRequest, Employee.class);
         employee.setPassword(passwordEncoder.encode(employeeRequest.getPassword()));
         employee.setRole("ROLE_EMPLOYEE");

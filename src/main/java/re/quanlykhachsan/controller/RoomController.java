@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import re.quanlykhachsan.dto.request.RoomRequest;
 import re.quanlykhachsan.dto.response.ApiResponse;
 import re.quanlykhachsan.dto.response.RoomRespone;
+import re.quanlykhachsan.dto.response.RoomRestatusRespone;
 import re.quanlykhachsan.dto.response.SoPhongRequest;
 import re.quanlykhachsan.exception.DataConfickException;
 import re.quanlykhachsan.exception.ResourceNotFoundException;
@@ -66,9 +67,9 @@ public class RoomController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     @GetMapping("/status/clear")
-    public ResponseEntity<?> getRoomsStatusClear(){
-        ApiResponse<List<RoomRespone>> response = new ApiResponse<>(
-                "get rooms","400",roomService.getListRoomByStatusClear()
+    public ResponseEntity<?> getRoomsStatusClear(@RequestParam String workBranch)  {
+        ApiResponse<List<RoomRestatusRespone>> response = new ApiResponse<>(
+                "get rooms","400",roomService.getListRoomByStatusClear(workBranch)
         );
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
