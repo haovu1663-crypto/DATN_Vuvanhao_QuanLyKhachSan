@@ -101,5 +101,8 @@ public class RoomTypeController {
         );
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
-
+   @PutMapping("/delete/{id}")
+   public ResponseEntity<?>deleteroomtype(@PathVariable Long id) throws ResourceNotFoundException, IOException{
+        return new ResponseEntity<>(roomTypeService.deleteRoomTypeSoft(id),HttpStatus.OK);
+   }
 }

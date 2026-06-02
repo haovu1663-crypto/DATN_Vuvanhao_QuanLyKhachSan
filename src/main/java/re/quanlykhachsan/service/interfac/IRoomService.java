@@ -31,5 +31,5 @@ public interface IRoomService {
     //
     List<SoPhongRequest> getListSoPhong(String workBranch, Long roomtypeId, LocalDate checkIn, LocalDate checkOut);
     List<SoPhongRequest> getListSoPhongBookingOff(String workBranch, Long roomtypeId, int capacity, LocalDate checkIn, LocalDate checkOut);
-
+    String deleteSort(Long id);
 }

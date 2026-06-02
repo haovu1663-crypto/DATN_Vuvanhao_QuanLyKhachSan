@@ -100,5 +100,6 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Long> {
             @Param("checkIn")    LocalDate checkIn,
             @Param("checkOut")   LocalDate checkOut
     );
-
+  // tìm kiếm theo id và active = true
+  RoomType findByIdAndActiveTrue(Long id);
 }

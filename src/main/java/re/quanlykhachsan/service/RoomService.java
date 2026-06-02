@@ -119,7 +119,10 @@ public class RoomService implements IRoomService {
 
     @Override
     public RoomRespone getRoomById(Long id) throws ResourceNotFoundException {
-        Room room = roomRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("không tìm thấy phòng có id này"));
+        Room room = roomRepository.findByIdAndActiveTrue(id);
+        if (room == null) {
+            throw new ResourceNotFoundException("không tìm thấy phòng cos id : "+id);
+        }
         RoomRespone roomRespone= modelMapper.map(room, RoomRespone.class);
         roomRespone.setType_room_id(room.getRoomType().getId());
         return roomRespone;
@@ -255,4 +258,11 @@ public class RoomService implements IRoomService {
         return soPhongRequests;
     }
 
+    @Override
+    public String deleteSort(Long id) {
+        Room room = roomRepository.findByIdAndActiveTrue(id);
+        room.setActive(false);
+        roomRepository.save(room);
+        return "xóa thành công ";
+    }
 }

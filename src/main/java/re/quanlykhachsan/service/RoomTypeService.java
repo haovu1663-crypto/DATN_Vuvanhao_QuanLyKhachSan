@@ -94,10 +94,13 @@ public class RoomTypeService implements IRoomTypeService {
                 .map(en -> modelMapper.map(en, RoomTypeResponse.class))
                 .collect(Collectors.toList());
     }
-
+    // tìm kiếm roomtype to updat
     @Override
     public RoomTypeResponse getRoomTypeById(Long id) throws ResourceNotFoundException, IOException {
-        RoomType roomType = roomTypeRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("không tìm thây RoomType có id : "+id));
+        RoomType roomType = roomTypeRepository.findByIdAndActiveTrue(id);
+        if(roomType==null){
+            throw new ResourceNotFoundException("không tìm thấy roomType id : "+id);
+        }
         RoomTypeResponse roomTypeResponse=modelMapper.map(roomType,RoomTypeResponse.class);
         return roomTypeResponse;
     }
@@ -124,4 +127,11 @@ public class RoomTypeService implements IRoomTypeService {
         return list;
     }
 
+    @Override
+    public String deleteRoomTypeSoft(Long id) throws ResourceNotFoundException, IOException {
+        RoomType roomType = roomTypeRepository.findByIdAndActiveTrue(id);
+        roomType.setActive(false);
+        roomTypeRepository.save(roomType);
+        return "xóa thành công";
+    }
 }

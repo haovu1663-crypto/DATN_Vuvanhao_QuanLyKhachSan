@@ -96,4 +96,6 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     List<Room> findByWorkBranchAndStatus(@Param("workBranch") String workBranch,
                                          @Param("status") StatusRoom status);
 
+    // tìm kiếm room còn hoạt đongp
+    Room findByIdAndActiveTrue(Long id);
 }

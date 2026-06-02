@@ -127,5 +127,8 @@ public class RoomController {
         );
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
+    @PutMapping("/delete/{id}")
+    public ResponseEntity<?> deleteRoomById(@Valid @PathVariable Long id) throws ResourceNotFoundException {
+        return new ResponseEntity<>(roomService.deleteSort(id), HttpStatus.OK);
+    }
 }
