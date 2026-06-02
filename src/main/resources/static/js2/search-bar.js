@@ -201,7 +201,50 @@ function doSearch() {
     loadRoomsBySearch(workBranch, capacity, fmtDate(dateStart), fmtDate(dateEnd));
 }
 
+// ===== ẨN / HIỆN CÁC SECTION TRANG CHỦ =====
+function hideHomeSections() {
+    // Ẩn tất cả section trang chủ
+    var sections = document.querySelectorAll('.hero-section, .promo-section, .dest-section, .deals-section');
+    sections.forEach(function(el) { el.style.display = 'none'; });
+
+    // Hiện room-section
+    var roomSection = document.getElementById('room-section');
+    if (roomSection) roomSection.style.display = 'block';
+
+    // Tạo hoặc hiện nút quay lại
+    var btnBack = document.getElementById('btn-back-home');
+    if (!btnBack) {
+        btnBack = document.createElement('div');
+        btnBack.id = 'btn-back-home';
+        btnBack.style.cssText = 'max-width:1100px;margin:0 auto;padding:20px 5% 0;';
+        btnBack.innerHTML = '<button onclick="showHomeSections()" style="display:inline-flex;align-items:center;gap:8px;font-family:\'DM Sans\',sans-serif;font-size:13px;font-weight:600;color:#1a2744;background:#fff;border:1.5px solid #e8e4dc;border-radius:20px;padding:8px 18px;cursor:pointer;box-shadow:0 2px 8px rgba(26,39,68,0.08);">&#8592; Quay l\u1ea1i trang ch\u1ee7</button>';
+        if (roomSection) roomSection.parentNode.insertBefore(btnBack, roomSection);
+    } else {
+        btnBack.style.display = 'block';
+    }
+}
+
+function showHomeSections() {
+    // Hiện lại tất cả section trang chủ
+    var sections = document.querySelectorAll('.hero-section, .promo-section, .dest-section, .deals-section');
+    sections.forEach(function(el) { el.style.display = ''; });
+
+    // Ẩn room-section
+    var roomSection = document.getElementById('room-section');
+    if (roomSection) roomSection.style.display = 'none';
+
+    // Ẩn nút quay lại
+    var btnBack = document.getElementById('btn-back-home');
+    if (btnBack) btnBack.style.display = 'none';
+
+    // Scroll lên đầu
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 function loadRoomsBySearch(workBranch, capacity, checkIn, checkOut) {
+    // Ẩn section trang chủ, hiện khu vực phòng
+    hideHomeSections();
+
     // Hiện skeleton, ẩn các trạng thái khác
     document.getElementById('room-skeleton').style.display = 'flex';
     document.getElementById('room-grid').style.display     = 'none';

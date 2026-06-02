@@ -3,12 +3,6 @@ function menuAction(action) {
     closeAll();
 
     const token = localStorage.getItem('accessToken');
-    const ROLE_ROUTES = {
-        'quan-ly-phong': '/rooms/form',
-        'lich-su':        '/booking/history',
-        'yeu-thich':      '/favorites',
-        'ho-tro':         '/support'
-    };
 
     if (action === 'quan-ly-phong') {
         // Kiểm tra đăng nhập trước khi chuyển trang
@@ -25,6 +19,16 @@ function menuAction(action) {
             return;
         }
         window.location.href = '/rooms/form';
+        return;
+    }
+
+    if (action === 'dat-phong') {
+        if (typeof hideHomeSections === 'function') hideHomeSections();
+        if (typeof loadRooms === 'function') loadRooms();
+        setTimeout(function() {
+            var rs = document.getElementById('room-section');
+            if (rs) rs.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
         return;
     }
 

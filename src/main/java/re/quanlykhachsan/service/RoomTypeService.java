@@ -42,6 +42,7 @@ public class RoomTypeService implements IRoomTypeService {
             }
         }
         roomType.setImages(imageUrls);
+        roomType.setActive(true);
         roomTypeRepository.save(roomType);
         return modelMapper.map(roomType,RoomTypeResponse.class);
     }

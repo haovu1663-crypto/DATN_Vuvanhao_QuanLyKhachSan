@@ -27,4 +27,5 @@ public class Room {
     @JoinColumn(name = "roomType_id")
     private RoomType roomType;
     private String workBranch; // chi nhánh
+    private Boolean active;
 }

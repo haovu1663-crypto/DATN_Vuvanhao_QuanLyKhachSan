@@ -25,8 +25,34 @@ async function loadRooms() {
     }
 }
 
+// ===== ẨN / HIỆN CÁC SECTION TRANG CHỦ =====
+function hideHomeSections() {
+    document.querySelectorAll('.promo-section, .dest-section, .deals-section')
+        .forEach(function(el) { el.style.display = 'none'; });
+
+    var roomSection = document.getElementById('room-section');
+    if (roomSection) roomSection.style.display = 'block';
+
+}
+
+function showHomeSections() {
+    document.querySelectorAll('.promo-section, .dest-section, .deals-section')
+        .forEach(function(el) { el.style.display = ''; });
+
+    var roomSection = document.getElementById('room-section');
+    if (roomSection) roomSection.style.display = 'none';
+
+    var btnBack = document.getElementById('btn-back-home');
+    if (btnBack) btnBack.style.display = 'none';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 // ---- Gọi API tìm kiếm phòng theo điều kiện ----
 function loadRoomsBySearch(workBranch, capacity, checkIn, checkOut) {
+    // Ẩn section trang chủ, hiện khu vực phòng
+    hideHomeSections();
+
     window._searchMode = true;
     filterTypeId = null;
     showState('skeleton');
@@ -377,5 +403,9 @@ function slideImg(event, id, images, dir) {
     if (badgeEl) badgeEl.textContent = (idx + 1) + ' / ' + total;
 }
 
-// Tự động load khi trang khởi động
-document.addEventListener('DOMContentLoaded', loadRooms);
+// ---- Ẩn toàn bộ khu vực phòng khi trang mới tải ----
+// Chỉ hiện khi người dùng tìm kiếm hoặc chọn "Đặt phòng" từ menu
+document.addEventListener('DOMContentLoaded', function () {
+    const roomSection = document.getElementById('room-section');
+    if (roomSection) roomSection.style.display = 'none';
+});

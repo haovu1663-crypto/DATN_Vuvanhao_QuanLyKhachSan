@@ -34,5 +34,6 @@ public class RoomType {
     @ElementCollection(fetch = FetchType.EAGER)
     private List<String> images;
     private Double price;
+    private Boolean active;
 
 }
