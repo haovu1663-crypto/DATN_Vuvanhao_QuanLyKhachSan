@@ -278,6 +278,9 @@ async function rtuSubmit() {
     formData.append('amenities', amenities);
     formData.append('description', desc);
     formData.append('capacity', capacity);
+    // Gửi URL ảnh cũ còn giữ lại
+    _rtuExistingImages.forEach(url => formData.append('existingImages', url));
+    // Gửi ảnh mới upload
     _rtuFiles.forEach(f => formData.append('images', f));
 
     try {
@@ -311,3 +314,63 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+// ===== DELETE ROOM TYPE (SOFT) =====
+async function rtuDeleteRoomType() {
+    const id = document.getElementById('rtu-id').value.trim();
+    if (!id) {
+        showToast('warning', 'Chưa tải dữ liệu', 'Vui lòng tìm kiếm và tải loại phòng trước khi xóa!');
+        return;
+    }
+
+    const confirmed = await Swal.fire({
+        title: 'Xác nhận xóa?',
+        text: `Bạn có chắc muốn xóa loại phòng #${id}? Hành động này không thể hoàn tác.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: '<i class="fas fa-trash-alt"></i> Xóa',
+        cancelButtonText: 'Hủy'
+    });
+    if (!confirmed.isConfirmed) return;
+
+    const btn = document.getElementById('rtu-btn-delete');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xóa...';
+
+    try {
+        const token = localStorage.getItem('accessToken');
+        const res = await fetch(`/api/v1/roomtypes/delete/${id}`, {
+            method: 'PUT',
+            headers: token ? { Authorization: 'Bearer ' + token } : {}
+        });
+        if (!res.ok) {
+            const errText = await res.text().catch(() => '');
+            throw new Error(errText || 'Lỗi ' + res.status);
+        }
+        showToast('success', '✅ Xóa thành công!', `Loại phòng #${id} đã được xóa.`);
+        // Reset toàn bộ form sau khi xóa
+        document.getElementById('rtu-id').value = '';
+        document.getElementById('rtu-search-id').value = '';
+        document.getElementById('rtu-name').value = '';
+        document.getElementById('rtu-price').value = '';
+        document.getElementById('rtu-price').dataset.raw = '';
+        document.getElementById('rtu-amenities').value = '';
+        document.getElementById('rtu-description').value = '';
+        document.getElementById('rtu-name-count').textContent = '0';
+        document.getElementById('rtu-amenities-count').textContent = '0';
+        document.getElementById('rtu-desc-count').textContent = '0';
+        document.getElementById('rtu-preview-grid').innerHTML = '';
+        _rtuFiles = [];
+        _rtuExistingImages = [];
+        _rtuCapacity = 2;
+        document.getElementById('rtu-cap-num').textContent = '2';
+        document.getElementById('rtu-capacity').value = '2';
+        if (typeof loadRoomTypes === 'function') loadRoomTypes();
+    } catch (err) {
+        showToast('error', 'Xóa thất bại', err.message || 'Có lỗi xảy ra.');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-trash-alt"></i> Xóa loại phòng';
+    }
+}

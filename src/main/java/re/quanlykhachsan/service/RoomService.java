@@ -259,8 +259,14 @@ public class RoomService implements IRoomService {
     }
 
     @Override
-    public String deleteSort(Long id) {
+    public String deleteSort(Long id) throws ResourceNotFoundException, DataConfickException {
         Room room = roomRepository.findByIdAndActiveTrue(id);
+        if (room == null) {
+            throw new ResourceNotFoundException("Không tìm thấy phòng có id: " + id);
+        }
+        if (!room.getStatus().equals(StatusRoom.AVAILABLE)) {
+            throw new DataConfickException("Phòng #" + id + " đang có người thuê, không thể xóa");
+        }
         room.setActive(false);
         roomRepository.save(room);
         return "xóa thành công ";

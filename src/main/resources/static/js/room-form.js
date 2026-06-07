@@ -3,6 +3,19 @@ document.addEventListener("DOMContentLoaded", function() {
     fetchRoomTypes();
 });
 
+// ===== CLEAR PREVIEW / RESET FORM =====
+function clearPreview() {
+    const deleteBtn = document.getElementById('btnDelete');
+    if (deleteBtn) {
+        deleteBtn.classList.add('hidden');
+        deleteBtn.style.display = 'none';
+    }
+    const roomIdEl = document.getElementById('roomId');
+    if (roomIdEl) {
+        roomIdEl.value = '';
+    }
+}
+
 async function fetchRoomTypes() {
     const selectElement = document.getElementById('roomTypeSelect');
     try {
@@ -47,8 +60,20 @@ async function fetchRoomDetail() {
         if (roomIdEl) roomIdEl.value = room.id || roomId;
         const nameInput = document.querySelector('input[name="name"]');
         if (nameInput) nameInput.value = room.name || '';
-        const statusSelect = document.querySelector('select[name="status"]');
-        if (statusSelect && room.status) statusSelect.value = room.status;
+        const statusSelect = document.getElementById('roomStatusSelect') || document.querySelector('select[name="status"]');
+        if (statusSelect) {
+            // room.status có thể là string 'AVAILABLE' hoặc object {name:'AVAILABLE'}
+            const statusVal = typeof room.status === 'object' && room.status !== null
+                ? room.status.name || room.status
+                : room.status;
+            console.log('[fetchRoomDetail] status từ API:', statusVal);
+            if (statusVal) {
+                statusSelect.value = String(statusVal).trim();
+                // Nếu không khớp option nào thì log ra để debug
+                const matched = [...statusSelect.options].some(o => o.value === String(statusVal).trim());
+                if (!matched) console.warn('[fetchRoomDetail] Không tìm thấy option status:', statusVal);
+            }
+        }
         const typeSelect = document.getElementById('roomTypeSelect');
         const typeId = room.type_room_id || room.roomType?.id || room.roomTypeId || null;
         if (typeSelect && typeId) {
@@ -57,6 +82,14 @@ async function fetchRoomDetail() {
         }
         const workBranchSelect = document.getElementById('workBranchSelect');
         if (workBranchSelect && room.workBranch) { workBranchSelect.value = room.workBranch; }
+
+        // Hiển thị nút Delete khi có roomId
+        const deleteBtn = document.getElementById('btnDelete');
+        if (deleteBtn) {
+            deleteBtn.classList.remove('hidden');
+            deleteBtn.style.display = 'inline-flex';
+        }
+
         showToast('success', 'Tải thành công', 'Đã tải dữ liệu phòng #' + roomId);
     } catch (err) {
         showToast('error', 'Thất bại', err.message || 'Không thể tải dữ liệu phòng');
@@ -122,3 +155,69 @@ document.getElementById('addRoomForm').addEventListener('submit', async function
         submitBtn.innerHTML = originalBtnText;
     }
 });
+
+// ===== HANDLE DELETE ROOM =====
+async function handleDelete() {
+    const roomId = document.getElementById('roomId')?.value?.trim();
+
+    if (!roomId) {
+        showToast('warning', 'Thiếu thông tin', 'Vui lòng tải dữ liệu phòng trước!');
+        return;
+    }
+
+    // Xác nhận trước khi xóa
+    const confirmDelete = await Swal.fire({
+        title: 'Xác nhận xóa?',
+        text: `Bạn có chắc chắn muốn xóa phòng #${roomId}? Hành động này không thể hoàn tác.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Xóa',
+        cancelButtonText: 'Hủy'
+    });
+
+    if (!confirmDelete.isConfirmed) return;
+
+    const deleteBtn = document.getElementById('btnDelete');
+    const originalBtnText = deleteBtn.innerHTML;
+    deleteBtn.disabled = true;
+    deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Đang xóa...</span>';
+
+    try {
+        const response = await fetch(`/api/v1/rooms/delete/${roomId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const rawText = await response.text();
+        let errMsg = rawText;
+        try {
+            const result = JSON.parse(rawText);
+            errMsg = result.message
+                || result.error
+                || (result.errors ? Object.values(result.errors).join(', ') : null)
+                || rawText;
+        } catch (_) { /* plain text, giữ nguyên */ }
+
+        if (response.ok) {
+            showToast('success', 'Xóa thành công!', 'Phòng đã được xóa.');
+            // Reset form sau khi xóa thành công
+            document.getElementById('addRoomForm').reset();
+            document.getElementById('roomId').value = '';
+            deleteBtn.classList.add('hidden');
+            deleteBtn.style.display = 'none';
+            clearPreview();
+        } else {
+            showToast('error', `Lỗi ${response.status}`, errMsg);
+        }
+    } catch (error) {
+        showToast('error', 'Lỗi kết nối', 'Không thể kết nối đến Server!');
+        console.error('[handleDelete]', error);
+    } finally {
+        deleteBtn.disabled = false;
+        deleteBtn.innerHTML = originalBtnText;
+    }
+}

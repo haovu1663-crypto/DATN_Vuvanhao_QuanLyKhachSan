@@ -23,6 +23,7 @@ public class RoomTypeRequest {
     private String amenities;// nội thất
     private String description;
     private List<MultipartFile> images;
+    private List<String> existingImages;
     @NotNull(message = "kooong được để chống giá ")
     private Double price;
 }

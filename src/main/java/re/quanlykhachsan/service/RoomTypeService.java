@@ -46,28 +46,41 @@ public class RoomTypeService implements IRoomTypeService {
         roomTypeRepository.save(roomType);
         return modelMapper.map(roomType,RoomTypeResponse.class);
     }
-    public RoomTypeResponse update(RoomTypeRequest roomTypeRequest,Long id) throws ResourceNotFoundException, IOException {
-        if(!roomTypeRepository.existsById(id)){
-            throw new ResourceNotFoundException("không tìm thấy RoomType có id : "+id);
-        }
+    public RoomTypeResponse update(RoomTypeRequest roomTypeRequest, Long id) throws ResourceNotFoundException, IOException {
+        RoomType existing = roomTypeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("không tìm thấy RoomType có id : " + id));
+
         List<MultipartFile> files = roomTypeRequest.getImages();
         boolean hasNewImages = files != null && files.stream().anyMatch(f -> f != null && !f.isEmpty());
-        List<String> imageUrls = new ArrayList<>();
-        if (hasNewImages) {
 
+        List<String> imageUrls = new ArrayList<>();
+
+        // Giữ lại ảnh cũ mà người dùng không xóa
+        List<String> existingImages = roomTypeRequest.getExistingImages();
+        if (existingImages != null && !existingImages.isEmpty()) {
+            imageUrls.addAll(existingImages);
+        }
+
+        // Upload và thêm ảnh mới nếu có
+        if (hasNewImages) {
             for (MultipartFile file : files) {
                 if (file != null && !file.isEmpty()) {
                     imageUrls.add(uploadService.uploadFile(file));
                 }
             }
-
         }
 
-        RoomType roomType=modelMapper.map(roomTypeRequest,RoomType.class);
+        // Nếu không có ảnh nào được gửi lên (cả cũ lẫn mới), giữ nguyên ảnh cũ từ DB
+        if (imageUrls.isEmpty()) {
+            imageUrls = existing.getImages() != null ? existing.getImages() : new ArrayList<>();
+        }
+
+        RoomType roomType = modelMapper.map(roomTypeRequest, RoomType.class);
         roomType.setId(id);
+        roomType.setActive(true);
         roomType.setImages(imageUrls);
         roomTypeRepository.save(roomType);
-        return modelMapper.map(roomType,RoomTypeResponse.class);
+        return modelMapper.map(roomType, RoomTypeResponse.class);
     }
     public RoomTypeResponse delete(Long id) throws ResourceNotFoundException,DataConfickException {
         RoomType roomType = roomTypeRepository.findById(id)
@@ -81,7 +94,7 @@ public class RoomTypeService implements IRoomTypeService {
         return modelMapper.map(roomType,RoomTypeResponse.class);
     }
     public List<RoomTypeResponse> getListRoomType(){
-        List<RoomType> roomTypeList=roomTypeRepository.findAll();
+        List<RoomType> roomTypeList=roomTypeRepository.findAllByActiveTrue();
         return  roomTypeList.stream()
                 .map(en -> modelMapper.map(en, RoomTypeResponse.class))
                 .collect(Collectors.toList());

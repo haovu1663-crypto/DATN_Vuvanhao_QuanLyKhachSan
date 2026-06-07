@@ -14,26 +14,30 @@ import java.util.List;
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Long> {
 
-    @Query("SELECT COUNT(r) > 0 FROM Room r WHERE r.roomType.id = :key")
+    @Query("SELECT COUNT(r) > 0 FROM Room r WHERE r.roomType.id = :key AND r.active = true")
     boolean existsByRoomTypeId(@Param("key") Long id);
 
-    List<Room> findByStatus(StatusRoom status);
+    @Query("SELECT r FROM Room r WHERE r.status = :status AND r.active = true")
+    List<Room> findByStatus(@Param("status") StatusRoom status);
 
     // tìm kiếm phòng đã được đặt cọc theo email của khách
     @Query("SELECT b.room FROM Booking b " +
             "WHERE b.customer.email = :email " +
-            "AND b.room.status = 'CURRENTLY_TENANT'")
+            "AND b.room.status = 'CURRENTLY_TENANT' " +
+            "AND b.room.active = true")
     List<Room> findRoomsByCustomerEmail(@Param("email") String email);
 
     // tìm kiếm phòng đã checkIn theo email của khách
     @Query("SELECT b.room FROM Booking b " +
             "WHERE b.customer.email = :email " +
-            "AND b.room.status = 'CHECKED'")
+            "AND b.room.status = 'CHECKED' " +
+            "AND b.room.active = true")
     List<Room> findRoomsByCustomerEmailchecIn(@Param("email") String email);
 
     // lấy room checked theo phonenumber
     @Query("SELECT r FROM Booking b JOIN b.room r " +
             "WHERE r.status = re.quanlykhachsan.entity.StatusRoom.CHECKED " +
+            "AND r.active = true " +
             "AND b.phonenumber = :phoneNumber")
     List<Room> findCheckedRoomsByPhoneNumber(@Param("phoneNumber") String phoneNumber);
 
@@ -43,6 +47,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     SELECT r.* FROM room r
     WHERE r.room_type_id = :roomTypeId
     AND r.work_branch = :workBranch
+    AND r.active = true
     AND r.id NOT IN (
         SELECT b.room_id FROM booking b
         WHERE b.room_id IS NOT NULL
@@ -69,6 +74,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     WHERE r.roomType.capacity >= :capacity
     AND r.roomType.id = :roomTypeId
     AND r.workBranch = :workBranch
+    AND r.active = true
     AND r.id NOT IN (
         SELECT b.room.id FROM Booking b
         WHERE b.room.id IS NOT NULL
@@ -92,7 +98,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     boolean existsByNameAndWorkBranch(String name, String workBranch);
 
     // lấy danh sach room restaus
-    @Query("SELECT r FROM Room r WHERE r.workBranch = :workBranch AND r.status = :status")
+    @Query("SELECT r FROM Room r WHERE r.workBranch = :workBranch AND r.status = :status AND r.active = true")
     List<Room> findByWorkBranchAndStatus(@Param("workBranch") String workBranch,
                                          @Param("status") StatusRoom status);
 

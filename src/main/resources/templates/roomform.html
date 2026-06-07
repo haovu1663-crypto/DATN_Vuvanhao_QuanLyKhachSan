@@ -329,9 +329,10 @@
                     <div>
                         <label class="text-[13px] font-bold text-slate-500 uppercase tracking-wider ml-1 mb-2 block">Current Status</label>
                         <div class="relative">
-                            <select name="status" class="input-focus w-full px-5 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none text-slate-700 font-medium appearance-none cursor-pointer">
+                            <select id="roomStatusSelect" name="status" class="input-focus w-full px-5 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl outline-none text-slate-700 font-medium appearance-none cursor-pointer">
                                 <option value="AVAILABLE">Available</option>
                                 <option value="CURRENTLY_TENANT">Currently Tenant</option>
+                                <option value="CHECKED">Checked In</option>
                                 <option value="MAINTENANCE">Maintenance</option>
                                 <option value="CLEANING">Cleaning</option>
                             </select>
@@ -1447,7 +1448,10 @@
 
         <!-- ACTIONS -->
         <div class="rt-actions">
-            <button class="rt-btn-cancel" onclick="switchToView('add-room-type')" type="button">Hủy</button>
+            <button class="rt-btn-cancel" id="rtu-btn-delete" onclick="rtuDeleteRoomType()" type="button"
+                    style="background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;border:none;gap:8px;display:inline-flex;align-items:center;">
+                <i class="fas fa-trash-alt"></i> Xóa loại phòng
+            </button>
             <button class="rt-btn-save" id="rtu-btn-save" onclick="rtuSubmit()" type="button">
                 <i class="fas fa-sync-alt"></i> Cập nhật loại phòng
             </button>

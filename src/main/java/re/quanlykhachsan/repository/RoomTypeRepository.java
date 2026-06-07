@@ -17,9 +17,11 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Long> {
     @Query("""
     SELECT DISTINCT rt FROM RoomType rt 
     WHERE rt.capacity >= :capacity 
+    AND rt.active = true
     AND EXISTS (
         SELECT r FROM Room r 
         WHERE r.roomType = rt
+        AND r.active = true
         AND LOWER(r.workBranch) LIKE LOWER(CONCAT('%', :workBranch, '%'))
         AND r.id NOT IN (
             SELECT b.room.id FROM Booking b 
@@ -41,9 +43,11 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Long> {
     @Query("""
     SELECT DISTINCT rt FROM RoomType rt 
     WHERE rt.capacity >= :capacity 
+    AND rt.active = true
     AND EXISTS (
         SELECT r FROM Room r 
         WHERE r.roomType = rt
+        AND r.active = true
         AND r.workBranch = :workBranch
         AND r.id NOT IN (
             SELECT b.room.id FROM Booking b 
@@ -81,6 +85,8 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Long> {
     FROM RoomType rt 
     JOIN Room r ON r.roomType = rt
     WHERE rt.capacity >= :capacity 
+    AND rt.active = true
+    AND r.active = true
     AND LOWER(r.workBranch) LIKE LOWER(CONCAT('%', :workBranch, '%'))
     AND r.id NOT IN (
         SELECT b.room.id FROM Booking b 
@@ -100,6 +106,9 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Long> {
             @Param("checkIn")    LocalDate checkIn,
             @Param("checkOut")   LocalDate checkOut
     );
-  // tìm kiếm theo id và active = true
-  RoomType findByIdAndActiveTrue(Long id);
+    // tìm kiếm theo id và active = true
+    RoomType findByIdAndActiveTrue(Long id);
+
+    // lấy tất cả roomtype đang active
+    List<RoomType> findAllByActiveTrue();
 }
