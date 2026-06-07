@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Xác nhận đặt phòng</title>
+    <style>
+        body { margin: 0; padding: 0; background: #f4f6fb; font-family: 'Segoe UI', Arial, sans-serif; }
+        .wrapper { max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .header { background: linear-gradient(135deg, #1a3c5e, #2e6da4); padding: 36px 40px; text-align: center; }
+        .header h1 { margin: 0; color: #fff; font-size: 26px; letter-spacing: 1px; }
+        .header p  { margin: 6px 0 0; color: #c0d8f0; font-size: 14px; }
+        .badge { display: inline-block; background: #f0a500; color: #fff; font-size: 12px; font-weight: 700;
+            padding: 4px 14px; border-radius: 20px; margin-top: 12px; letter-spacing: 0.5px; }
+        .body { padding: 36px 40px; }
+        .greeting { font-size: 16px; color: #333; margin-bottom: 20px; }
+        .greeting strong { color: #1a3c5e; }
+        .info-card { background: #f0f6ff; border-left: 4px solid #2e6da4; border-radius: 8px;
+            padding: 20px 24px; margin-bottom: 24px; }
+        .info-card h3 { margin: 0 0 14px; color: #1a3c5e; font-size: 15px; text-transform: uppercase;
+            letter-spacing: 0.5px; }
+        .info-row { display: flex; justify-content: space-between; padding: 8px 0;
+            border-bottom: 1px dashed #cde; font-size: 14px; }
+        .info-row:last-child { border-bottom: none; }
+        .info-row .label { color: #6b7a99; }
+        .info-row .value { color: #1a2b45; font-weight: 600; }
+        .price-box { background: linear-gradient(135deg, #1a3c5e, #2e6da4); border-radius: 10px;
+            padding: 20px 24px; text-align: center; margin-bottom: 24px; }
+        .price-box p  { margin: 0; color: #c0d8f0; font-size: 13px; }
+        .price-box .amount { font-size: 32px; font-weight: 700; color: #fff; margin: 6px 0 0; }
+        .note-box { background: #fffbea; border: 1px solid #f5e04a; border-radius: 8px; padding: 14px 18px;
+            font-size: 13px; color: #7a6200; margin-bottom: 24px; }
+        .footer { background: #f4f6fb; text-align: center; padding: 24px 40px; font-size: 12px; color: #9aa; }
+        .footer a { color: #2e6da4; text-decoration: none; }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="header">
+        <h1>🏨 Xác Nhận Đặt Phòng</h1>
+        <p>Cảm ơn quý khách đã tin tưởng sử dụng dịch vụ của chúng tôi</p>
+        <span class="badge">PENDING – Chờ xác nhận</span>
+    </div>
+
+    <div class="body">
+        <p class="greeting">Xin chào, <strong>{{customerName}}</strong>!</p>
+        <p style="color:#555; font-size:14px; margin-top:0;">
+            Đặt phòng của quý khách đã được ghi nhận thành công. Dưới đây là chi tiết thông tin:
+        </p>
+
+        <div class="info-card">
+            <h3>📋 Thông tin phòng</h3>
+            <div class="info-row">
+                <span class="label">Tên phòng</span>
+                <span class="value">{{nameRoom}}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Chi nhánh</span>
+                <span class="value">{{workBranch}}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Ngày nhận phòng dự kiến</span>
+                <span class="value">{{checkInDate}}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Ngày trả phòng dự kiến</span>
+                <span class="value">{{checkOutDate}}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Ngày đặt</span>
+                <span class="value">{{createDate}}</span>
+            </div>
+        </div>
+
+        <div class="price-box">
+            <p>Giá phòng / đêm</p>
+            <div class="amount">{{price}} VNĐ</div>
+        </div>
+
+        <div class="note-box">
+            ⚠️ <strong>Lưu ý:</strong> Đây là email xác nhận đặt phòng. Nhân viên sẽ liên hệ xác nhận lại trước ngày nhận phòng.
+            Vui lòng có mặt đúng giờ hoặc thông báo trước nếu có thay đổi.
+        </div>
+
+        <p style="font-size:13px; color:#888;">{{body}}</p>
+    </div>
+
+    <div class="footer">
+        © 2025 Hệ thống Quản lý Khách sạn &nbsp;|&nbsp;
+        Nếu bạn không thực hiện đặt phòng này, vui lòng <a href="#">liên hệ với chúng tôi</a>.
+    </div>
+</div>
+</body>
+</html>

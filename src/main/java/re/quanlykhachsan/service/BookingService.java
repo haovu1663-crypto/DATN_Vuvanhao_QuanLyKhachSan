@@ -12,6 +12,8 @@ import re.quanlykhachsan.exception.ResourceNotFoundException;
 import re.quanlykhachsan.repository.*;
 import re.quanlykhachsan.repository.OrderRepository;
 import re.quanlykhachsan.service.interfac.IBookingService;
+import re.quanlykhachsan.upload.MailService;
+import re.quanlykhachsan.dto.response.EmailRespone;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,7 +33,9 @@ public class BookingService implements IBookingService {
     private final ModelMapper modelMapper;
     private final PaymentRespository paymentRepository;
     private final OrderRepository orderRepository;
+    private final MailService mailService;
     @Override
+    @Transactional
     public BookingRespone CustomerBooking(BookingRequest bookingRequest) throws ResourceNotFoundException {
         Booking booking = new Booking();
         booking.setStatusBooking(StatusBooking.PENDING);
@@ -52,8 +56,33 @@ public class BookingService implements IBookingService {
         booking.setEnventCheckoutDate(bookingRequest.getEnventCheckoutDate());
         // nhân viên sẽ để null
         booking.setEmployee(null);
+
+        // Lấy dữ liệu eager TRƯỚC khi session đóng (tránh lazy-load proxy lỗi)
+        String roomName = room.getName();
+        String workBranch = room.getWorkBranch();
+        Double roomPrice = room.getRoomType().getPrice();
+        String customerEmail = customer.getEmail();
+        String customerName = customer.getFullname();
+
         bookingRespository.save(booking);
         roomService.upadteRoomCurrnetlyTenant(bookingRequest.getRoomId());
+
+        // Gửi email xác nhận đặt phòng
+        try {
+            EmailRespone emailRespone = new EmailRespone();
+            emailRespone.setNameRoom(roomName);
+            emailRespone.setNameCutomer(customerName);
+            emailRespone.setWorkBranch(workBranch);
+            emailRespone.setPrice(roomPrice);
+            emailRespone.setCheckInEnventDate(booking.getEnventCheckinDate().atStartOfDay());
+            emailRespone.setCheckOutEnventDate(booking.getEnventCheckoutDate().atStartOfDay());
+            emailRespone.setCreate(LocalDateTime.now());
+            emailRespone.setBody("Cảm ơn quý khách đã đặt phòng. Chúng tôi sẽ liên hệ xác nhận sớm nhất.");
+            mailService.sendBookingConfirmation(customerEmail, emailRespone);
+        } catch (Exception e) {
+            System.err.println("Gửi email thất bại: " + e.getMessage());
+        }
+
         return modelMapper.map(booking, BookingRespone.class);
     }
 

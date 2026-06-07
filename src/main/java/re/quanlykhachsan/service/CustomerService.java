@@ -80,6 +80,7 @@ public class CustomerService implements ICustomerService {
             user.setFullname(employee.getName());
             user.setUsername(employee.getUserName());
             user.setRole(employee.getRole());
+            user.setEmail(employee.getEmail());
         }
         JwtRespone res =  JwtRespone.builder()
                 .userId(user.getId())
@@ -88,6 +89,7 @@ public class CustomerService implements ICustomerService {
                 .expirationDate(new Date(new Date().getTime()+15*60*1000))
                 .refreshToken(null)
                 .role(user.getRole())
+                .email(user.getEmail())
                 .build();
         return res;
     }

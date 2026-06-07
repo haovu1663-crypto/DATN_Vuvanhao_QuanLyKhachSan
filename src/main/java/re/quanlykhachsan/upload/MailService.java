@@ -14,9 +14,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import re.quanlykhachsan.dto.response.EmailRespone;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
@@ -84,6 +87,38 @@ public class MailService {
 
         // 3. Gửi nội dung đã được thay thế (finalHtml) chứ không phải htmlContent gốc
         helper.setText(finalHtml, true);
+
+        sender.send(message);
+    }
+
+    public void sendBookingConfirmation(String to, EmailRespone emailRespone) throws MessagingException, IOException {
+        MimeMessage message = sender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+        ClassPathResource resource = new ClassPathResource("templates/booking-confirmation.html");
+        byte[] bData = FileCopyUtils.copyToByteArray(resource.getInputStream());
+        String htmlContent = new String(bData, StandardCharsets.UTF_8);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+        htmlContent = htmlContent
+                .replace("{{customerName}}", emailRespone.getNameCutomer() != null ? emailRespone.getNameCutomer() : "")
+                .replace("{{nameRoom}}", emailRespone.getNameRoom() != null ? emailRespone.getNameRoom() : "")
+                .replace("{{workBranch}}", emailRespone.getWorkBranch() != null ? emailRespone.getWorkBranch() : "")
+                .replace("{{checkInDate}}", emailRespone.getCheckInEnventDate() != null
+                        ? emailRespone.getCheckInEnventDate().format(formatter) : "")
+                .replace("{{checkOutDate}}", emailRespone.getCheckOutEnventDate() != null
+                        ? emailRespone.getCheckOutEnventDate().format(formatter) : "")
+                .replace("{{createDate}}", emailRespone.getCreate() != null
+                        ? emailRespone.getCreate().format(formatter) : "")
+                .replace("{{price}}", emailRespone.getPrice() != null
+                        ? String.format("%,.0f", emailRespone.getPrice()) : "0")
+                .replace("{{body}}", emailRespone.getBody() != null ? emailRespone.getBody() : "");
+
+        helper.setTo(to);
+        helper.setSubject("✅ Xác nhận đặt phòng – " + emailRespone.getNameRoom());
+        helper.setFrom("Khách Sạn <haovu1663@gmail.com>");
+        helper.setText(htmlContent, true);
 
         sender.send(message);
     }

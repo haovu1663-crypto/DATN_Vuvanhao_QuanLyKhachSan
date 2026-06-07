@@ -66,6 +66,37 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
+
+    // ===== ROLE-BASED MENU VISIBILITY =====
+    const MANAGER_ONLY_MENUS = [
+        'menuAdd',
+        'menuUpdate',
+        'menuAddRoomType',
+        'menuUpdateRoomType',
+        'menuManageEmployee',
+        'menuRevenue',
+    ];
+
+    function applyRolePermissions() {
+        const userRole = localStorage.getItem('userRole');
+        const isManager = userRole === 'ROLE_MANAGER';
+        MANAGER_ONLY_MENUS.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.style.display = isManager ? '' : 'none';
+        });
+        // Ẩn/hiện các section label và wrapper
+        const displayVal = isManager ? '' : 'none';
+        const labelRoomTypes     = document.getElementById('labelRoomTypes');
+        const sectionManageRooms = document.getElementById('sectionManageRooms');
+        const sectionEmployees   = document.getElementById('sectionEmployees');
+        if (labelRoomTypes)     labelRoomTypes.style.display     = displayVal;
+        if (sectionManageRooms) sectionManageRooms.style.display = displayVal;
+        if (sectionEmployees)   sectionEmployees.style.display   = displayVal;
+    }
+
+    applyRolePermissions();
+
     document.getElementById('menuResetStatus')?.addEventListener('click',   e => { e.preventDefault(); switchToView('reset');           rsLoadRooms(); });
     document.getElementById('menuCheckIn')?.addEventListener('click',       e => { e.preventDefault(); switchToView('checkin');         ciLoadBookings(); });
     document.getElementById('menuCheckOut')?.addEventListener('click',      e => { e.preventDefault(); switchToView('checkout');        coLoadBookings(); });

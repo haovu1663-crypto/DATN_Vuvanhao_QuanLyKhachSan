@@ -32,12 +32,17 @@ function submitLogin() {
         return;
     }
 
-    Swal.showLoading();
-
     // Sử dụng URLSearchParams vì Backend dùng @ModelAttribute
     const params = new URLSearchParams();
     params.append('username', username);
     params.append('password', password);
+
+    // Hiển thị loading đúng cách
+    Swal.fire({
+        title: 'Đang đăng nhập...',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
 
     // Endpoint dựa trên CustomerController
     fetch('/api/v1/customer/login', {
@@ -53,10 +58,13 @@ function submitLogin() {
             return response.json();
         })
         .then(async data => {
+            console.log('[DEBUG] Login response:', data); // debug tạm
+
             // 1. LƯU DỮ LIỆU CƠ BẢN VÀO LOCALSTORAGE
             localStorage.setItem('accessToken', data.accessToken);
             localStorage.setItem('userId', data.userId);
             localStorage.setItem('fullName', data.fullName);
+            localStorage.setItem('email', data.email);
 
             const userRole = data.role || 'ROLE_USER';
             localStorage.setItem('userRole', userRole);
