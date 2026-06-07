@@ -132,25 +132,10 @@ function bkResetUI() {
     var roomInput = document.getElementById('bk-room-list');
     if (roomInput) roomInput.value = '';
     document.getElementById('bk-notes').value = '';
-    // Reset email OTP
-    document.getElementById('bk-email').value = '';
+    // Tự động điền email từ localStorage nếu đã đăng nhập
+    const _savedEmail = localStorage.getItem('email') || '';
+    document.getElementById('bk-email').value = _savedEmail;
     document.getElementById('bk-email').classList.remove('error');
-    document.getElementById('bk-otp-hint').textContent = '';
-    document.getElementById('bk-otp-hint').className = 'bk-otp-hint';
-    const otpBtn = document.getElementById('btn-bk-send-otp');
-    otpBtn.disabled = true;
-    otpBtn.innerHTML = 'Gửi mã<br>xác nhận';
-    clearInterval(window._bkOtpTimer);
-    // Reset OTP verified state
-    _bkOtpCode     = null;
-    _bkOtpVerified = false;
-    document.getElementById('bk-otp-section').classList.remove('show');
-    [0,1,2,3].forEach(function(i){
-        var el = document.getElementById('bk-otp-' + i);
-        if(el){ el.value=''; el.className='reg-otp-digit'; }
-    });
-    var st = document.getElementById('bk-otp-status');
-    if(st){ st.textContent=''; st.className='reg-otp-status'; }
     bkUpdateBtn();
 }
 
@@ -287,9 +272,9 @@ function bkChangeGuest(type, delta) {
 
 function bkUpdateBtn() {
     const btn   = document.getElementById('btn-submit-booking');
-    const ready = _bkOtpVerified;
+    const ready = !!(bkState.checkIn && bkState.checkOut);
     btn.disabled = !ready;
-    btn.textContent = ready ? '✅ Xác nhận đặt phòng' : '🔒 Xác thực email đặt phòng';
+    btn.textContent = '✅ Xác nhận đặt phòng';
 }
 
 // Hàm format Date sang chuỗi YYYY-MM-DD để gửi lên Backend
