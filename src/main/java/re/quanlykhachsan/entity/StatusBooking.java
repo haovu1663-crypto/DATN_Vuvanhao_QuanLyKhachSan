@@ -1,5 +1,5 @@
 package re.quanlykhachsan.entity;
 
 public enum StatusBooking {
-    PENDING, CHECKED_IN, CHECKED_OUT
+    PENDING, CHECKED_IN, CHECKED_OUT,CANCELLED
 }

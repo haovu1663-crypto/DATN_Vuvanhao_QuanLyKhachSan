@@ -330,6 +330,14 @@ function coPayOpen(checkOutData, btn) {
     if (stepBank)   stepBank.style.display   = 'none';
     if (stepCash)   stepCash.style.display   = 'none';
 
+    // Cập nhật tiêu đề banner cho checkout (ghi đè nếu booking.js đã set khác)
+    const bannerIcon  = document.getElementById('co-pay-banner-icon');
+    const bannerTitle = document.getElementById('co-pay-banner-title-txt');
+    const bannerSub   = document.getElementById('co-pay-banner-sub');
+    if (bannerIcon)  bannerIcon.textContent  = '💳';
+    if (bannerTitle) bannerTitle.textContent = 'Thanh toán tiền phòng';
+    if (bannerSub)   bannerSub.textContent   = 'Chọn phương thức thanh toán phù hợp';
+
     // Mở overlay
     const overlay = document.getElementById('co-payment-overlay');
     if (overlay) overlay.style.display = 'flex';

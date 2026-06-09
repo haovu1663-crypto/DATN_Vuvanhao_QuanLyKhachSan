@@ -3,6 +3,8 @@ package re.quanlykhachsan.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import re.quanlykhachsan.dto.request.BookingRequest;
 import re.quanlykhachsan.dto.request.EmployeeBooking;
@@ -106,6 +108,26 @@ public class BookingService implements IBookingService {
         booking.setEmployee(employee);
         bookingRespository.save(booking);
         roomService.updateStatusCurrentToChecked(bookingRequest.getRoomId());
+        // Gửi email xác nhận đặt phòng
+//        String roomName = room.getName();
+//        String workBranch = room.getWorkBranch();
+//        Double roomPrice = room.getRoomType().getPrice();
+//        String customerEmail = customer.getEmail();
+//        String customerName = customer.getFullname();
+//        try {
+//            EmailRespone emailRespone = new EmailRespone();
+//            emailRespone.setNameRoom(roomName);
+//            emailRespone.setNameCutomer(customerName);
+//            emailRespone.setWorkBranch(workBranch);
+//            emailRespone.setPrice(roomPrice);
+//            emailRespone.setCheckInEnventDate(booking.getEnventCheckinDate().atStartOfDay());
+//            emailRespone.setCheckOutEnventDate(booking.getEnventCheckoutDate().atStartOfDay());
+//            emailRespone.setCreate(LocalDateTime.now());
+//            emailRespone.setBody("Cảm ơn quý khách đã đặt phòng. Chúng tôi sẽ liên hệ xác nhận sớm nhất.");
+//            mailService.sendBookingConfirmation(customerEmail, emailRespone);
+//        } catch (Exception e) {
+//            System.err.println("Gửi email thất bại: " + e.getMessage());
+//        }
         return modelMapper.map(booking, BookingRespone.class);
     }
 
@@ -349,4 +371,16 @@ public class BookingService implements IBookingService {
                 .toList();
         return soPhongRequests;
     }
+
+    // bất đồng bộ . nó sẽ tự chạy
+//    @Async
+//    @Scheduled(cron = "0 59 23 * * *")
+//    @Transactional
+//    public void autoCancelExpiredBookings() {
+//        LocalDate today = LocalDate.now();
+//        List<Booking> expiredBookings = bookingRespository
+//                .findByEnventCheckoutDateAndStatusBooking(today, StatusBooking.PENDING);
+//        expiredBookings.forEach(booking -> booking.setStatusBooking(StatusBooking.CANCELLED));
+//        bookingRespository.saveAll(expiredBookings);
+//    }
 }

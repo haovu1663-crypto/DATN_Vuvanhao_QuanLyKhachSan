@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import re.quanlykhachsan.entity.Booking;
 import re.quanlykhachsan.entity.StatusBooking;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,4 +67,6 @@ public interface BookingRespository extends JpaRepository<Booking,Long> {
             @Param("workBranch") String workBranch,
             @Param("statusBooking") StatusBooking statusBooking
     );
+    // làm bất đồng bộ
+    List<Booking> findByEnventCheckoutDateAndStatusBooking(LocalDate enventCheckoutDate, StatusBooking statusBooking);
 }
