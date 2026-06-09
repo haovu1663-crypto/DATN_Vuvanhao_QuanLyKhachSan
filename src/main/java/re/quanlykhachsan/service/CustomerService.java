@@ -104,6 +104,21 @@ public class CustomerService implements ICustomerService {
          throw new DataConfickException("Tài khoàn Emai không khớp ");
      }
     }
+    public void checkEmailMk(String email) throws DataConfickException {
+        Customer customer = customerRespository.findByEmail(email);
+        if(customer==null){
+            throw new DataConfickException("Tài khoàn Emai này không khớp  ");
+        }
+    }
 
-
+    @Override
+    public String updatePassword(String email, String mk) throws ResourceNotFoundException {
+        Customer customer = customerRespository.findByEmail(email);
+        if(customer==null){
+            throw new ResourceNotFoundException("khồng tìm thấy tài khoản có chứa "+email+" này ");
+        }
+        customer.setPassword(passwordEncoder.encode(mk));
+        customerRespository.save(customer);
+        return "Quý khách đã đổi mật khẩu thành công ";
+    }
 }

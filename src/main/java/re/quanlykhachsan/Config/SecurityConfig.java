@@ -105,6 +105,9 @@ public class SecurityConfig {
                                         .requestMatchers("/api/email/register").permitAll()
                                         .requestMatchers("/api/email/register/employee").permitAll()
                                         .requestMatchers("/home").permitAll()
+                                        // cutomer
+                                        .requestMatchers("/api/v1/customer/mk").permitAll()
+                                        .requestMatchers("/api/email/mk").permitAll()
                                         //lịch sử đặt phòng
                                         .requestMatchers("/api/v1/booking/**").permitAll()
                                         // service

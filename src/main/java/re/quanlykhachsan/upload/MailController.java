@@ -40,4 +40,11 @@ public class MailController {
         mailService.sendEmailNormal(email, "Mã OTP", String.valueOf(otp));
         return new ResponseEntity<>(otp, HttpStatus.OK) ;
     }
+    @PostMapping("/mk")
+    public ResponseEntity<?> mailMk(@RequestParam String email) throws DataConfickException {
+        customerService.checkEmailMk(email);
+        int otp = ThreadLocalRandom.current().nextInt(1000, 10000);
+        mailService.sendEmailNormal(email, "Mã OTP", String.valueOf(otp));
+        return new ResponseEntity<>(otp, HttpStatus.OK) ;
+    }
 }

@@ -36,4 +36,11 @@ public class CustomerController {
         );
         return  new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
+    @PutMapping("/mk")
+    public ResponseEntity<?> updateMl(String email , String mk ) throws ResourceNotFoundException, DataConfickException {
+        ApiResponse<String> apiResponse = new ApiResponse<>(
+                "Update success","200",customerService.updatePassword(email,mk)
+        );
+        return  new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
+    }
 }

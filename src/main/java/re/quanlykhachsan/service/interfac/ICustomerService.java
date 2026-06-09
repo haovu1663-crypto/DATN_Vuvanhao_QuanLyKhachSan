@@ -7,9 +7,11 @@ import re.quanlykhachsan.dto.request.Login;
 import re.quanlykhachsan.dto.response.JwtRespone;
 import re.quanlykhachsan.entity.Customer;
 import re.quanlykhachsan.exception.DataConfickException;
+import re.quanlykhachsan.exception.ResourceNotFoundException;
 
 @Service
 public interface ICustomerService {
     Customer register(CustomerRequest request) throws DataConfickException;
     JwtRespone logi (Login login) ;
+    String updatePassword(String email,String mk ) throws ResourceNotFoundException;
 }
