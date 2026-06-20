@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liên Hệ – StayViet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* ── RESET & TOKENS (giữ nhất quán với header.css) ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --navy: #1a2744;
+            --navy-deep: #111b34;
+            --gold: #c9a84c;
+            --gold-light: #f0d080;
+            --cream: #faf8f4;
+            --white: #ffffff;
+            --gray: #8a8fa8;
+            --border: #e8e4dc;
+            --shadow: 0 8px 40px rgba(26,39,68,0.18);
+            --radius: 16px;
+        }
+
+        /* ── OVERLAY ── */
+        .contact-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(17, 27, 52, 0.72);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 900;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.25s ease;
+        }
+        .contact-overlay.open { display: flex; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        /* ── MODAL CARD ── */
+        .contact-card {
+            background: var(--white);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 780px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            animation: slideUp 0.32s cubic-bezier(.22,1,.36,1);
+            position: relative;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(40px); opacity: 0; }
+            to   { transform: translateY(0);    opacity: 1; }
+        }
+
+        /* ── CLOSE BUTTON ── */
+        .contact-close {
+            position: absolute;
+            top: 18px; right: 18px;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(26,39,68,0.08);
+            color: var(--navy);
+            font-size: 16px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s, transform 0.2s;
+            z-index: 5;
+        }
+        .contact-close:hover { background: rgba(26,39,68,0.15); transform: rotate(90deg); }
+
+        /* ── LAYOUT 2 CỘT ── */
+        .contact-body {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+        }
+
+        /* ── SIDEBAR THÔNG TIN ── */
+        .contact-sidebar {
+            background: var(--navy);
+            padding: 48px 32px 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .cs-logo {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 28px;
+        }
+        .cs-logo-icon {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; flex-shrink: 0;
+        }
+        .cs-logo-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px; color: var(--white); letter-spacing: 0.5px;
+        }
+        .cs-logo-text span { color: var(--gold); }
+
+        .cs-tagline {
+            font-size: 13px;
+            color: rgba(255,255,255,0.55);
+            line-height: 1.6;
+            margin-bottom: 36px;
+        }
+
+        .cs-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+            margin-bottom: 28px;
+        }
+
+        .cs-section-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 16px;
+        }
+
+        .cs-info-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin-bottom: 32px;
+        }
+        .cs-info-item {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+        }
+        .cs-info-icon {
+            width: 34px; height: 34px;
+            border-radius: 8px;
+            background: rgba(201,168,76,0.15);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; flex-shrink: 0;
+        }
+        .cs-info-content {}
+        .cs-info-label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 2px;
+        }
+        .cs-info-value {
+            font-size: 13.5px;
+            font-weight: 500;
+            color: var(--white);
+        }
+        .cs-info-value a {
+            color: var(--white);
+            text-decoration: none;
+        }
+        .cs-info-value a:hover { color: var(--gold-light); }
+
+        /* Zalo badge */
+        .zalo-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #0068FF;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            margin-top: 4px;
+            letter-spacing: 0.3px;
+        }
+
+        /* ── FORM BÊN PHẢI ── */
+        .contact-form-area {
+            padding: 48px 40px 40px;
+        }
+
+        .cf-heading {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 6px;
+        }
+        .cf-sub {
+            font-size: 13.5px;
+            color: var(--gray);
+            margin-bottom: 28px;
+        }
+
+        .cf-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+        .cf-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+        .cf-field.full { grid-column: 1 / -1; }
+
+        .cf-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--navy);
+            letter-spacing: 0.3px;
+        }
+        .cf-input, .cf-textarea {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13.5px;
+            color: var(--navy);
+            background: var(--cream);
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+        .cf-input:focus, .cf-textarea:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+        }
+        .cf-textarea {
+            resize: none;
+            height: 88px;
+        }
+
+        /* Subject chips */
+        .cf-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+        .cf-chip {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 5px 13px;
+            border-radius: 20px;
+            border: 1.5px solid var(--border);
+            background: var(--white);
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.18s;
+        }
+        .cf-chip:hover, .cf-chip.active {
+            border-color: var(--gold);
+            background: rgba(201,168,76,0.1);
+            color: var(--navy);
+        }
+
+        .cf-btn {
+            width: 100%;
+            padding: 13px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: var(--navy);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.18s, box-shadow 0.18s;
+            letter-spacing: 0.3px;
+        }
+        .cf-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(201,168,76,0.38);
+        }
+        .cf-btn:active { transform: translateY(0); }
+
+        /* Success state */
+        .cf-success {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 48px 24px;
+            gap: 14px;
+        }
+        .cf-success.show { display: flex; }
+        .cf-form-inner.hidden { display: none; }
+
+        .success-icon {
+            width: 64px; height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px;
+            animation: pop 0.4s cubic-bezier(.22,1,.36,1);
+        }
+        @keyframes pop {
+            from { transform: scale(0.5); opacity: 0; }
+            to   { transform: scale(1);   opacity: 1; }
+        }
+        .success-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--navy);
+        }
+        .success-desc {
+            font-size: 13.5px;
+            color: var(--gray);
+            line-height: 1.6;
+        }
+        .btn-back {
+            margin-top: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--gold);
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 640px) {
+            .contact-body { grid-template-columns: 1fr; }
+            .contact-sidebar { padding: 32px 24px 28px; }
+            .contact-form-area { padding: 32px 24px 28px; }
+            .cf-row { grid-template-columns: 1fr; }
+            .contact-card { border-radius: 18px; }
+        }
+    </style>
+</head>
+<body style="background:#eef0f4; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;">
+
+<!--
+    ╔══════════════════════════════════════════════════════╗
+    ║  TÍCH HỢP VÀO header.html:                          ║
+    ║  1. Copy phần #contactOverlay vào cuối <body>        ║
+    ║  2. Copy phần <style> vào contact.css (link vào head)║
+    ║  3. Thay onclick của nút "📞 Liên hệ" thành:         ║
+    ║     onclick="openContact()"                          ║
+    ║  4. Copy 2 hàm JS vào menu.js hoặc auth.js           ║
+    ╚══════════════════════════════════════════════════════╝
+-->
+
+<!-- NÚT MÔ PHỎNG THANH NAV (demo) -->
+<div style="position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:999;">
+    <button onclick="openContact()" style="
+        font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500;
+        background:#1a2744; color:#fff; border:none;
+        padding:9px 22px; border-radius:22px; cursor:pointer;
+        display:flex;align-items:center;gap:8px;
+        box-shadow:0 4px 16px rgba(26,39,68,0.25);">
+        📞 Liên hệ — nhấn để xem demo
+    </button>
+</div>
+
+<!-- ══════════ CONTACT OVERLAY ══════════ -->
+<div class="contact-overlay" id="contactOverlay" onclick="handleContactOverlayClick(event)">
+    <div class="contact-card" id="contactCard">
+
+        <button class="contact-close" onclick="closeContact()" title="Đóng">✕</button>
+
+        <div class="contact-body">
+
+            <!-- ── SIDEBAR ── -->
+            <aside class="contact-sidebar">
+                <div class="cs-logo">
+                    <div class="cs-logo-icon">🏨</div>
+                    <span class="cs-logo-text">Stay<span>Viet</span></span>
+                </div>
+                <p class="cs-tagline">Chúng tôi luôn sẵn sàng hỗ trợ bạn — từ tư vấn đặt phòng đến giải đáp mọi thắc mắc.</p>
+
+                <div class="cs-divider"></div>
+                <p class="cs-section-label">Liên hệ trực tiếp</p>
+
+                <ul class="cs-info-list">
+                    <li class="cs-info-item">
+                        <div class="cs-info-icon">👤</div>
+                        <div class="cs-info-content">
+                            <div class="cs-info-label">Người phụ trách</div>
+                            <div class="cs-info-value">Vũ Văn Hảo</div>
+                        </div>
+                    </li>
+                    <li class="cs-info-item">
+                        <div class="cs-info-icon">📞</div>
+                        <div class="cs-info-content">
+                            <div class="cs-info-label">Điện thoại</div>
+                            <div class="cs-info-value">
+                                <a href="tel:0965321129">0965 321 129</a>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cs-info-item">
+                        <div class="cs-info-icon">💬</div>
+                        <div class="cs-info-content">
+                            <div class="cs-info-label">Zalo</div>
+                            <div class="cs-info-value">
+                                <a href="https://zalo.me/0348425849" target="_blank" rel="noopener">0348 425 849</a>
+                                <br>
+                                <a class="zalo-badge" href="https://zalo.me/0348425849" target="_blank" rel="noopener">
+                                    <svg width="14" height="14" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#0068FF"/><text x="50%" y="53%" dominant-baseline="middle" text-anchor="middle" fill="#fff" font-size="13" font-weight="700" font-family="Arial">Z</text></svg>
+                                    Chat Zalo ngay
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cs-info-item">
+                        <div class="cs-info-icon">⏰</div>
+                        <div class="cs-info-content">
+                            <div class="cs-info-label">Giờ hỗ trợ</div>
+                            <div class="cs-info-value">Hàng ngày · 8:00 – 22:00</div>
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="cs-divider"></div>
+                <p class="cs-section-label">Địa chỉ</p>
+                <p style="font-size:12.5px;color:rgba(255,255,255,0.55);line-height:1.65;">
+                    Tầng 12, Tòa nhà Sun Tower<br>
+                    9 Đoàn Văn Bơ, Phường 13<br>
+                    Quận 4, TP. Hồ Chí Minh
+                </p>
+            </aside>
+
+            <!-- ── FORM ── -->
+            <div class="contact-form-area">
+                <div class="cf-form-inner" id="cfFormInner">
+                    <h2 class="cf-heading">Gửi tin nhắn</h2>
+                    <p class="cf-sub">Điền thông tin bên dưới — chúng tôi sẽ phản hồi trong vòng 30 phút.</p>
+
+                    <!-- Chủ đề nhanh -->
+                    <div style="margin-bottom:18px;">
+                        <p class="cf-label" style="margin-bottom:8px;">Chủ đề</p>
+                        <div class="cf-chips" id="cfChips">
+                            <button class="cf-chip active" onclick="selectChip(this)">Đặt phòng</button>
+                            <button class="cf-chip" onclick="selectChip(this)">Giá & Khuyến mãi</button>
+                            <button class="cf-chip" onclick="selectChip(this)">Hủy / Đổi phòng</button>
+                            <button class="cf-chip" onclick="selectChip(this)">Dịch vụ khác</button>
+                        </div>
+                    </div>
+
+                    <div class="cf-row">
+                        <div class="cf-field">
+                            <label class="cf-label" for="cfName">Họ và tên <span style="color:#e74c3c;">*</span></label>
+                            <input class="cf-input" type="text" id="cfName" placeholder="Nguyễn Văn A">
+                        </div>
+                        <div class="cf-field">
+                            <label class="cf-label" for="cfPhone">Số điện thoại <span style="color:#e74c3c;">*</span></label>
+                            <input class="cf-input" type="tel" id="cfPhone" placeholder="0912 345 678">
+                        </div>
+                    </div>
+
+                    <div class="cf-field">
+                        <label class="cf-label" for="cfEmail">Email</label>
+                        <input class="cf-input" type="email" id="cfEmail" placeholder="example@email.com">
+                    </div>
+
+                    <div class="cf-field">
+                        <label class="cf-label" for="cfMsg">Nội dung <span style="color:#e74c3c;">*</span></label>
+                        <textarea class="cf-textarea" id="cfMsg" placeholder="Mô tả yêu cầu hoặc câu hỏi của bạn..."></textarea>
+                    </div>
+
+                    <button class="cf-btn" onclick="submitContact()">
+                        ✉️ &nbsp; Gửi tin nhắn
+                    </button>
+                </div>
+
+                <!-- SUCCESS STATE -->
+                <div class="cf-success" id="cfSuccess">
+                    <div class="success-icon">✅</div>
+                    <p class="success-title">Đã gửi thành công!</p>
+                    <p class="success-desc">
+                        Cảm ơn bạn đã liên hệ.<br>
+                        <strong>Vũ Văn Hảo</strong> sẽ phản hồi sớm nhất có thể<br>
+                        qua số <strong>0965 321 129</strong> hoặc Zalo.
+                    </p>
+                    <button class="btn-back" onclick="resetContactForm()">← Gửi thêm tin nhắn</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ══════════ JAVASCRIPT ══════════ -->
+<script>
+    /* ── Mở / Đóng overlay ── */
+    function openContact() {
+        const overlay = document.getElementById('contactOverlay');
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeContact() {
+        const overlay = document.getElementById('contactOverlay');
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    /* Đóng khi click bên ngoài card */
+    function handleContactOverlayClick(e) {
+        if (e.target === document.getElementById('contactOverlay')) {
+            closeContact();
+        }
+    }
+
+    /* Đóng bằng phím Escape */
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeContact();
+    });
+
+    /* ── Chip chủ đề ── */
+    function selectChip(el) {
+        document.querySelectorAll('.cf-chip').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    /* ── Gửi form (demo — thay bằng fetch API thực tế) ── */
+    function submitContact() {
+        const name  = document.getElementById('cfName').value.trim();
+        const phone = document.getElementById('cfPhone').value.trim();
+        const msg   = document.getElementById('cfMsg').value.trim();
+
+        if (!name) {
+            document.getElementById('cfName').focus();
+            document.getElementById('cfName').style.borderColor = '#e74c3c';
+            return;
+        }
+        if (!phone) {
+            document.getElementById('cfPhone').focus();
+            document.getElementById('cfPhone').style.borderColor = '#e74c3c';
+            return;
+        }
+        if (!msg) {
+            document.getElementById('cfMsg').focus();
+            document.getElementById('cfMsg').style.borderColor = '#e74c3c';
+            return;
+        }
+
+        /* TODO: thay bằng fetch('/api/v1/contact', { method:'POST', body: JSON.stringify({name, phone, msg}) }) */
+
+        document.getElementById('cfFormInner').classList.add('hidden');
+        document.getElementById('cfSuccess').classList.add('show');
+    }
+
+    /* ── Reset về form ban đầu ── */
+    function resetContactForm() {
+        document.getElementById('cfName').value = '';
+        document.getElementById('cfPhone').value = '';
+        document.getElementById('cfEmail').value = '';
+        document.getElementById('cfMsg').value = '';
+        ['cfName','cfPhone','cfMsg'].forEach(id =>
+            document.getElementById(id).style.borderColor = ''
+        );
+        document.getElementById('cfFormInner').classList.remove('hidden');
+        document.getElementById('cfSuccess').classList.remove('show');
+    }
+</script>
+
+</body>
+</html>

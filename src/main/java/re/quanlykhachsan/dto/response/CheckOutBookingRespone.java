@@ -14,4 +14,5 @@ public class CheckOutBookingRespone {
     private String roomName;
     private String roomType;
     private LocalDateTime checkIntDate;
+    private LocalDate enventCheckOutDate;
 }

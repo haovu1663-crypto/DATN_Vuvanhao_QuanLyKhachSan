@@ -14,4 +14,5 @@ public class EmployeeBooking {
     private String phonenumber;
     private String name;
     private Long employeeId;
+    private String cccd;
 }

@@ -676,6 +676,11 @@ header {
 #bh-backdrop.show { display: flex; }
 @keyframes bhFadeIn { from { opacity:0 } to { opacity:1 } }
 
+/* Đảm bảo popup xác nhận (SweetAlert2) luôn hiện TRÊN modal Lịch sử đặt phòng (z-index 9999) */
+.swal2-container {
+    z-index: 10000 !important;
+}
+
 /* Drawer / panel */
 .bh-drawer {
     background: #1A1815;

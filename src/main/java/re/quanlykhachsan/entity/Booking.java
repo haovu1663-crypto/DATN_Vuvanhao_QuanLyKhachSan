@@ -27,6 +27,7 @@ public class Booking {
     private LocalDate enventCheckoutDate;
     private String phonenumber;
     private String name;
+    private String cccd;
 
 
 

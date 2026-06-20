@@ -256,6 +256,7 @@ function bkOpenModal(room) {
     document.getElementById('bk-modal-room-price').textContent = fmtPrice(room.price || 0);
     document.getElementById('bk-customer-name').value = '';
     document.getElementById('bk-customer-phone').value = '';
+    document.getElementById('bk-customer-cccd').value = '';
 
     // Tự động điền ngày từ thanh tìm kiếm
     const today = new Date().toISOString().split('T')[0];
@@ -326,12 +327,15 @@ async function bkSubmitBooking() {
     if (!_bkSelectedRoom) return;
     const customerName  = document.getElementById('bk-customer-name').value.trim();
     const customerPhone = document.getElementById('bk-customer-phone').value.trim();
+    const customerCccd  = document.getElementById('bk-customer-cccd').value.trim();
     const checkin    = document.getElementById('bk-checkin-date').value;
     const checkout   = document.getElementById('bk-checkout-date').value;
     const employeeId = localStorage.getItem('userId');
 
     if (!customerName)  { showToast('warning', 'Thiếu thông tin', 'Vui lòng nhập họ tên khách hàng.'); return; }
     if (!customerPhone) { showToast('warning', 'Thiếu thông tin', 'Vui lòng nhập số điện thoại.'); return; }
+    if (!customerCccd)  { showToast('warning', 'Thiếu thông tin', 'Vui lòng nhập số CCCD.'); return; }
+    if (!/^\d{9}(\d{3})?$/.test(customerCccd)) { showToast('warning', 'CCCD không hợp lệ', 'Số CCCD phải gồm 9 hoặc 12 chữ số.'); return; }
     if (!checkin)    { showToast('warning', 'Thiếu thông tin', 'Vui lòng chọn ngày nhận phòng.'); return; }
     if (!checkout)   { showToast('warning', 'Thiếu thông tin', 'Vui lòng chọn ngày trả phòng.'); return; }
     if (checkin >= checkout) { showToast('warning', 'Ngày không hợp lệ', 'Ngày trả phòng phải sau ngày nhận phòng.'); return; }
@@ -345,6 +349,7 @@ async function bkSubmitBooking() {
     const params = new URLSearchParams();
     params.append('name', customerName);
     params.append('phonenumber', customerPhone);
+    params.append('cccd', customerCccd);
     params.append('roomId', String(_bkSelectedRoom.id));
     params.append('enventCheckinDate', checkin);
     params.append('enventCheckoutDate', checkout);

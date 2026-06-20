@@ -38,6 +38,115 @@ body {
 .preview-card {
     transition: all 0.3s ease;
 }
+
+/* ============================================================
+   NÚT 3 GẠCH BẬT/TẮT SIDEBAR — thiết kế lại theo brand (blue/slate)
+   ============================================================ */
+#appSidebar {
+    transition: margin-left .32s cubic-bezier(.4,0,.2,1), opacity .25s ease;
+    flex-shrink: 0;
+    position: relative; /* để nút có thể "neo" theo sidebar khi mở */
+}
+#appSidebar.sb-collapsed {
+    margin-left: -288px; /* = w-72 (18rem) */
+    opacity: 0;
+    pointer-events: none;
+}
+
+#sbToggleBtn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1100;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12), 0 1px 3px rgba(15, 23, 42, 0.08);
+    transition: left .32s cubic-bezier(.4,0,.2,1),
+    top .32s cubic-bezier(.4,0,.2,1),
+    background .25s ease,
+    border-color .25s ease,
+    box-shadow .25s ease,
+    transform .15s ease;
+}
+#sbToggleBtn:hover {
+    border-color: rgba(59, 130, 246, 0.45);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.18), 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+#sbToggleBtn:active { transform: scale(0.93); }
+
+#sbToggleBtn .sb-bars {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 18px;
+    height: 14px;
+    position: relative;
+}
+#sbToggleBtn .sb-bar {
+    display: block;
+    width: 100%;
+    height: 2px;
+    border-radius: 2px;
+    background: #334155;
+    transition: transform .28s cubic-bezier(.4,0,.2,1), opacity .2s ease,
+    width .2s ease, background .25s ease;
+}
+/* gạch giữa ngắn hơn một chút cho cảm giác tinh tế */
+#sbToggleBtn .sb-bar:nth-child(2) { width: 70%; align-self: flex-end; }
+#sbToggleBtn:hover .sb-bar { background: #2563eb; }
+#sbToggleBtn:hover .sb-bar:nth-child(2) { width: 100%; }
+
+/* ---- Khi sidebar ĐANG MỞ: nút nằm NGAY TRONG header sidebar,
+        thẳng hàng với logo "GrandHotel", màu hoà cùng nền tối ---- */
+body.sb-open #sbToggleBtn {
+    top: 28px;            /* thẳng hàng theo chiều cao với khối logo */
+    left: 212px;           /* nằm bên trong sidebar (w-72 = 288px), sát mép phải */
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+body.sb-open #sbToggleBtn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+}
+body.sb-open #sbToggleBtn .sb-bar { background: #cbd5e1; } /* slate-300 - đồng bộ với chữ sidebar */
+body.sb-open #sbToggleBtn:hover .sb-bar { background: #ffffff; }
+
+/* Icon biến hình thành dấu X khi sidebar mở */
+body.sb-open #sbToggleBtn .sb-bar:nth-child(1) { width: 100%; transform: translateY(6px) rotate(45deg); }
+body.sb-open #sbToggleBtn .sb-bar:nth-child(2) { opacity: 0; }
+body.sb-open #sbToggleBtn .sb-bar:nth-child(3) { width: 100%; transform: translateY(-6px) rotate(-45deg); }
+body.sb-open #sbToggleBtn:hover .sb-bar:nth-child(1),
+body.sb-open #sbToggleBtn:hover .sb-bar:nth-child(3) { background: #ffffff; }
+
+/* ---- Khi sidebar ĐANG TẮT: nút nằm sát trước tiêu đề trang
+        (VD "Booking Room") và đẩy lùi tiêu đề + breadcrumb vào ---- */
+header[class*="bg-white/80 backdrop-blur-md"] > div:first-child {
+    padding-left: 0;
+    transition: padding-left .32s cubic-bezier(.4,0,.2,1);
+}
+body:not(.sb-open) header[class*="bg-white/80 backdrop-blur-md"] > div:first-child {
+    padding-left: 44px; /* đẩy chữ "Booking Room" / breadcrumb lùi vào để không bị nút đè lên */
+}
+
+@media (max-width: 768px) {
+    body.sb-open #sbToggleBtn { left: 20px; top: 20px; background: rgba(255,255,255,0.92); box-shadow: 0 4px 16px rgba(15,23,42,0.12); }
+    body.sb-open #sbToggleBtn .sb-bar { background:#334155; }
+    #appSidebar { position: fixed; top: 0; bottom: 0; left: 0; z-index: 1050; }
+    #appSidebar:not(.sb-collapsed) {
+        box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.45);
+    }
+}
 .preview-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
@@ -2686,4 +2795,208 @@ body.rf-update-mode .rf-btn-submit {
     display: flex;
     align-items: center;
     gap: 12px;
+}
+/* ===================================================
+   SERVICE — NÚT VÀ PILL BAR (chuyển từ <style> inline)
+   =================================================== */
+
+/* ── Nút Add dịch vụ (trong bảng) ── */
+.sv-add-service-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .15s, transform .1s;
+    white-space: nowrap;
+}
+.sv-add-service-btn:hover  { opacity: .88; transform: translateY(-1px); }
+.sv-add-service-btn:active { opacity: 1;   transform: translateY(0);    }
+.sv-add-service-btn i { font-size: 11px; }
+
+/* ── Nút Add Service (header) ── */
+.sv-add-service-header-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.35);
+    transition: opacity .15s, transform .1s, box-shadow .15s;
+}
+.sv-add-service-header-btn:hover  {
+    opacity: .9;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(37,99,235,0.45);
+}
+.sv-add-service-header-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+}
+.sv-add-service-header-btn i { font-size: 12px; }
+
+/* ── Nút Cập nhật dịch vụ (header) ── */
+.sv-update-service-header-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(245,158,11,0.35);
+    transition: opacity .15s, transform .1s, box-shadow .15s;
+}
+.sv-update-service-header-btn:hover  {
+    opacity: .9;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(245,158,11,0.45);
+}
+.sv-update-service-header-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(245,158,11,0.3);
+}
+.sv-update-service-header-btn i { font-size: 12px; }
+
+/* ── Ô tìm kiếm ID dịch vụ ── */
+.sv-search-id-wrap {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.sv-search-id-input {
+    flex: 1;
+    -moz-appearance: textfield;
+}
+.sv-search-id-input::-webkit-inner-spin-button,
+.sv-search-id-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.sv-search-id-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity .15s, transform .1s;
+}
+.sv-search-id-btn:hover  { opacity: .88; transform: translateY(-1px); }
+.sv-search-id-btn:active { transform: translateY(0); }
+.sv-search-id-msg {
+    margin-top: 6px;
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+.sv-search-id-msg.ok  { background: #dcfce7; color: #166534; }
+.sv-search-id-msg.err { background: #fee2e2; color: #991b1b; }
+
+/* ── Badge ảnh cũ / mới ── */
+.sv-img-thumb-badge {
+    position: absolute;
+    bottom: 4px; left: 4px;
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    pointer-events: none;
+}
+.sv-img-thumb-badge--new {
+    background: rgba(37,99,235,0.82);
+}
+
+/* ── Thanh chọn loại dịch vụ (pill bar) ── */
+.sv-type-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 6px 8px;
+    background: #f1f5f9;
+    border-radius: 14px;
+    border: 1.5px solid #e2e8f0;
+}
+.sv-type-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, color .15s, box-shadow .15s;
+    white-space: nowrap;
+}
+.sv-type-pill:hover {
+    background: #fff;
+    color: #1e293b;
+}
+.sv-type-pill.active {
+    background: #fff;
+    color: #2563eb;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.10), 0 0 0 1.5px #bfdbfe;
+}
+.sv-type-pill i { font-size: 12px; }
+
+/* ── Pill bar loại giặt ủi ── */
+.sv-laundry-type-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+}
+.sv-laundry-type-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 14px;
+    border-radius: 10px;
+    border: 1.5px solid #e2e8f0;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s, box-shadow .15s;
+    white-space: nowrap;
+}
+.sv-laundry-type-pill:hover {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1d4ed8;
+}
+.sv-laundry-type-pill.active {
+    background: #eff6ff;
+    border-color: #2563eb;
+    color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
 }

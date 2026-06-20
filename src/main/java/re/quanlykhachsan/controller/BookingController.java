@@ -53,8 +53,8 @@ public class BookingController {
         return new ResponseEntity<>(bookingService.CheckIn(workBranch), HttpStatus.OK);
     }
     @PostMapping("/checkinbooking")
-    public ResponseEntity<String> getCheckin(@RequestParam Long employeeId,@RequestParam Long bookingId) throws ResourceNotFoundException {
-        return new ResponseEntity<>(bookingService.checkInBooking(employeeId,bookingId), HttpStatus.OK);
+    public ResponseEntity<String> getCheckin(@RequestParam Long employeeId,@RequestParam Long bookingId,@RequestParam String cccd) throws ResourceNotFoundException {
+        return new ResponseEntity<>(bookingService.checkInBooking(employeeId,bookingId,cccd), HttpStatus.OK);
     }
     @GetMapping("/checkout")
     public ResponseEntity<List<CheckOutBookingRespone>> getCheckOut(@RequestParam String workBranch) {
@@ -81,5 +81,8 @@ public class BookingController {
     public ResponseEntity<?> roomservice(@RequestParam String workBrach) {
         return new ResponseEntity<>(bookingService.soPhongService(workBrach), HttpStatus.OK);
     }
-
+    @PostMapping("/cancelbooking")
+    public ResponseEntity<?> cancelbooking(@RequestParam Long bookingId) throws ResourceNotFoundException {
+        return new  ResponseEntity<>(bookingService.cancelBooking(bookingId),HttpStatus.OK);
+    }
 }

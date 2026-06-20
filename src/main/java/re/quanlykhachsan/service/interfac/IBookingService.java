@@ -15,8 +15,9 @@ public interface IBookingService {
 
     //
     List<CheckInRespone> CheckIn(String workBranch) ;
-    String checkInBooking(Long employeeId,Long bookingId) throws ResourceNotFoundException;
+    String checkInBooking(Long employeeId,Long bookingId,String cccd) throws ResourceNotFoundException;
     List<CheckOutBookingRespone> CheckOut(String workBranch) throws ResourceNotFoundException;
     CheckOutRespone checkOutBooking(Long bookingId) throws ResourceNotFoundException;
     List<SoPhongServiceRequest> soPhongService(String workBrach);
+    String cancelBooking(Long bookingId) throws ResourceNotFoundException;
 }

@@ -158,6 +158,7 @@ function ciOpenConfirm(bookingId, roomName, btn) {
     document.getElementById('ci-modal-booking').textContent = '#' + bookingId;
     const empId = localStorage.getItem('userId') || localStorage.getItem('employeeId') || '—';
     document.getElementById('ci-modal-emp').textContent = 'ID: ' + empId;
+    document.getElementById('ci-modal-cccd').value = '';
     document.getElementById('ci-modal-overlay').style.display = 'flex';
 }
 
@@ -171,10 +172,19 @@ async function ciDoCheckIn() {
     const bookingId  = _ciPendingBookingId;
     const btn        = _ciPendingBtn;
     const employeeId = localStorage.getItem('userId') || localStorage.getItem('employeeId');
+    const cccd       = document.getElementById('ci-modal-cccd').value.trim();
 
     if (!employeeId) {
         showToast('error', 'Chưa đăng nhập', 'Không tìm thấy thông tin nhân viên. Vui lòng đăng nhập lại!');
         ciCloseConfirm();
+        return;
+    }
+    if (!cccd) {
+        showToast('warning', 'Thiếu thông tin', 'Vui lòng nhập số CCCD của khách hàng.');
+        return;
+    }
+    if (!/^\d{9}(\d{3})?$/.test(cccd)) {
+        showToast('warning', 'CCCD không hợp lệ', 'Số CCCD phải gồm 9 hoặc 12 chữ số.');
         return;
     }
 
@@ -187,7 +197,7 @@ async function ciDoCheckIn() {
 
     try {
         const token = localStorage.getItem('accessToken');
-        const params = new URLSearchParams({ employeeId, bookingId });
+        const params = new URLSearchParams({ employeeId, bookingId, cccd });
         const res = await fetch('/api/v1/booking/checkinbooking?' + params.toString(), {
             method: 'POST',
             headers: token ? { Authorization: 'Bearer ' + token } : {}

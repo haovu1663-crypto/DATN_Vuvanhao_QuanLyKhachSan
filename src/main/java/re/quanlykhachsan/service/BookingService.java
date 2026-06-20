@@ -97,6 +97,7 @@ public class BookingService implements IBookingService {
         booking.setToyalPrice(null);
         booking.setName(bookingRequest.getName());
         booking.setPhonenumber(bookingRequest.getPhonenumber());
+        booking.setCccd(bookingRequest.getCccd());
 
         Room room = roomRespository.findById(bookingRequest.getRoomId()).orElseThrow(()->new ResourceNotFoundException("không tìm thấy phòng này"));
         booking.setRoom(room);
@@ -222,11 +223,12 @@ public class BookingService implements IBookingService {
     }
 
     @Override
-    public String checkInBooking(Long employeeId, Long bookingId) throws ResourceNotFoundException {
+    public String checkInBooking(Long employeeId, Long bookingId,String cccd) throws ResourceNotFoundException {
         Booking booking= bookingRespository.findById(bookingId).orElseThrow(()-> new ResourceNotFoundException("không tìm thấy hóa đơn đặt phòng "));
         Employee e = employeeRespository.findById(employeeId).orElseThrow(()-> new ResourceNotFoundException("không tìm thấy nhân viên này "));
         booking.setCheckInDate( LocalDateTime.now());
         booking.setEmployee(e);
+        booking.setCccd(cccd);
         booking.setStatusBooking(StatusBooking.CHECKED_IN);
         bookingRespository.save(booking);
         return "Quý khách đã CheckIn thành công " ;
@@ -244,6 +246,7 @@ public class BookingService implements IBookingService {
                     checkOutRespone.setRoomName(n.getRoom().getName());
                     checkOutRespone.setRoomType(n.getRoom().getRoomType().getType());
                     checkOutRespone.setCheckIntDate(n.getCheckInDate());
+                    checkOutRespone.setEnventCheckOutDate(n.getEnventCheckoutDate());
                     return checkOutRespone;
                 }
         ).toList();
@@ -372,15 +375,13 @@ public class BookingService implements IBookingService {
         return soPhongRequests;
     }
 
-    // bất đồng bộ . nó sẽ tự chạy
-//    @Async
-//    @Scheduled(cron = "0 59 23 * * *")
-//    @Transactional
-//    public void autoCancelExpiredBookings() {
-//        LocalDate today = LocalDate.now();
-//        List<Booking> expiredBookings = bookingRespository
-//                .findByEnventCheckoutDateAndStatusBooking(today, StatusBooking.PENDING);
-//        expiredBookings.forEach(booking -> booking.setStatusBooking(StatusBooking.CANCELLED));
-//        bookingRespository.saveAll(expiredBookings);
-//    }
+    @Override
+    public String cancelBooking(Long bookingId) throws ResourceNotFoundException {
+        Booking booking = bookingRespository.findById(bookingId).orElseThrow(()-> new ResourceNotFoundException("khoong tim thấy"));
+        booking.setEnventCheckinDate(null);
+        booking.setEnventCheckoutDate(null);
+        booking.setStatusBooking(StatusBooking.CANCELLED);
+        bookingRespository.save(booking);
+        return "Hủy thành công booking";
+    }
 }

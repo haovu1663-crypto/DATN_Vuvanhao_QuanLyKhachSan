@@ -196,15 +196,25 @@
     /** Fill dữ liệu từ API response vào các ô nhập liệu */
     function svFillForm(data) {
         const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val ?? ''; };
-        set('sv-input-name',        data.name);
-        set('sv-input-price',       data.price);
-        set('sv-input-description', data.description);
+        const isLaundry = (data.type === 'Dịch vụ giặt ủi');
+
+        if (isLaundry) {
+            // Fill vào panel giặt ủi
+            set('sv-laundry-type',   data.name);
+            set('sv-laundry-weight', data.price);
+            set('sv-laundry-note',   data.description);
+        } else {
+            // Fill vào form chung
+            set('sv-input-name',        data.name);
+            set('sv-input-price',       data.price);
+            set('sv-input-description', data.description);
+        }
 
         // Status
         const statusEl = document.getElementById('sv-input-status');
         if (statusEl) statusEl.value = String(data.active ?? data.status ?? true);
 
-        // Pill bar loại dịch vụ
+        // Pill bar loại dịch vụ — active đúng tab + toggle panel giặt
         if (data.type) {
             let matched = false;
             document.querySelectorAll('#sv-type-bar .sv-type-pill').forEach(p => {
@@ -212,11 +222,16 @@
                 p.classList.toggle('active', isMatch);
                 if (isMatch) matched = true;
             });
-            // Nếu không khớp pill nào, giữ pill đầu tiên
             if (!matched) document.querySelectorAll('#sv-type-bar .sv-type-pill')[0]?.classList.add('active');
+
+            // Hiện/ẩn panel giặt ủi + common info đúng với loại vừa load
+            const panel      = document.getElementById('sv-panel-laundry');
+            const commonInfo = document.getElementById('sv-common-info');
+            if (panel)      panel.style.display      = isLaundry ? 'block' : 'none';
+            if (commonInfo) commonInfo.style.display = isLaundry ? 'none'  : '';
         }
 
-        // Ảnh cũ từ server: hiển thị preview URL, lưu lại để gửi keepImages
+        // Ảnh cũ từ server
         _svImageFiles    = [];
         _svKeepImageUrls = Array.isArray(data.images) ? [...data.images] : [];
         svRenderAllPreviews();
@@ -311,22 +326,34 @@
     /*  MODAL – GỬI FORM                                                    */
     /* ================================================================== */
     window.svSubmitService = async function () {
-        const name        = (document.getElementById('sv-input-name')?.value || '').trim();
-        const price       = document.getElementById('sv-input-price')?.value;
-        const description = (document.getElementById('sv-input-description')?.value || '').trim();
-        const status      = document.getElementById('sv-input-status')?.value || 'true';
-        const createdAt   = '';
-        const activePill  = document.querySelector('#sv-type-bar .sv-type-pill.active');
-        const type        = activePill ? activePill.dataset.type : '';
+        const activePill = document.querySelector('#sv-type-bar .sv-type-pill.active');
+        const type       = activePill ? activePill.dataset.type : '';
+        const isLaundry  = (type === 'Dịch vụ giặt ủi');
+
+        let name, price, description;
+
+        if (isLaundry) {
+            // Lấy data từ panel giặt ủi
+            name        = (document.getElementById('sv-laundry-type')?.value || '').trim();
+            price       = document.getElementById('sv-laundry-weight')?.value;
+            description = (document.getElementById('sv-laundry-note')?.value || '').trim();
+        } else {
+            // Lấy data từ form chung
+            name        = (document.getElementById('sv-input-name')?.value || '').trim();
+            price       = document.getElementById('sv-input-price')?.value;
+            description = (document.getElementById('sv-input-description')?.value || '').trim();
+        }
+
+        const status = document.getElementById('sv-input-status')?.value || 'true';
 
         // Validate
         if (!name) {
-            svShake('sv-input-name');
+            svShake(isLaundry ? 'sv-laundry-type' : 'sv-input-name');
             svShowToast('Vui lòng nhập tên dịch vụ.', 'warning');
             return;
         }
         if (!price || Number(price) < 0) {
-            svShake('sv-input-price');
+            svShake(isLaundry ? 'sv-laundry-weight' : 'sv-input-price');
             svShowToast('Vui lòng nhập giá hợp lệ.', 'warning');
             return;
         }
@@ -558,5 +585,123 @@
             if (e.dataTransfer?.files?.length) svHandleImages(e.dataTransfer.files);
         });
     });
+
+    /* ================================================================== */
+    /*  PANEL GIẶT ỦI                                                       */
+    /*  – Hiện/ẩn panel khi chọn tab "Dịch vụ giặt ủi"                     */
+    /*  – Live preview tóm tắt thông tin giặt                               */
+    /*  – Reset panel khi đóng modal                                        */
+    /* ================================================================== */
+    (function initLaundryPanel() {
+        const LAUNDRY_TYPE = 'Dịch vụ giặt ủi';
+
+        /* ── Hiện/ẩn panel ── */
+        function svLaundryTogglePanel(type) {
+            const panel      = document.getElementById('sv-panel-laundry');
+            const commonInfo = document.getElementById('sv-common-info');
+            if (!panel) return;
+            const isLaundry = (type === LAUNDRY_TYPE);
+            panel.style.display      = isLaundry ? 'block' : 'none';
+            if (commonInfo) commonInfo.style.display = isLaundry ? 'none' : '';
+            if (isLaundry) svLaundryUpdatePreview();
+        }
+
+        /* ── Wrap svPickType để hook show/hide panel ── */
+        function hookSvPickType() {
+            const _orig = window.svPickType;
+            window.svPickType = function (btn) {
+                if (typeof _orig === 'function') _orig(btn);
+                const type = btn ? btn.getAttribute('data-type') : '';
+                svLaundryTogglePanel(type);
+            };
+        }
+
+        /* ── Live preview ── */
+        window.svLaundryUpdatePreview = function () {
+            const type     = document.getElementById('sv-laundry-type')?.value     || '';
+            const price    = document.getElementById('sv-laundry-weight')?.value   || '';
+            const duration = document.getElementById('sv-laundry-duration')?.value || '';
+            const express  = document.getElementById('sv-laundry-express')?.checked;
+            const delivery = document.getElementById('sv-laundry-delivery')?.checked;
+
+            const preview = document.getElementById('sv-laundry-preview');
+            const preText = document.getElementById('sv-laundry-preview-text');
+            if (!preview || !preText) return;
+
+            if (!type) { preview.style.display = 'none'; return; }
+
+            const parts = [type];
+            if (price)    parts.push(new Intl.NumberFormat('vi-VN').format(price) + ' ₫');
+            if (duration) parts.push(`hoàn thành trong ${duration}h`);
+            if (express)  parts.push('dịch vụ khẩn');
+            if (delivery) parts.push('giao tận phòng');
+
+            preText.textContent = parts.join(' · ');
+            preview.style.display = 'block';
+        };
+
+        /* ── Reset toàn bộ panel ── */
+        function svLaundryReset() {
+            ['sv-laundry-type', 'sv-laundry-unit', 'sv-laundry-duration'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.value = (el.tagName === 'SELECT' && el.options.length) ? el.options[0].value : '';
+            });
+            ['sv-laundry-weight', 'sv-laundry-note'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            ['sv-laundry-express', 'sv-laundry-delivery', 'sv-laundry-fold', 'sv-laundry-eco'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.checked = false;
+            });
+            const preview = document.getElementById('sv-laundry-preview');
+            if (preview) preview.style.display = 'none';
+        }
+
+        /* ── Wrap svCloseModal để reset panel khi đóng ── */
+        function hookSvCloseModal() {
+            const _origClose = window.svCloseModal;
+            window.svCloseModal = function () {
+                if (typeof _origClose === 'function') _origClose();
+                svLaundryReset();
+                const panel = document.getElementById('sv-panel-laundry');
+                if (panel) panel.style.display = 'none';
+                const commonInfo = document.getElementById('sv-common-info');
+                if (commonInfo) commonInfo.style.display = '';
+            };
+        }
+
+        /* ── Gắn event listeners live preview ── */
+        function bindEvents() {
+            ['sv-laundry-type', 'sv-laundry-unit', 'sv-laundry-duration',
+                'sv-laundry-weight', 'sv-laundry-express', 'sv-laundry-delivery'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.addEventListener('change', window.svLaundryUpdatePreview);
+                if (el.type === 'number' || el.type === 'text') el.addEventListener('input', window.svLaundryUpdatePreview);
+            });
+        }
+
+        /* ── Init ── */
+        function init() {
+            bindEvents();
+            hookSvPickType();
+            hookSvCloseModal();
+
+            /* Nếu tab Giặt ủi đang active ngay lúc mở → hiện panel */
+            const activeBtn = document.querySelector('#sv-type-bar .sv-type-pill.active');
+            if (activeBtn && activeBtn.getAttribute('data-type') === LAUNDRY_TYPE) {
+                const panel = document.getElementById('sv-panel-laundry');
+                if (panel) panel.style.display = 'block';
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            setTimeout(init, 0);
+        }
+    }());
 
 })();

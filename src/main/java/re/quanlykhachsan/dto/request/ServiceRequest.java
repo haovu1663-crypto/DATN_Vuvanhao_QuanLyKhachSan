@@ -16,6 +16,5 @@ public class ServiceRequest {
     private List<MultipartFile> images;
     private List<String> keepImages; // URL ảnh cũ cần giữ lại khi update
     private Double price;
-
     private boolean active;
 }
