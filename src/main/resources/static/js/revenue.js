@@ -263,8 +263,41 @@ function rvShowLoading(show) {
 }
 
 function rvShowToast(msg, type) {
-    if (typeof showToast === 'function') { showToast(msg, type); return; }
-    alert(msg);
+    const cfg = {
+        success : { title: 'Thành công', icon: 'fa-circle-check',           cls: 'toast-success' },
+        error   : { title: 'Lỗi',        icon: 'fa-circle-xmark',            cls: 'toast-error'   },
+        warning : { title: 'Cảnh báo',   icon: 'fa-triangle-exclamation',    cls: 'toast-warning' },
+        info    : { title: 'Thông tin',  icon: 'fa-circle-info',             cls: 'toast-info'    },
+    };
+    const { title, icon, cls } = cfg[type] || cfg.info;
+    const duration = 3500;
+
+    const el = document.createElement('div');
+    el.className = 'toast ' + cls;
+    el.innerHTML =
+        '<div class="toast-bar" style="animation-duration:' + duration + 'ms"></div>' +
+        '<div class="toast-icon"><i class="fas ' + icon + '"></i></div>' +
+        '<div class="toast-content">' +
+        '<div class="toast-title">' + title + '</div>' +
+        '<div class="toast-msg">' + msg + '</div>' +
+        '</div>' +
+        '<button class="toast-close" onclick="this.closest(\'.toast\').remove()">' +
+        '<i class="fas fa-xmark"></i>' +
+        '</button>';
+
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.style.cssText = 'position:fixed;top:24px;right:24px;z-index:99999;display:flex;flex-direction:column;gap:10px;pointer-events:none;';
+        document.body.appendChild(container);
+    }
+    container.appendChild(el);
+
+    setTimeout(function() {
+        el.classList.add('toast-exit');
+        el.addEventListener('animationend', function() { el.remove(); }, { once: true });
+    }, duration);
 }
 
 // ── Init: set default tab khi view load ──────────────────────────────────────
@@ -292,3 +325,145 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 })();
+
+// ===== REVENUE EXPORT TO EXCEL =====
+// File: /js/revenue-export.js
+// Xử lý xuất dữ liệu thống kê doanh thu ra file Excel
+
+/**
+ * Xuất dữ liệu thống kê doanh thu ra Excel
+ * Tự động lấy loại thống kê hiện tại từ tab đang xem
+ */
+async function rvExportExcel() {
+    try {
+        rvShowExportLoading(true);
+
+        const token = localStorage.getItem('accessToken');
+        const headers = token ? { Authorization: 'Bearer ' + token } : {};
+
+        // Lấy thông tin hiện tại từ UI
+        const type = _rvTab; // day, month, quarter, year
+        const year = document.getElementById('rv-input-year')?.value || new Date().getFullYear();
+        const dateFrom = document.getElementById('rv-date-from')?.value || '';
+        const dateTo = document.getElementById('rv-date-to')?.value || '';
+
+        // Xây dựng URL
+        let url = `/api/v1/revenue/export-excel?type=${type}&year=${year}`;
+        if (dateFrom) url += `&dateFrom=${dateFrom}`;
+        if (dateTo) url += `&dateTo=${dateTo}`;
+
+        // Gọi API để lấy file
+        const response = await fetch(url, { headers });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        // Lấy filename từ Content-Disposition header
+        const contentDisposition = response.headers.get('content-disposition');
+        let filename = `ThongKe_${type}_${new Date().getTime()}.xlsx`;
+
+        if (contentDisposition) {
+            const filenameMatch = contentDisposition.match(/filename="(.+?)"/);
+            if (filenameMatch && filenameMatch[1]) {
+                filename = filenameMatch[1];
+            }
+        }
+
+        // Lấy blob từ response
+        const blob = await response.blob();
+
+        // Tạo link download và trigger click
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(downloadUrl);
+
+        // Hiển thị thông báo thành công
+        rvShowToast('Xuất file Excel thành công!', 'success');
+
+    } catch (err) {
+        console.error('Export error:', err);
+        rvShowToast('Lỗi xuất Excel: ' + err.message, 'error');
+    } finally {
+        rvShowExportLoading(false);
+    }
+}
+
+/**
+ * Hiển thị loading spinner khi xuất Excel
+ */
+function rvShowExportLoading(show) {
+    const btn = document.getElementById('rv-export-btn');
+    const icon = btn?.querySelector('i');
+    const text = btn?.querySelector('span');
+
+    if (show) {
+        btn?.setAttribute('disabled', 'disabled');
+        btn?.classList.add('opacity-60', 'cursor-not-allowed');
+        if (icon) {
+            icon.className = 'fas fa-spinner fa-spin';
+        }
+        if (text) {
+            text.textContent = 'Đang xuất...';
+        }
+    } else {
+        btn?.removeAttribute('disabled');
+        btn?.classList.remove('opacity-60', 'cursor-not-allowed');
+        if (icon) {
+            icon.className = 'fas fa-file-excel';
+        }
+        if (text) {
+            text.textContent = 'Xuất Excel';
+        }
+    }
+}
+
+/**
+ * Xuất tất cả dữ liệu (all types) - tạo file Excel chứa multiple sheets
+ */
+async function rvExportAllExcel() {
+    try {
+        rvShowExportLoading(true);
+
+        const token = localStorage.getItem('accessToken');
+        const headers = token ? { Authorization: 'Bearer ' + token } : {};
+        const year = document.getElementById('rv-input-year')?.value || new Date().getFullYear();
+
+        // Xuất file chứa tất cả loại thống kê
+        const url = `/api/v1/revenue/export-excel-all?year=${year}`;
+        const response = await fetch(url, { headers });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        const filename = `ThongKe_Full_${year}.xlsx`;
+
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(downloadUrl);
+
+        rvShowToast('Xuất toàn bộ thống kê thành công!', 'success');
+
+    } catch (err) {
+        console.error('Export all error:', err);
+        rvShowToast('Lỗi xuất Excel: ' + err.message, 'error');
+    } finally {
+        rvShowExportLoading(false);
+    }
+}
+
+// Export functions globally để HTML onclick có thể gọi
+window.rvExportExcel = rvExportExcel;
+window.rvExportAllExcel = rvExportAllExcel;

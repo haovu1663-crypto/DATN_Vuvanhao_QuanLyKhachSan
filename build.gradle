@@ -19,6 +19,9 @@ repositories {
 }
 
 dependencies {
+    // Thêm thư viện Apache POI để làm việc với Excel (.xlsx)
+    implementation 'org.apache.poi:poi-ooxml:5.3.0'
+
     // up clound
     implementation group: 'com.cloudinary', name: 'cloudinary-http44', version: '1.39.0'
 
