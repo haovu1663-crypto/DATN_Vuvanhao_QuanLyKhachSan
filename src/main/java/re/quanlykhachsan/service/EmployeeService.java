@@ -89,7 +89,7 @@ public class EmployeeService implements IEmployeeSevice {
 
     @Override
     public List<EmployeeResponse> get() {
-        List<Employee> employees = employeeRepository.findAll();
+        List<Employee> employees = employeeRepository.findByActive(true);
         return employees.stream().map(en ->modelMapper.map(en,EmployeeResponse.class)).collect(Collectors.toList());
     }
 
@@ -106,5 +106,13 @@ public class EmployeeService implements IEmployeeSevice {
     public String getBranch(Long employeeId){
         Employee employee = employeeRepository.findById(employeeId).orElse(null);
         return employee.getWorkBranch();
+    }
+
+    @Override
+    public String deleteSoft(Long id) throws ResourceNotFoundException {
+        Employee employee = employeeRepository.findById(id).orElse(null);
+        employee.setActive(false);
+        employeeRepository.save(employee);
+        return "xóa thành công";
     }
 }

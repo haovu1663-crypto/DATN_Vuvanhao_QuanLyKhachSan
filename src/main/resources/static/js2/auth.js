@@ -55,6 +55,9 @@ function handleLogout() {
             localStorage.removeItem('userId');
             localStorage.removeItem('fullName');
             localStorage.removeItem('expirationDate');
+            localStorage.removeItem('workBranch');
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('email');
             updateAuthUI(false);
             Swal.fire({
                 icon: 'success',

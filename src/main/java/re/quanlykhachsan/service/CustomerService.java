@@ -2,6 +2,7 @@ package re.quanlykhachsan.service;
 
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,6 +33,10 @@ public class CustomerService implements ICustomerService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+
+    @Value("${jwt.expired}")
+    private Long expiredTime;
+
     @Override
     public Customer register(CustomerRequest request) throws DataConfickException {
         Customer customer=modelMapper.map(request,Customer.class);
@@ -86,7 +91,7 @@ public class CustomerService implements ICustomerService {
                 .userId(user.getId())
                 .fullName(user.getFullname())
                 .accessToken(jwtService.generateAccessToken(user.getUsername()))
-                .expirationDate(new Date(new Date().getTime()+15*60*1000))
+                .expirationDate(new Date(new Date().getTime() + expiredTime  * 4 * 8)) // khớp với JwtService: expiredTime*4*8 = 8 tiếng
                 .refreshToken(null)
                 .role(user.getRole())
                 .email(user.getEmail())
@@ -99,10 +104,10 @@ public class CustomerService implements ICustomerService {
         }
     }
     public void checkEmailBooking(String email,Long id) throws DataConfickException {
-     Customer customer = customerRespository.findByEmail(email);
-     if(customer==null || !customer.getId().equals(id)){
-         throw new DataConfickException("Tài khoàn Emai không khớp ");
-     }
+        Customer customer = customerRespository.findByEmail(email);
+        if(customer==null || !customer.getId().equals(id)){
+            throw new DataConfickException("Tài khoàn Emai không khớp ");
+        }
     }
     public void checkEmailMk(String email) throws DataConfickException {
         Customer customer = customerRespository.findByEmail(email);

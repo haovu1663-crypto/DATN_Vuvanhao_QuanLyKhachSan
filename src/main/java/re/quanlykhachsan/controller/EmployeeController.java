@@ -68,4 +68,8 @@ public class EmployeeController {
     public ResponseEntity<?> getbranch(@RequestParam Long id)  {
         return  new ResponseEntity<>(employeeService.getBranch(id), HttpStatus.OK);
     }
+    @PutMapping("/delete")
+    public ResponseEntity<?> deleteSoft(@RequestParam Long id) throws ResourceNotFoundException {
+        return new ResponseEntity<>(employeeService.deleteSoft(id),HttpStatus.OK);
+    }
 }

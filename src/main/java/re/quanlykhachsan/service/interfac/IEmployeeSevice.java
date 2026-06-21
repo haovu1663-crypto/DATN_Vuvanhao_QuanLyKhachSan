@@ -14,4 +14,5 @@ public interface IEmployeeSevice {
     EmployeeRequest getbyId(Long id) throws ResourceNotFoundException;
     List< EmployeeResponse> get();
     List<EmployeeResponse> getbyName(String name);
+    String deleteSoft(Long id) throws ResourceNotFoundException;
 }

@@ -28,4 +28,6 @@ public class Employee {
     private String password;
     private String role;
     private String workBranch;// chi nhanh làm việc
+
+    private boolean active;
 }

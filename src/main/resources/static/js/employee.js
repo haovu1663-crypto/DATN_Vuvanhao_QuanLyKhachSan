@@ -502,12 +502,28 @@ function eupSubmit() {
 }
 
 function eupDeleteConfirm() {
-    const id   = document.getElementById('eup-id').value;
+    // Lấy ID từ form field hoặc localStorage
+    let id = document.getElementById('eup-id').value;
+    if (!id) {
+        const savedId = localStorage.getItem('editEmployeeId');
+        if (!savedId) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: 'Không tìm thấy ID nhân viên. Vui lòng thử lại.',
+                confirmButtonColor: '#dc2626'
+            });
+            return;
+        }
+        id = savedId;
+    }
+
     const name = document.getElementById('eup-name').value.trim() || 'nhân viên này';
+
     Swal.fire({
         icon: 'warning',
         title: 'Xác nhận xóa',
-        html: `Bạn có chắc muốn xóa nhân viên <b>${name}</b>?<br><span style="font-size:12px;color:#94a3b8">Hành động này không thể hoàn tác.</span>`,
+        html: `Bạn có chắc muốn xóa nhân viên <b>${name}</b>?<br><span style="font-size:12px;color:#94a3b8">Hành động này sẽ khóa tài khoản nhân viên.</span>`,
         showCancelButton: true,
         confirmButtonText: 'Xóa',
         cancelButtonText: 'Hủy',
@@ -515,24 +531,47 @@ function eupDeleteConfirm() {
         cancelButtonColor:  '#64748b',
     }).then(result => {
         if (!result.isConfirmed) return;
+
         const token = localStorage.getItem('accessToken');
-        fetch('/api/v1/employees/' + id, {
-            method: 'DELETE',
+
+        // Gọi API soft delete: PUT /api/v1/employees/delete?id=xxx
+        fetch('/api/v1/employees/delete?id=' + id, {
+            method: 'PUT',
             headers: token ? { Authorization: 'Bearer ' + token } : {}
         })
             .then(async res => {
-                if (!res.ok) throw new Error(await res.text());
+                const body = await res.text();
+                if (!res.ok) {
+                    try {
+                        const json = JSON.parse(body);
+                        throw new Error(json.message || json.msg || body);
+                    } catch (_) {
+                        throw new Error(body || 'Lỗi ' + res.status);
+                    }
+                }
+                return body;
+            })
+            .then(() => {
                 Swal.fire({
-                    icon: 'success', title: 'Đã xóa!',
-                    text: name + ' đã được xóa khỏi hệ thống.',
-                    confirmButtonColor: '#0f1c35', timer: 2000, timerProgressBar: true
+                    icon: 'success',
+                    title: 'Đã xóa!',
+                    text: name + ' đã được khóa khỏi hệ thống.',
+                    confirmButtonColor: '#0f1c35',
+                    timer: 2000,
+                    timerProgressBar: true
                 }).then(() => {
+                    localStorage.removeItem('editEmployeeId');
                     switchToView('manage-employee');
                     empLoadList();
                 });
             })
             .catch(err => {
-                Swal.fire({ icon: 'error', title: 'Xóa thất bại', text: err.message, confirmButtonColor: '#dc2626' });
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Xóa thất bại',
+                    text: err.message || 'Có lỗi xảy ra, vui lòng thử lại.',
+                    confirmButtonColor: '#dc2626'
+                });
             });
     });
 }
