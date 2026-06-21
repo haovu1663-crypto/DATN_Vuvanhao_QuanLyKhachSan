@@ -423,3 +423,124 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 });
+// =====================================================
+// DỊCH VỤ KHÁCH SẠN (sv-*)
+// Dữ liệu lấy từ GET /api/v1/services -> List<ListProduct>
+// (id, type, name, images, price)
+// =====================================================
+
+let _svAllProducts = null; // cache dữ liệu ListProduct
+let _svCurrentTab   = 'food';
+
+// Bỏ dấu tiếng Việt để so khớp "type" linh hoạt (không phân biệt có dấu/không dấu/hoa-thường)
+function svNormalize(str) {
+    return (str || '')
+        .toString()
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .trim();
+}
+
+// Phân loại 1 sản phẩm thuộc tab "food" (ăn uống) hay "laundry" (giặt ủi)
+// dựa trên field "type" trả về từ ListProduct.java.
+// Hỗ trợ cả tiếng Việt có dấu/không dấu và tiếng Anh để khớp nhiều cách đặt tên type ở backend.
+function svClassifyType(type) {
+    const t = svNormalize(type);
+    if (t.includes('an uong') || t.includes('food') || t.includes('eat') || t.includes('dining')) return 'food';
+    if (t.includes('giat') || t.includes('laundry') || t.includes('wash')) return 'laundry';
+    return null;
+}
+
+// ----- Mở modal -----
+function openServiceModal() {
+    document.getElementById('sv-backdrop').classList.add('show');
+    document.body.style.overflow = 'hidden';
+    if (!_svAllProducts) {
+        svLoadProducts();
+    } else {
+        svRenderTab(_svCurrentTab);
+    }
+}
+
+// ----- Đóng modal -----
+function closeServiceModal() {
+    document.getElementById('sv-backdrop').classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+// ----- Click ra ngoài drawer để đóng -----
+function handleSVBackdropClick(e) {
+    if (e.target.id === 'sv-backdrop') closeServiceModal();
+}
+
+// ----- Chuyển tab -----
+function switchTabSV(tab, btn) {
+    if (_svCurrentTab === tab) return;
+    _svCurrentTab = tab;
+    document.querySelectorAll('.sv-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    svRenderTab(tab);
+}
+
+// ----- Gọi API lấy danh sách dịch vụ -----
+async function svLoadProducts() {
+    const body = document.getElementById('sv-drawerBody');
+    body.innerHTML = `<div class="sv-state-box">
+        <div class="sv-spinner"></div>
+        <div class="sv-state-text">Đang tải dữ liệu...</div>
+    </div>`;
+    try {
+        const token = localStorage.getItem('accessToken');
+        const res = await fetch('/api/v1/services', {
+            headers: token ? { Authorization: 'Bearer ' + token } : {}
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const json = await res.json();
+        // ListProduct[] trả về trực tiếp (không bọc ApiResponse) theo ServiceController.get()
+        _svAllProducts = Array.isArray(json) ? json : (json.data || []);
+        svRenderTab(_svCurrentTab);
+    } catch (err) {
+        body.innerHTML = `<div class="sv-state-box">
+            <div class="sv-state-icon">⚠️</div>
+            <div class="sv-state-text">Không thể tải dịch vụ — ${err.message}</div>
+        </div>`;
+    }
+}
+
+function svFormatPrice(price) {
+    const n = Number(price) || 0;
+    return n.toLocaleString('vi-VN') + ' đ';
+}
+
+// ----- Render danh sách dịch vụ theo tab -----
+function svRenderTab(tab) {
+    const body = document.getElementById('sv-drawerBody');
+    if (!_svAllProducts) return;
+
+    const items = _svAllProducts.filter(p => svClassifyType(p.type) === tab);
+
+    if (!items.length) {
+        const label = tab === 'food' ? 'ăn uống' : 'giặt ủi';
+        body.innerHTML = `<div class="sv-state-box">
+            <div class="sv-state-icon">🍽️</div>
+            <div class="sv-state-text">Chưa có dịch vụ ${label} nào.</div>
+        </div>`;
+        return;
+    }
+
+    body.innerHTML = `<div class="sv-product-grid">
+        ${items.map((p, idx) => {
+        const img = (p.images && p.images.length) ? p.images[0] : '';
+        return `
+            <div class="sv-product-card" style="animation-delay:${idx * 0.04}s">
+                <div class="sv-product-thumb">
+                    ${img ? `<img src="${img}" alt="${p.name || ''}" loading="lazy">` : `<div class="sv-thumb-fallback">🛎️</div>`}
+                </div>
+                <div class="sv-product-info">
+                    <div class="sv-product-name">${p.name || 'Dịch vụ'}</div>
+                    <div class="sv-product-price">${svFormatPrice(p.price)}</div>
+                </div>
+            </div>`;
+    }).join('')}
+    </div>`;
+}

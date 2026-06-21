@@ -171,6 +171,7 @@
                 <button class="menu-item" onclick="menuAction('dat-phong')"><span class="menu-icon">🛏️</span>Đặt phòng</button>
                 <button class="menu-item" onclick="menuAction('lich-su')"><span class="menu-icon">🕐</span>Lịch sử đặt phòng</button>
                 <button class="menu-item" onclick="menuAction('yeu-thich')"><span class="menu-icon">❤️</span>Yêu thích</button>
+                <button class="menu-item" onclick="openServiceModal()"><span class="menu-icon">🛎️</span>Dịch vụ</button>
                 <hr class="menu-divider">
                 <div class="menu-section-title">Quản lý</div>
                 <button class="menu-item" id="menu-quan-ly-phong" onclick="menuAction('quan-ly-phong')"><span class="menu-icon">🏨</span>Quản lý phòng</button>
@@ -1046,7 +1047,37 @@
     </div>
 </div>
 
-<!-- ===== FOOTER STAYVIET ===== -->
+<!-- ===== MODAL DỊCH VỤ (sv-*) ===== -->
+<div id="sv-backdrop" onclick="handleSVBackdropClick(event)">
+    <div class="sv-drawer">
+
+        <div class="sv-drawer-header">
+            <div class="sv-header-top">
+                <div>
+                    <div class="sv-header-title">Dịch Vụ Khách Sạn</div>
+                    <div class="sv-header-subtitle">Tiện ích bổ sung dành cho khách lưu trú</div>
+                </div>
+                <button class="sv-close-btn" onclick="closeServiceModal()">✕</button>
+            </div>
+            <div class="sv-tabs">
+                <button class="sv-tab-btn active" data-tab="food" onclick="switchTabSV('food', this)">
+                    <span class="sv-tab-dot"></span>Dịch Vụ Ăn Uống
+                </button>
+                <button class="sv-tab-btn" data-tab="laundry" onclick="switchTabSV('laundry', this)">
+                    <span class="sv-tab-dot"></span>Dịch Vụ Giặt Ủi
+                </button>
+            </div>
+        </div>
+
+        <div class="sv-drawer-body" id="sv-drawerBody">
+            <div class="sv-state-box">
+                <div class="sv-spinner"></div>
+                <div class="sv-state-text">Đang tải dữ liệu...</div>
+            </div>
+        </div>
+
+    </div>
+</div>
 <!-- Thêm vào cuối <body>, trước </body> -->
 <!-- Đảm bảo đã link footer.css trong <head>:
      <link rel="stylesheet" href="/footer.css">

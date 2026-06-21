@@ -110,6 +110,7 @@ public class SecurityConfig {
                                         .requestMatchers("/api/email/mk").permitAll()
                                         //lịch sử đặt phòng
                                         .requestMatchers("/api/v1/booking/**").permitAll()
+                                        .requestMatchers("/api/v1/services").permitAll()
                                         // service
                                         .requestMatchers("/api/v1/services/**").permitAll()
                                         //

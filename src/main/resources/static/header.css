@@ -1713,3 +1713,189 @@ header {
 .fp-msg.ok  { display: block; background: #dcfce7; color: #166534; }
 .fp-msg.err { display: block; background: #fee2e2; color: #991b1b; }
 .fp-msg.info{ display: block; background: #dbeafe; color: #1e40af; }
+/* ===================================================
+   MODAL DỊCH VỤ  –  sv-*  (đồng bộ phong cách bh-*)
+   =================================================== */
+#sv-backdrop {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    animation: bhFadeIn 0.3s ease;
+}
+#sv-backdrop.show { display: flex; }
+
+.sv-drawer {
+    background: #1A1815;
+    border: 1px solid rgba(201,169,110,0.2);
+    border-radius: 4px;
+    width: 100%;
+    max-width: 860px;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    animation: bhSlideUp 0.35s cubic-bezier(0.16,1,0.3,1);
+    overflow: hidden;
+}
+
+.sv-drawer-header {
+    padding: 28px 32px 0;
+    border-bottom: 1px solid rgba(201,169,110,0.2);
+    flex-shrink: 0;
+}
+.sv-header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+.sv-header-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 600;
+    color: #E8D5B0;
+    letter-spacing: 0.02em;
+}
+.sv-header-subtitle {
+    font-size: 12px;
+    color: #8C8880;
+    margin-top: 4px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.sv-close-btn {
+    background: none;
+    border: 1px solid rgba(201,169,110,0.2);
+    color: #8C8880;
+    width: 34px; height: 34px;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+.sv-close-btn:hover { border-color: #C9A96E; color: #C9A96E; }
+
+/* Tabs */
+.sv-tabs { display: flex; gap: 0; }
+.sv-tab-btn {
+    background: none;
+    border: none;
+    color: #8C8880;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 14px 24px;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s;
+    display: flex; align-items: center; gap: 8px;
+}
+.sv-tab-btn::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 2px;
+    background: #C9A96E;
+    transform: scaleX(0);
+    transition: transform 0.25s ease;
+}
+.sv-tab-btn:hover { color: #E8E4DC; }
+.sv-tab-btn.active { color: #C9A96E; }
+.sv-tab-btn.active::after { transform: scaleX(1); }
+
+.sv-tab-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.sv-tab-btn[data-tab="food"]    .sv-tab-dot { background: #E07A5F; }
+.sv-tab-btn[data-tab="laundry"] .sv-tab-dot { background: #4CAF7D; }
+
+/* Body */
+.sv-drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 32px;
+}
+.sv-drawer-body::-webkit-scrollbar { width: 4px; }
+.sv-drawer-body::-webkit-scrollbar-track { background: transparent; }
+.sv-drawer-body::-webkit-scrollbar-thumb { background: rgba(201,169,110,0.2); border-radius: 2px; }
+
+/* Loading / empty / error */
+.sv-state-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+    gap: 12px;
+    color: #8C8880;
+}
+.sv-state-icon { font-size: 36px; opacity: 0.5; }
+.sv-state-text { font-size: 13px; letter-spacing: 0.04em; }
+
+.sv-spinner {
+    width: 28px; height: 28px;
+    border: 2px solid rgba(201,169,110,0.2);
+    border-top-color: #C9A96E;
+    border-radius: 50%;
+    animation: bhSpin 0.7s linear infinite;
+}
+
+/* Grid sản phẩm dịch vụ */
+.sv-product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+}
+.sv-product-card {
+    background: #252320;
+    border: 1px solid rgba(201,169,110,0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+    animation: bhCardIn 0.3s ease both;
+}
+.sv-product-card:hover {
+    border-color: rgba(201,169,110,0.45);
+    transform: translateY(-2px);
+}
+.sv-product-thumb {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: #1A1815;
+    overflow: hidden;
+}
+.sv-product-thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.sv-thumb-fallback {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    color: rgba(201,169,110,0.4);
+}
+.sv-product-info { padding: 12px 14px 16px; }
+.sv-product-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #E8E4DC;
+    margin-bottom: 6px;
+    line-height: 1.35;
+}
+.sv-product-price {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #C9A96E;
+}

@@ -55,38 +55,34 @@ body {
 
 #sbToggleBtn {
     position: fixed;
-    top: 20px;
-    left: 20px;
+    top: 16px;
+    left: 18px;
     z-index: 1100;
-    width: 44px;
-    height: 44px;
-    border-radius: 14px;
-    border: 1px solid rgba(226, 232, 240, 0.9);
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(8px);
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12), 0 1px 3px rgba(15, 23, 42, 0.08);
+    box-shadow: none;
     transition: left .32s cubic-bezier(.4,0,.2,1),
     top .32s cubic-bezier(.4,0,.2,1),
-    background .25s ease,
-    border-color .25s ease,
-    box-shadow .25s ease,
+    background .2s ease,
     transform .15s ease;
 }
 #sbToggleBtn:hover {
-    border-color: rgba(59, 130, 246, 0.45);
-    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.18), 0 1px 3px rgba(15, 23, 42, 0.08);
+    background: rgba(100, 116, 139, 0.10); /* slate-500 @10% — hoà nhẹ vào header, không nổi cục */
 }
-#sbToggleBtn:active { transform: scale(0.93); }
+#sbToggleBtn:active { transform: scale(0.92); }
 
 #sbToggleBtn .sb-bars {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 5px;
+    gap: 4.5px;
     width: 18px;
     height: 14px;
     position: relative;
@@ -96,7 +92,7 @@ body {
     width: 100%;
     height: 2px;
     border-radius: 2px;
-    background: #334155;
+    background: #475569; /* slate-600 - nhẹ và trung tính hơn đen kịt */
     transition: transform .28s cubic-bezier(.4,0,.2,1), opacity .2s ease,
     width .2s ease, background .25s ease;
 }
@@ -106,6 +102,7 @@ body {
 #sbToggleBtn:hover .sb-bar:nth-child(2) { width: 100%; }
 
 /* ---- Khi sidebar ĐANG MỞ: nút nằm NGAY TRONG header sidebar,
+
         thẳng hàng với logo "GrandHotel", màu hoà cùng nền tối ---- */
 body.sb-open #sbToggleBtn {
     top: 28px;            /* thẳng hàng theo chiều cao với khối logo */
@@ -140,8 +137,8 @@ body:not(.sb-open) header[class*="bg-white/80 backdrop-blur-md"] > div:first-chi
 }
 
 @media (max-width: 768px) {
-    body.sb-open #sbToggleBtn { left: 20px; top: 20px; background: rgba(255,255,255,0.92); box-shadow: 0 4px 16px rgba(15,23,42,0.12); }
-    body.sb-open #sbToggleBtn .sb-bar { background:#334155; }
+    body.sb-open #sbToggleBtn { left: 18px; top: 18px; background: transparent; box-shadow: none; }
+    body.sb-open #sbToggleBtn .sb-bar { background:#e2e8f0; }
     #appSidebar { position: fixed; top: 0; bottom: 0; left: 0; z-index: 1050; }
     #appSidebar:not(.sb-collapsed) {
         box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.45);
