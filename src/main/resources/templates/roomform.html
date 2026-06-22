@@ -1252,6 +1252,19 @@
                        oninput="empSearchFilter()"
                        class="pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 outline-none focus:border-blue-400 focus:bg-white transition-all w-56">
             </div>
+            <!-- Combobox lọc chi nhánh -->
+            <div class="relative">
+                <i class="fas fa-map-marker-alt absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none"></i>
+                <select id="emp-branch-filter" onchange="empBranchFilter()"
+                        class="pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 outline-none focus:border-blue-400 focus:bg-white transition-all appearance-none cursor-pointer font-medium">
+                    <option value="">Tất cả chi nhánh</option>
+                    <option value="Số 1 đường Nguyễn Chí Thanh, Hà Nội">Số 1 - Nguyễn Chí Thanh, HN</option>
+                    <option value="Số 2 Lê Đại Hành, Hà Nội">Số 2 - Lê Đại Hành, HN</option>
+                    <option value="Số 3 đường Lê Lợi, Ninh Bình">Số 3 - Lê Lợi, Ninh Bình</option>
+                    <option value="Số 4 Trần Quốc Nghiễn, Hạ Long">Số 4 - Trần Quốc Nghiễn, HN</option>
+                </select>
+                <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+            </div>
             <button onclick="switchToView('add-employee')"
                     class="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-sm transition-all">
                 <i class="fas fa-user-plus"></i> Add Employee

@@ -90,7 +90,13 @@ public class EmployeeService implements IEmployeeSevice {
     @Override
     public List<EmployeeResponse> get() {
         List<Employee> employees = employeeRepository.findByActive(true);
-        return employees.stream().map(en ->modelMapper.map(en,EmployeeResponse.class)).collect(Collectors.toList());
+        return employees.stream().map(en -> modelMapper.map(en, EmployeeResponse.class)).collect(Collectors.toList());
+    }
+
+    // Lấy nhân viên theo chi nhánh cụ thể
+    public List<EmployeeResponse> getByBranch(String branch) {
+        List<Employee> employees = employeeRepository.findByActiveTrueAndWorkBranch(branch);
+        return employees.stream().map(en -> modelMapper.map(en, EmployeeResponse.class)).collect(Collectors.toList());
     }
 
     @Override

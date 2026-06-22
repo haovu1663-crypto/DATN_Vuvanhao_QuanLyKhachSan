@@ -125,7 +125,8 @@ document.addEventListener('DOMContentLoaded', function () {
 /* ============================================================
    MANAGE EMPLOYEES — LIST VIEW
 ============================================================ */
-let _empAllData = []; // cache toàn bộ danh sách
+let _empAllData  = [];   // toàn bộ dữ liệu từ API
+let _empBranch   = '';   // chi nhánh đang lọc
 
 function empLoadList() {
     const tbody = document.getElementById('emp-table-body');
@@ -142,7 +143,11 @@ function empLoadList() {
         </tr>`;
     empty?.classList.add('hidden');
 
-    fetch('/api/v1/employees', {})
+    const branch = _empBranch || '';
+    const url = branch
+        ? `/api/v1/employees?branch=${encodeURIComponent(branch)}`
+        : '/api/v1/employees';
+    fetch(url, {})
         .then(async res => {
             if (!res.ok) throw new Error('Lỗi ' + res.status);
             return res.json();
@@ -231,9 +236,21 @@ function empUpdateStats(list) {
 }
 
 function empSearchFilter() {
+    empApplyFilters();
+}
+
+// Gọi khi đổi combobox chi nhánh — load lại từ API
+function empBranchFilter() {
+    _empBranch = document.getElementById('emp-branch-filter')?.value || '';
+    empLoadList();
+}
+
+// Hàm lọc tên client-side (trên dữ liệu đã load theo branch)
+function empApplyFilters() {
     const keyword = (document.getElementById('emp-search-input')?.value || '').toLowerCase().trim();
     if (!keyword) {
         empRenderTable(_empAllData);
+        empUpdateStats(_empAllData);
         return;
     }
     const filtered = _empAllData.filter(e =>

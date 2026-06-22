@@ -21,4 +21,7 @@ public interface EmployeeRepository extends JpaRepository<Employee,Long> {
     boolean existsByUserName(String userName);
     Optional<Employee> findByUserName(String username);
     List<Employee> findByActive(boolean active);
+
+    // Lọc theo chi nhánh (active = true)
+    List<Employee> findByActiveTrueAndWorkBranch(String workBranch);
 }

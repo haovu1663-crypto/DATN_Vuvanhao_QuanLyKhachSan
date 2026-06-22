@@ -23,13 +23,17 @@ import java.util.List;
 public class EmployeeController {
     private final EmployeeService employeeService;
     @GetMapping
-    public ResponseEntity<?> get() {
+    public ResponseEntity<?> get(
+            @RequestParam(required = false, defaultValue = "") String branch) {
+        List<EmployeeResponse> data = (branch == null || branch.isBlank())
+                ? employeeService.get()
+                : employeeService.getByBranch(branch);
         ApiResponse<List<EmployeeResponse>> apiResponse = new ApiResponse<>(
-                "Get Employee","400",employeeService.get()
+                "Get Employee", "200", data
         );
-        return  new ResponseEntity<>(apiResponse,HttpStatus.OK);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     } @GetMapping("/name")
-    public ResponseEntity<?> get(@RequestParam String name) {
+    public ResponseEntity<?> fget(@RequestParam String name) {
         ApiResponse<List<EmployeeResponse>> apiResponse = new ApiResponse<>(
                 "Get Employee","400",employeeService.getbyName(name)
         );
