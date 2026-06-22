@@ -2221,6 +2221,19 @@
                        class="w-24 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-blue-400 transition-all text-center">
             </div>
 
+            <!-- Combobox chi nhánh -->
+            <div class="flex items-center gap-2">
+                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Chi nhánh</label>
+                <select id="rv-branch-select" onchange="rvLoad()"
+                        class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 outline-none focus:border-blue-400 transition-all cursor-pointer">
+                    <option value="">Tất cả</option>
+                    <option value="Số 1 đường Nguyễn Chí Thanh, Hà Nội">Số 1 - Nguyễn Chí Thanh, HN</option>
+                    <option value="Số 2 Lê Đại Hành, Hà Nội">Số 2 - Lê Đại Hành, HN</option>
+                    <option value="Số 3 đường Lê Lợi, Ninh Bình">Số 3 - Lê Lợi, Ninh Bình</option>
+                    <option value="Số 4 Trần Quốc Nghiễn, Hạ Long">Số 4 - Trần Quốc Nghiễn, HN</option>
+                </select>
+            </div>
+
             <!-- Input khoảng ngày (chỉ hiện khi xem theo ngày) -->
             <div id="rv-date-range-wrap" class="hidden flex items-center gap-2">
                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Từ</label>

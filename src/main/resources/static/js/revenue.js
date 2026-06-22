@@ -54,19 +54,21 @@ async function rvLoad() {
         const token = localStorage.getItem('accessToken');
         const headers = token ? { Authorization: 'Bearer ' + token } : {};
         const year    = document.getElementById('rv-input-year')?.value || new Date().getFullYear();
+        const branch  = document.getElementById('rv-branch-select')?.value || '';
+        const branchParam = branch ? `&branch=${encodeURIComponent(branch)}` : '';
 
         let url, urlChart;
         if (_rvTab === 'day') {
-            url      = `/api/v1/revenue/by-day`;        // bảng - DESC
-            urlChart = `/api/v1/revenue/by-day-chart`;  // chart - ASC
+            url      = `/api/v1/revenue/by-day?${branchParam}`;        // bảng - DESC
+            urlChart = `/api/v1/revenue/by-day-chart?${branchParam}`;  // chart - ASC
         } else if (_rvTab === 'month') {
-            url      = `/api/v1/revenue/by-month?year=${year}`;
+            url      = `/api/v1/revenue/by-month?year=${year}${branchParam}`;
             urlChart = url;
         } else if (_rvTab === 'quarter') {
-            url      = `/api/v1/revenue/by-quarter?year=${year}`;
+            url      = `/api/v1/revenue/by-quarter?year=${year}${branchParam}`;
             urlChart = url;
         } else {
-            url      = `/api/v1/revenue/by-year`;
+            url      = `/api/v1/revenue/by-year?${branchParam}`;
             urlChart = url;
         }
 
@@ -347,10 +349,13 @@ async function rvExportExcel() {
         const dateFrom = document.getElementById('rv-date-from')?.value || '';
         const dateTo = document.getElementById('rv-date-to')?.value || '';
 
+        const branch = document.getElementById('rv-branch-select')?.value || '';
+
         // Xây dựng URL
         let url = `/api/v1/revenue/export-excel?type=${type}&year=${year}`;
         if (dateFrom) url += `&dateFrom=${dateFrom}`;
-        if (dateTo) url += `&dateTo=${dateTo}`;
+        if (dateTo)   url += `&dateTo=${dateTo}`;
+        if (branch)   url += `&branch=${encodeURIComponent(branch)}`;
 
         // Gọi API để lấy file
         const response = await fetch(url, { headers });
@@ -434,8 +439,11 @@ async function rvExportAllExcel() {
         const headers = token ? { Authorization: 'Bearer ' + token } : {};
         const year = document.getElementById('rv-input-year')?.value || new Date().getFullYear();
 
+        const branch = document.getElementById('rv-branch-select')?.value || '';
+
         // Xuất file chứa tất cả loại thống kê
-        const url = `/api/v1/revenue/export-excel-all?year=${year}`;
+        let url = `/api/v1/revenue/export-excel-all?year=${year}`;
+        if (branch) url += `&branch=${encodeURIComponent(branch)}`;
         const response = await fetch(url, { headers });
 
         if (!response.ok) {

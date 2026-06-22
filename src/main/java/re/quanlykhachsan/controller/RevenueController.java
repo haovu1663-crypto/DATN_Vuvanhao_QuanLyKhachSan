@@ -25,60 +25,54 @@ public class RevenueController {
     private final RevenueService revenueService;
     private final RevenueExcelService revenueExcelService;
 
-
     // ==================== REVENUE STATISTICS ====================
 
-    // Dùng cho biểu đồ - ngày cũ trước (ASC)
     @GetMapping("/by-day-chart")
-    public ResponseEntity<List<RevenueStatDTO>> byDayChart() {
-        return ResponseEntity.ok(revenueService.getRevenueByDayAsc());
+    public ResponseEntity<List<RevenueStatDTO>> byDayChart(
+            @RequestParam(required = false, defaultValue = "") String branch) {
+        return ResponseEntity.ok(revenueService.getRevenueByDayAsc(branch));
     }
 
-    // Dùng cho bảng - ngày mới trước (DESC)
     @GetMapping("/by-day")
-    public ResponseEntity<List<RevenueStatDTO>> byDay() {
-        return ResponseEntity.ok(revenueService.getRevenueByDay());
+    public ResponseEntity<List<RevenueStatDTO>> byDay(
+            @RequestParam(required = false, defaultValue = "") String branch) {
+        return ResponseEntity.ok(revenueService.getRevenueByDay(branch));
     }
 
     @GetMapping("/by-month")
-    public ResponseEntity<List<RevenueStatDTO>> byMonth(@RequestParam int year) {
-        return ResponseEntity.ok(revenueService.getRevenueByMonth(year));
+    public ResponseEntity<List<RevenueStatDTO>> byMonth(
+            @RequestParam int year,
+            @RequestParam(required = false, defaultValue = "") String branch) {
+        return ResponseEntity.ok(revenueService.getRevenueByMonth(year, branch));
     }
 
     @GetMapping("/by-quarter")
-    public ResponseEntity<List<RevenueStatDTO>> byQuarter(@RequestParam int year) {
-        return ResponseEntity.ok(revenueService.getRevenueByQuarter(year));
+    public ResponseEntity<List<RevenueStatDTO>> byQuarter(
+            @RequestParam int year,
+            @RequestParam(required = false, defaultValue = "") String branch) {
+        return ResponseEntity.ok(revenueService.getRevenueByQuarter(year, branch));
     }
 
     @GetMapping("/by-year")
-    public ResponseEntity<List<RevenueStatDTO>> byYear() {
-        return ResponseEntity.ok(revenueService.getRevenueByYear());
+    public ResponseEntity<List<RevenueStatDTO>> byYear(
+            @RequestParam(required = false, defaultValue = "") String branch) {
+        return ResponseEntity.ok(revenueService.getRevenueByYear(branch));
     }
-
 
     // ==================== EXPORT EXCEL ====================
 
-    /**
-     * Xuất dữ liệu thống kê doanh thu ra file Excel theo loại
-     *
-     * @param type     Loại thống kê: day, month, quarter, year
-     * @param year     Năm (bắt buộc cho month, quarter)
-     * @param dateFrom Ngày bắt đầu (cho loại day)
-     * @param dateTo   Ngày kết thúc (cho loại day)
-     */
     @GetMapping("/export-excel")
     public ResponseEntity<Resource> exportExcel(
             @RequestParam String type,
             @RequestParam(defaultValue = "0") int year,
             @RequestParam(required = false) String dateFrom,
-            @RequestParam(required = false) String dateTo
+            @RequestParam(required = false) String dateTo,
+            @RequestParam(required = false, defaultValue = "") String branch
     ) {
         try {
-            if (year == 0) {
-                year = java.time.Year.now().getValue();
-            }
+            if (year == 0) year = java.time.Year.now().getValue();
 
-            String filePath = revenueExcelService.exportRevenue(type, year, dateFrom, dateTo);
+            String filePath = revenueExcelService.exportRevenue(type, year, dateFrom, dateTo, branch);
             File file = new File(filePath);
             Resource resource = new FileSystemResource(file);
 
@@ -94,21 +88,15 @@ public class RevenueController {
         }
     }
 
-    /**
-     * ✅ FIX 2: Thêm endpoint còn thiếu — xuất tất cả loại thống kê vào 1 file Excel (multi-sheet)
-     *
-     * @param year Năm cần xuất (mặc định năm hiện tại)
-     */
     @GetMapping("/export-excel-all")
     public ResponseEntity<Resource> exportExcelAll(
-            @RequestParam(defaultValue = "0") int year
+            @RequestParam(defaultValue = "0") int year,
+            @RequestParam(required = false, defaultValue = "") String branch
     ) {
         try {
-            if (year == 0) {
-                year = java.time.Year.now().getValue();
-            }
+            if (year == 0) year = java.time.Year.now().getValue();
 
-            String filePath = revenueExcelService.exportRevenueAll(year);
+            String filePath = revenueExcelService.exportRevenueAll(year, branch);
             File file = new File(filePath);
             Resource resource = new FileSystemResource(file);
 
@@ -122,9 +110,6 @@ public class RevenueController {
         }
     }
 
-    /**
-     * Kiểm tra trạng thái tạo file
-     */
     @GetMapping("/export-status")
     public ResponseEntity<Map<String, Object>> exportStatus() {
         Map<String, Object> response = new HashMap<>();

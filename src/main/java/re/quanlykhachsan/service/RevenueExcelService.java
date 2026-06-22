@@ -27,21 +27,21 @@ public class RevenueExcelService {
     /**
      * Xuất dữ liệu doanh thu theo loại (day/month/quarter/year)
      */
-    public String exportRevenue(String type, int year, String dateFrom, String dateTo) throws IOException {
+    public String exportRevenue(String type, int year, String dateFrom, String dateTo, String branch) throws IOException {
         List<RevenueStatDTO> data;
 
         switch (type.toLowerCase()) {
             case "day":
-                data = revenueService.getRevenueByDay();
+                data = revenueService.getRevenueByDay(branch);
                 break;
             case "month":
-                data = revenueService.getRevenueByMonth(year);
+                data = revenueService.getRevenueByMonth(year, branch);
                 break;
             case "quarter":
-                data = revenueService.getRevenueByQuarter(year);
+                data = revenueService.getRevenueByQuarter(year, branch);
                 break;
             case "year":
-                data = revenueService.getRevenueByYear();
+                data = revenueService.getRevenueByYear(branch);
                 break;
             default:
                 throw new IllegalArgumentException("Loại thống kê không hợp lệ: " + type);
@@ -59,7 +59,7 @@ public class RevenueExcelService {
     /**
      * Xuất tất cả loại thống kê (ngày, tháng, quý, năm) vào các sheet khác nhau
      */
-    public String exportRevenueAll(int year) throws IOException {
+    public String exportRevenueAll(int year, String branch) throws IOException {
         if (year == 0) {
             year = java.time.Year.now().getValue();
         }
@@ -69,22 +69,22 @@ public class RevenueExcelService {
         // ✅ FIX 3: Dùng try-with-resources
         try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             // ========== SHEET 1: THEO NGÀY ==========
-            List<RevenueStatDTO> dayData = revenueService.getRevenueByDay();
+            List<RevenueStatDTO> dayData = revenueService.getRevenueByDay(branch);
             Sheet daySheet = workbook.createSheet("Theo Ngày");
             populateSheet(daySheet, "day", dayData, year, workbook);
 
             // ========== SHEET 2: THEO THÁNG ==========
-            List<RevenueStatDTO> monthData = revenueService.getRevenueByMonth(year);
+            List<RevenueStatDTO> monthData = revenueService.getRevenueByMonth(year, branch);
             Sheet monthSheet = workbook.createSheet("Theo Tháng");
             populateSheet(monthSheet, "month", monthData, year, workbook);
 
             // ========== SHEET 3: THEO QUÝ ==========
-            List<RevenueStatDTO> quarterData = revenueService.getRevenueByQuarter(year);
+            List<RevenueStatDTO> quarterData = revenueService.getRevenueByQuarter(year, branch);
             Sheet quarterSheet = workbook.createSheet("Theo Quý");
             populateSheet(quarterSheet, "quarter", quarterData, year, workbook);
 
             // ========== SHEET 4: THEO NĂM ==========
-            List<RevenueStatDTO> yearData = revenueService.getRevenueByYear();
+            List<RevenueStatDTO> yearData = revenueService.getRevenueByYear(branch);
             Sheet yearSheet = workbook.createSheet("Theo Năm");
             populateSheet(yearSheet, "year", yearData, year, workbook);
 

@@ -78,4 +78,79 @@ public interface PaymentRespository extends JpaRepository<Payment, Long> {
             "GROUP BY nam ORDER BY nam",
             nativeQuery = true)
     List<Object[]> revenueByYearNative();
+
+    // ===================== THỐNG KÊ DOANH THU THEO CHI NHÁNH =====================
+
+    // Theo ngày ASC – có lọc branch
+    @Query(value = "SELECT p.payment_date::DATE AS ngay, " +
+            "       SUM(p.amount) AS doanh_thu, " +
+            "       COUNT(DISTINCT p.booking_id) AS so_luong_booking " +
+            "FROM payment p " +
+            "JOIN booking b ON b.id = p.booking_id " +
+            "JOIN room r ON r.id = b.room_id " +
+            "WHERE p.status = 'Success' " +
+            "AND b.status_booking = 'CHECKED_OUT' " +
+            "AND (:branch IS NULL OR :branch = '' OR r.work_branch = :branch) " +
+            "GROUP BY p.payment_date::DATE ORDER BY ngay ASC",
+            nativeQuery = true)
+    List<Object[]> revenueByDayNativeAscBranch(@Param("branch") String branch);
+
+    // Theo ngày DESC – có lọc branch
+    @Query(value = "SELECT p.payment_date::DATE AS ngay, " +
+            "       SUM(p.amount) AS doanh_thu, " +
+            "       COUNT(DISTINCT p.booking_id) AS so_luong_booking " +
+            "FROM payment p " +
+            "JOIN booking b ON b.id = p.booking_id " +
+            "JOIN room r ON r.id = b.room_id " +
+            "WHERE p.status = 'Success' " +
+            "AND b.status_booking = 'CHECKED_OUT' " +
+            "AND (:branch IS NULL OR :branch = '' OR r.work_branch = :branch) " +
+            "GROUP BY p.payment_date::DATE ORDER BY ngay DESC",
+            nativeQuery = true)
+    List<Object[]> revenueByDayNativeBranch(@Param("branch") String branch);
+
+    // Theo tháng – có lọc branch
+    @Query(value = "SELECT EXTRACT(MONTH FROM p.payment_date) AS thang, " +
+            "       SUM(p.amount) AS doanh_thu, " +
+            "       COUNT(DISTINCT p.booking_id) AS so_luong_booking " +
+            "FROM payment p " +
+            "JOIN booking b ON b.id = p.booking_id " +
+            "JOIN room r ON r.id = b.room_id " +
+            "WHERE p.status = 'Success' " +
+            "AND b.status_booking = 'CHECKED_OUT' " +
+            "AND EXTRACT(YEAR FROM p.payment_date) = :year " +
+            "AND (:branch IS NULL OR :branch = '' OR r.work_branch = :branch) " +
+            "GROUP BY thang ORDER BY thang",
+            nativeQuery = true)
+    List<Object[]> revenueByMonthInYearNativeBranch(@Param("year") int year, @Param("branch") String branch);
+
+    // Theo quý – có lọc branch
+    @Query(value = "SELECT EXTRACT(QUARTER FROM p.payment_date) AS quy, " +
+            "       SUM(p.amount) AS doanh_thu, " +
+            "       COUNT(DISTINCT p.booking_id) AS so_luong_booking " +
+            "FROM payment p " +
+            "JOIN booking b ON b.id = p.booking_id " +
+            "JOIN room r ON r.id = b.room_id " +
+            "WHERE p.status = 'Success' " +
+            "AND b.status_booking = 'CHECKED_OUT' " +
+            "AND EXTRACT(YEAR FROM p.payment_date) = :year " +
+            "AND (:branch IS NULL OR :branch = '' OR r.work_branch = :branch) " +
+            "GROUP BY quy ORDER BY quy",
+            nativeQuery = true)
+    List<Object[]> revenueByQuarterInYearNativeBranch(@Param("year") int year, @Param("branch") String branch);
+
+    // Theo năm – có lọc branch
+    @Query(value = "SELECT EXTRACT(YEAR FROM p.payment_date) AS nam, " +
+            "       SUM(p.amount) AS doanh_thu, " +
+            "       COUNT(DISTINCT p.booking_id) AS so_luong_booking " +
+            "FROM payment p " +
+            "JOIN booking b ON b.id = p.booking_id " +
+            "JOIN room r ON r.id = b.room_id " +
+            "WHERE p.status = 'Success' " +
+            "AND b.status_booking = 'CHECKED_OUT' " +
+            "AND (:branch IS NULL OR :branch = '' OR r.work_branch = :branch) " +
+            "GROUP BY nam ORDER BY nam",
+            nativeQuery = true)
+    List<Object[]> revenueByYearNativeBranch(@Param("branch") String branch);
+
 }
