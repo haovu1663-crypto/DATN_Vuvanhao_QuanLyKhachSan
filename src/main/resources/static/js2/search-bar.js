@@ -197,6 +197,7 @@ function doSearch() {
     window._searchCheckIn   = fmtDate(dateStart);
     window._searchCheckOut  = fmtDate(dateEnd);
     window._searchCapacity  = capacity;
+    window._currentWorkBranch = workBranch;  // 🔧 FIX: Lưu workBranch để dùng ở detail panel
 
     loadRoomsBySearch(workBranch, capacity, fmtDate(dateStart), fmtDate(dateEnd));
 }

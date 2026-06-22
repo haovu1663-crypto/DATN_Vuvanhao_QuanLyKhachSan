@@ -123,6 +123,8 @@ public class SecurityConfig {
                                         .requestMatchers("/api/v1/roomtypes/frindroomoff").permitAll()
                                         .requestMatchers("/api/v1/roomtypes/frindroomhn").permitAll()
                                         .requestMatchers("/api/v1/roomtypes/**").permitAll()
+                                        //romtypeDetail
+                                        .requestMatchers("/api/v1/roomtypedetail/**").permitAll()
                                         // room
                                         .requestMatchers("/api/v1/rooms").permitAll()
                                         .requestMatchers("/api/v1/rooms/**").permitAll()
@@ -142,6 +144,7 @@ public class SecurityConfig {
                                         .requestMatchers("/api/v1/employees/update/**").hasAuthority("ROLE_MANAGER")
                                         .requestMatchers("/**.css", "/**.js", "/js/**", "/js2/**", "/images/**", "/static/**").permitAll()
                                         .anyRequest().authenticated() // các api khác thì phải xác thực thì ms vào đc(đăng nhập)
+
 
                 )
                 // ✅ đăng ký EntryPoint ở đây

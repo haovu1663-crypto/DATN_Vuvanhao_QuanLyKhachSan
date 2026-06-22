@@ -16,6 +16,17 @@ function openBooking(rt) {
         ? rt.workBranch.trim()
         : document.getElementById('destVal').textContent.trim();
 
+    // 🔧 FIX: Kiểm tra workBranch - nếu rỗng thì báo lỗi
+    if (!workBranch) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Chưa chọn điểm đến',
+            text: 'Vui lòng nhập điểm đến trên thanh tìm kiếm trước khi đặt phòng!',
+            confirmButtonColor: '#1a2744'
+        });
+        return;
+    }
+
     if (!checkIn || !checkOut || !window._searchMode) {
         Swal.fire({ icon: 'warning', title: 'Chưa tìm kiếm', text: 'Vui lòng nhập điểm đến và ngày trên thanh tìm kiếm trước!', confirmButtonColor: '#1a2744' });
         return;
@@ -44,6 +55,7 @@ function openBooking(rt) {
         + '&checkIn='    + checkIn
         + '&checkOut='   + checkOut;
 
+    console.log('[openBooking] URL:', url);
     fetch(url)
         .then(async res => {
             if (!res.ok) throw new Error(await res.text());

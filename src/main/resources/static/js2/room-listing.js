@@ -1,6 +1,6 @@
 // ===== ROOM LISTING - API /api/v1/roomtypes =====
-let allRooms    = [];   // dữ liệu gốc từ API (RoomTypeResponse[])
-let filterTypeId = null; // null = tất cả
+var allRooms    = [];   // dữ liệu gốc từ API (RoomTypeResponse[])
+var filterTypeId = null; // null = tất cả
 
 // ---- Gọi API lấy danh sách loại phòng (mặc định, không lọc) ----
 async function loadRooms() {
@@ -130,6 +130,9 @@ function sortAndRender() {
         countEl.textContent = 'Tìm thấy ' + rooms.length + ' loại phòng' + (filterTypeId ? ' đã chọn' : '');
     }
 
+    // Lưu danh sách đã render vào window để onclick dùng index thay vì truyền JSON string
+    window._roomCards = rooms;
+
     const grid = document.getElementById('room-grid');
     grid.innerHTML = rooms.length ? rooms.map(renderRoomCard).join('') : renderNoMatch();
     grid.style.display = 'flex';
@@ -166,7 +169,11 @@ function renderRoomCard(rt) {
         : '';
 
     // Nút đặt phòng
-    const bookBtn = '<button class="rc-btn-book" onclick="openBooking(' + JSON.stringify(rt).replace(/"/g,"&quot;") + ')">Đặt phòng</button>';
+    // FIX: Dùng index vào window._roomCards thay vì truyền JSON string vào onclick
+    // Tránh lỗi dấu nháy kép phá vỡ HTML attribute onclick="..."
+    const cardIdx  = window._roomCards ? window._roomCards.findIndex(r => r.id === rt.id) : -1;
+    const detailBtn = '<button class="rc-btn-detail" onclick="_openRoomDetailByIdx(' + cardIdx + ')">Chi tiết phòng</button>';
+    const bookBtn   = '<button class="rc-btn-book"   onclick="_openBookingByIdx('   + cardIdx + ')">Đặt phòng</button>';
 
     // Render phần ảnh — carousel với mũi tên nếu có nhiều ảnh
     const hasImg = Array.isArray(rt.images) && rt.images.length > 0;
@@ -208,9 +215,10 @@ function renderRoomCard(rt) {
         '<div style="display:flex;align-items:center;gap:8px;">' +
         '<div class="rc-price" style="background:linear-gradient(135deg,#1a2744,#2d6a9f);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">' + priceDisplay + '</div>' +
         '</div>' +
-        '</div>' +
         '<div class="rc-btn-group">' +
+        detailBtn +
         bookBtn +
+        '</div>' +
         '</div>' +
         '</div>' +
         '</div>' +
@@ -376,11 +384,6 @@ function bkSendOtp() {}
 function bkOtpInput(idx) {}
 function bkOtpKey(e, idx) {}
 
-// ---- Mở modal booking từ card ----
-function openBooking(rt) {
-    showBooking(rt.id, rt.type || ('Loại phòng #' + rt.id), rt.type || 'Phòng', rt.price || 0);
-}
-
 // ---- Hiển thị đúng trạng thái ----
 function showState(state) {
     document.getElementById('room-skeleton').style.display = state === 'skeleton' ? 'flex'  : 'none';
@@ -409,3 +412,17 @@ document.addEventListener('DOMContentLoaded', function () {
     const roomSection = document.getElementById('room-section');
     if (roomSection) roomSection.style.display = 'none';
 });
+
+// ---- Helper: gọi openRoomDetail/openBooking bằng index (tránh escape JSON trong onclick) ----
+function _openRoomDetailByIdx(idx) {
+    if (!window._roomCards || idx < 0 || idx >= window._roomCards.length) return;
+    var rt = window._roomCards[idx];
+    window._currentWorkBranch = rt.workBranch || '';
+    openRoomDetail(rt.id, rt.type || '');
+}
+
+function _openBookingByIdx(idx) {
+    if (!window._roomCards || idx < 0 || idx >= window._roomCards.length) return;
+    var rt = window._roomCards[idx];
+    openBooking(rt);
+}
