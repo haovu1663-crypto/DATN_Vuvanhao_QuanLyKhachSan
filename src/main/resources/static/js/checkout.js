@@ -69,7 +69,7 @@ function coRenderTable(bookings) {
     countEl.textContent = bookings.length + ' booking';
 
     if (!bookings.length) {
-        tbody.innerHTML = `<tr><td colspan="7" class="px-5 py-12 text-center text-slate-400">
+        tbody.innerHTML = `<tr><td colspan="8" class="px-5 py-12 text-center text-slate-400">
             <div style="font-size:2rem;margin-bottom:8px;">🏨</div>
             <span class="text-sm font-medium">Không có booking nào cần Check Out.</span>
         </td></tr>`;
@@ -79,8 +79,10 @@ function coRenderTable(bookings) {
     const today = new Date().toISOString().slice(0, 10);
 
     tbody.innerHTML = bookings.map((b, idx) => {
-        const checkinDate = coFormatDateTime(b.checkIntDate);
+        const checkinDate  = coFormatDate(b.checkIntDate);
+        const checkoutDate = coFormatDate(b.enventCheckOutDate);
 
+        // Badge cho cột Check In (lâu ngày / hôm nay)
         let dateBadge = '';
         if (b.checkIntDate) {
             const d = String(b.checkIntDate).slice(0, 10);
@@ -88,6 +90,17 @@ function coRenderTable(bookings) {
                 dateBadge = `<span style="display:inline-block;margin-left:6px;padding:1px 7px;border-radius:20px;font-size:10px;font-weight:700;background:#fee2e2;color:#dc2626;">Lâu ngày</span>`;
             } else if (d === today) {
                 dateBadge = `<span style="display:inline-block;margin-left:6px;padding:1px 7px;border-radius:20px;font-size:10px;font-weight:700;background:#d1fae5;color:#065f46;">Hôm nay</span>`;
+            }
+        }
+
+        // Badge cho cột Check Out dự kiến (quá hạn / hôm nay / sắp tới)
+        let coBadge = '';
+        if (b.enventCheckOutDate) {
+            const coDay = String(b.enventCheckOutDate).slice(0, 10);
+            if (coDay < today) {
+                coBadge = `<span style="display:inline-block;margin-left:6px;padding:1px 7px;border-radius:20px;font-size:10px;font-weight:700;background:#fee2e2;color:#dc2626;">⚠ Quá hạn</span>`;
+            } else if (coDay === today) {
+                coBadge = `<span style="display:inline-block;margin-left:6px;padding:1px 7px;border-radius:20px;font-size:10px;font-weight:700;background:#fef3c7;color:#b45309;">Hôm nay</span>`;
             }
         }
 
@@ -126,6 +139,9 @@ function coRenderTable(bookings) {
             <td class="px-5 py-4 text-slate-600 font-medium text-sm">
                 ${checkinDate}${dateBadge}
             </td>
+            <td class="px-5 py-4 text-sm font-medium" style="color:#0f172a;">
+                ${checkoutDate}${coBadge}
+            </td>
             <td class="px-5 py-4 text-center">
                 <button
                     id="co-btn-${b.bookingId}"
@@ -142,6 +158,7 @@ function coRenderTable(bookings) {
 // =====================================================================
 // FORMAT
 // =====================================================================
+// Format LocalDateTime / array → "dd/MM/yyyy HH:mm"  (dùng cho checkIn)
 function coFormatDateTime(val) {
     if (!val) return '<span style="color:#cbd5e1;">—</span>';
     try {
@@ -152,6 +169,20 @@ function coFormatDateTime(val) {
             d = new Date(String(val));
         }
         return d.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } catch (_) { return val; }
+}
+
+// Format LocalDate / array → "dd/MM/yyyy"  (dùng cho checkout dự kiến)
+function coFormatDate(val) {
+    if (!val) return '<span style="color:#cbd5e1;">—</span>';
+    try {
+        let d;
+        if (Array.isArray(val)) {
+            d = new Date(val[0], val[1] - 1, val[2]);
+        } else {
+            d = new Date(String(val));
+        }
+        return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
     } catch (_) { return val; }
 }
 

@@ -85,4 +85,6 @@ public class BookingController {
     public ResponseEntity<?> cancelbooking(@RequestParam Long bookingId) throws ResourceNotFoundException {
         return new  ResponseEntity<>(bookingService.cancelBooking(bookingId),HttpStatus.OK);
     }
+    // xem phòng đã được đặt trong tương lại
+
 }
