@@ -83,4 +83,10 @@ public interface BookingRespository extends JpaRepository<Booking,Long> {
             @Param("roomName") String roomName,
             @Param("workBranch") String workBranch
     );
+    // lấy ra infomation khách hàng đang ỏ
+    @Query("SELECT b FROM Booking b " +
+            "WHERE b.room.workBranch = :workBranch " +
+            "AND b.statusBooking = re.quanlykhachsan.entity.StatusBooking.CHECKED_IN")
+    List<Booking> findByWorkBranchAndCheckedIn(@Param("workBranch") String workBranch);
+
 }

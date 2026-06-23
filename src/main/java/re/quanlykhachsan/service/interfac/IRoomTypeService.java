@@ -1,6 +1,7 @@
 package re.quanlykhachsan.service.interfac;
 
 import re.quanlykhachsan.dto.request.RoomTypeRequest;
+import re.quanlykhachsan.dto.response.InfoRoomTypeRespone;
 import re.quanlykhachsan.dto.response.RoomTypeResponse;
 import re.quanlykhachsan.exception.DataConfickException;
 import re.quanlykhachsan.exception.ResourceNotFoundException;
@@ -18,4 +19,6 @@ public interface IRoomTypeService {
     RoomTypeResponse getRoomTypeById(Long id) throws ResourceNotFoundException, IOException;
     List<RoomTypeResponse> getListRoomTypeByWorkBrankAndCapacityAndDateBookingOff(Integer capacity, String workBranch, LocalDate checIn , LocalDate checOut) throws IOException;
     String deleteRoomTypeSoft(Long id) throws ResourceNotFoundException, IOException;
+    // list room type info
+    List<InfoRoomTypeRespone> listInfoRoomType();
 }

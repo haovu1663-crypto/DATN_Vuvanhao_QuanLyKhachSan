@@ -91,4 +91,9 @@ public class BookingController {
     public ResponseEntity<List<InfoBookedRespone>> getInfo(@RequestParam String workBranch,@RequestParam String roomName) throws ResourceNotFoundException {
         return new ResponseEntity<>(bookingService.InfoBooked(workBranch,roomName),HttpStatus.OK);
     }
+    // lấy infomation khách hàng đang ở
+    @GetMapping("/info/cutomer")
+    public ResponseEntity<?> getInfoCustomer(@RequestParam String workBranch) {
+        return new ResponseEntity<>(bookingService.InfoCutomer(workBranch),HttpStatus.OK);
+    }
 }

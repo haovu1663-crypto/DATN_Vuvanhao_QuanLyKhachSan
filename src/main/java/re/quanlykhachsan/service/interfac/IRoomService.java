@@ -2,6 +2,7 @@ package re.quanlykhachsan.service.interfac;
 
 import org.springframework.data.repository.query.Param;
 import re.quanlykhachsan.dto.request.RoomRequest;
+import re.quanlykhachsan.dto.response.InfoRoomRespone;
 import re.quanlykhachsan.dto.response.RoomRespone;
 import re.quanlykhachsan.dto.response.RoomRestatusRespone;
 import re.quanlykhachsan.dto.response.SoPhongRequest;
@@ -32,4 +33,6 @@ public interface IRoomService {
     List<SoPhongRequest> getListSoPhong(String workBranch, Long roomtypeId, LocalDate checkIn, LocalDate checkOut);
     List<SoPhongRequest> getListSoPhongBookingOff(String workBranch, Long roomtypeId, int capacity, LocalDate checkIn, LocalDate checkOut);
     String deleteSort(Long id) throws ResourceNotFoundException, DataConfickException;
+    List<InfoRoomRespone>ListRoom();
+    List<InfoRoomRespone>ListRoomWorkb(String workBranch);
 }

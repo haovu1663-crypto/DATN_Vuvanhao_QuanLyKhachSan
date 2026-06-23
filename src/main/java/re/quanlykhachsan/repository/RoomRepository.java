@@ -104,4 +104,6 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
 
     // tìm kiếm room còn hoạt đongp
     Room findByIdAndActiveTrue(Long id);
+    // tìm kiếm rôm trong infomation
+    List<Room> findByWorkBranch(String workBranch);
 }

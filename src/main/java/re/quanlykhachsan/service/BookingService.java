@@ -402,4 +402,21 @@ public class BookingService implements IBookingService {
                 .toList();
         return infoBookedRespones;
     }
+
+    @Override
+    @Transactional
+    public List<InfoCutomerRespone> InfoCutomer(String workBranch) {
+        List<Booking> bookings = bookingRespository.findByWorkBranchAndCheckedIn(workBranch);
+        List<InfoCutomerRespone> infoCutomerRespones = bookings.stream()
+                .map(booking -> {
+                InfoCutomerRespone request = new InfoCutomerRespone();
+                request.setRoomName(booking.getRoom().getName());
+                request.setName(booking.getName());
+                request.setSdt(booking.getPhonenumber());
+                request.setCccd(booking.getCccd());
+                return request;
+                })
+                .toList();
+        return infoCutomerRespones;
+    }
 }

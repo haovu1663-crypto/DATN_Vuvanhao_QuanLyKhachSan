@@ -6,6 +6,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import re.quanlykhachsan.dto.request.RoomRequest;
+import re.quanlykhachsan.dto.response.InfoRoomRespone;
 import re.quanlykhachsan.dto.response.RoomRespone;
 import re.quanlykhachsan.dto.response.RoomRestatusRespone;
 import re.quanlykhachsan.dto.response.SoPhongRequest;
@@ -270,5 +271,41 @@ public class RoomService implements IRoomService {
         room.setActive(false);
         roomRepository.save(room);
         return "xóa thành công ";
+    }
+
+    @Override
+    @Transactional
+    public List<InfoRoomRespone> ListRoom() {
+        List<Room> rooms = roomRepository.findAll();
+        List<InfoRoomRespone> infoRoomRespones = rooms.stream()
+                .map(room -> {
+                    InfoRoomRespone request = new InfoRoomRespone();
+                    request.setId(room.getId());
+                    request.setRoomName(room.getName());
+                    request.setRoomType(room.getRoomType().getType());
+                    request.setRoomPrice(room.getRoomType().getPrice());
+                    request.setWorkBrach(room.getWorkBranch());
+                    return request;
+                })
+                .toList();
+        return infoRoomRespones;
+    }
+
+    @Override
+    @Transactional
+    public List<InfoRoomRespone> ListRoomWorkb(String workBranch) {
+        List<Room> rooms = roomRepository.findByWorkBranch(workBranch);
+        List<InfoRoomRespone> infoRoomRespones = rooms.stream()
+                .map(room -> {
+                    InfoRoomRespone request = new InfoRoomRespone();
+                    request.setId(room.getId());
+                    request.setRoomName(room.getName());
+                    request.setRoomType(room.getRoomType().getType());
+                    request.setRoomPrice(room.getRoomType().getPrice());
+                    request.setWorkBrach(room.getWorkBranch());
+                    return request;
+                })
+                .toList();
+        return infoRoomRespones;
     }
 }

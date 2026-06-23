@@ -7,8 +7,11 @@ import org.springframework.boot.context.config.ConfigDataResourceNotFoundExcepti
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import re.quanlykhachsan.dto.request.RoomTypeRequest;
+import re.quanlykhachsan.dto.response.InfoRoomRespone;
+import re.quanlykhachsan.dto.response.InfoRoomTypeRespone;
 import re.quanlykhachsan.dto.response.RoomTypeDisplayDTO;
 import re.quanlykhachsan.dto.response.RoomTypeResponse;
+import re.quanlykhachsan.entity.Room;
 import re.quanlykhachsan.entity.RoomType;
 import re.quanlykhachsan.exception.DataConfickException;
 import re.quanlykhachsan.exception.ResourceNotFoundException;
@@ -146,5 +149,20 @@ public class RoomTypeService implements IRoomTypeService {
         roomType.setActive(false);
         roomTypeRepository.save(roomType);
         return "xóa thành công";
+    }
+
+    @Override
+    public List<InfoRoomTypeRespone> listInfoRoomType() {
+        List<RoomType> roomTypess = roomTypeRepository.findAll();
+        List<InfoRoomTypeRespone> infoRoomRespones = roomTypess.stream()
+                .map(room -> {
+                    InfoRoomTypeRespone request = new InfoRoomTypeRespone();
+                    request.setId(room.getId());
+                    request.setName(room.getType());
+                    request.setPrice(room.getPrice());
+                    return request;
+                })
+                .toList();
+        return infoRoomRespones;
     }
 }

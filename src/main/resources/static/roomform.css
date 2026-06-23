@@ -3001,6 +3001,49 @@ body.rf-update-mode .rf-btn-submit {
    INFORMATION VIEW
    =================================================== */
 
+/* ── Sub-menu: Booking / Room / RoomType / Customer ── */
+.info-submenu {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    background: #fff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 8px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
+    flex-wrap: wrap;
+}
+.info-submenu-btn {
+    flex: 1;
+    min-width: 130px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 18px;
+    border: none;
+    border-radius: 11px;
+    background: transparent;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .15s, color .15s, box-shadow .15s;
+}
+.info-submenu-btn i { font-size: 13px; }
+.info-submenu-btn:hover:not(.active) { background: #f1f5f9; color: #2563eb; }
+.info-submenu-btn.active {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.30);
+}
+@media (max-width: 640px) {
+    .info-submenu { flex-direction: column; }
+    .info-submenu-btn { min-width: 0; }
+}
+
 /* ── Search card ── */
 .info-search-card {
     background: #fff;

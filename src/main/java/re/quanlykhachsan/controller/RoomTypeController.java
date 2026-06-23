@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import re.quanlykhachsan.dto.request.RoomTypeRequest;
 import re.quanlykhachsan.dto.response.ApiResponse;
+import re.quanlykhachsan.dto.response.InfoRoomTypeRespone;
 import re.quanlykhachsan.dto.response.RoomTypeDisplayDTO;
 import re.quanlykhachsan.dto.response.RoomTypeResponse;
 import re.quanlykhachsan.entity.RoomType;
@@ -104,5 +105,12 @@ public class RoomTypeController {
    @PutMapping("/delete/{id}")
    public ResponseEntity<?>deleteroomtype(@PathVariable Long id) throws ResourceNotFoundException, IOException{
         return new ResponseEntity<>(roomTypeService.deleteRoomTypeSoft(id),HttpStatus.OK);
+   }
+
+   // lây roomtyep trong  information
+   @GetMapping("/info")
+   ResponseEntity<?> getListInfor(){
+       List<InfoRoomTypeRespone> infoRoomTypeRespones = roomTypeService.listInfoRoomType();
+       return new ResponseEntity<>(infoRoomTypeRespones,HttpStatus.OK);
    }
 }

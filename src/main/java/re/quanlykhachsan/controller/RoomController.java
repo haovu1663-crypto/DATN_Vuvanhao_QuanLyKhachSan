@@ -7,10 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import re.quanlykhachsan.dto.request.RoomRequest;
-import re.quanlykhachsan.dto.response.ApiResponse;
-import re.quanlykhachsan.dto.response.RoomRespone;
-import re.quanlykhachsan.dto.response.RoomRestatusRespone;
-import re.quanlykhachsan.dto.response.SoPhongRequest;
+import re.quanlykhachsan.dto.response.*;
 import re.quanlykhachsan.exception.DataConfickException;
 import re.quanlykhachsan.exception.ResourceNotFoundException;
 import re.quanlykhachsan.service.interfac.IRoomService;
@@ -131,4 +128,15 @@ public class RoomController {
     public ResponseEntity<?> deleteRoomById(@Valid @PathVariable Long id) throws ResourceNotFoundException, DataConfickException {
         return new ResponseEntity<>(roomService.deleteSort(id), HttpStatus.OK);
     }
+    @GetMapping("/info")
+    public ResponseEntity<?> listRoom(){
+        List<InfoRoomRespone> infoRoomRespones = roomService.ListRoom();
+        return new ResponseEntity<>(infoRoomRespones, HttpStatus.OK);
+    }
+    @GetMapping("/info/workbranch")
+    public ResponseEntity<?> listRoomWorkBranchAndRoomName(@RequestParam String workBranch){
+        List<InfoRoomRespone> infoRoomRespones = roomService.ListRoomWorkb(workBranch);
+        return new ResponseEntity<>(infoRoomRespones, HttpStatus.OK);
+    }
+
 }

@@ -111,4 +111,5 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Long> {
 
     // lấy tất cả roomtype đang active
     List<RoomType> findAllByActiveTrue();
+
 }

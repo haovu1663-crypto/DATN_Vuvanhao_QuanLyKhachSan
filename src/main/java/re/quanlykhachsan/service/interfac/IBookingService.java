@@ -21,4 +21,6 @@ public interface IBookingService {
     List<SoPhongServiceRequest> soPhongService(String workBrach);
     String cancelBooking(Long bookingId) throws ResourceNotFoundException;
     List<InfoBookedRespone>InfoBooked(String workBranch,String roomName) throws ResourceNotFoundException;
+    // lấy ra infomation đang ở
+    List<InfoCutomerRespone> InfoCutomer(String workBranch);
 }
