@@ -105,6 +105,8 @@ public class SecurityConfig {
                                         .requestMatchers("/api/email/register").permitAll()
                                         .requestMatchers("/api/email/register/employee").permitAll()
                                         .requestMatchers("/home").permitAll()
+
+                                        .requestMatchers("/api/v1/booking/info").permitAll()
                                         // cutomer
                                         .requestMatchers("/api/v1/customer/mk").permitAll()
                                         .requestMatchers("/api/email/mk").permitAll()
@@ -113,7 +115,7 @@ public class SecurityConfig {
                                         .requestMatchers("/api/v1/services").permitAll()
                                         // service
                                         .requestMatchers("/api/v1/services/**").permitAll()
-                                        //
+
                                         .requestMatchers("/api/v1/employees/**").permitAll()
                                         .requestMatchers("/api/v1/customer/emp/**").permitAll()
                                         // roomtype

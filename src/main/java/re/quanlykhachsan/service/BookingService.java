@@ -384,4 +384,22 @@ public class BookingService implements IBookingService {
         bookingRespository.save(booking);
         return "Hủy thành công booking";
     }
+
+    @Override
+    public List<InfoBookedRespone> InfoBooked(String workBranch, String roomName) throws ResourceNotFoundException {
+        List<Booking> bookings = bookingRespository.findActiveBookingsByRoomNameAndWorkBranch(roomName, workBranch);
+        List<InfoBookedRespone> infoBookedRespones = bookings.stream()
+                .map(booking -> {
+                    InfoBookedRespone request = new InfoBookedRespone();
+                    request.setRoomId(booking.getRoom().getId());
+                    request.setRoomName(booking.getRoom().getName());
+                    request.setCustomerName(booking.getName());
+                    request.setPhoneNumber(booking.getPhonenumber());
+                    request.setCheckInDate(booking.getEnventCheckinDate());
+                    request.setCheckOutDate(booking.getEnventCheckoutDate());
+                    return request;
+                })
+                .toList();
+        return infoBookedRespones;
+    }
 }

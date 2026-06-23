@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
         'update-employee':   'menuManageEmployee',
         'revenue':           'menuRevenue',
         'service':           'menuService',
+        'information':       'menuInformation',
     };
 
     function setActiveMenu(view) {
@@ -38,6 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('view-update-employee').style.display  = view === 'update-employee'    ? 'flex' : 'none';
         document.getElementById('view-revenue').style.display          = view === 'revenue'             ? 'flex' : 'none';
         document.getElementById('view-service').style.display          = view === 'service'             ? 'flex' : 'none';
+        document.getElementById('view-information').style.display      = view === 'information'         ? 'flex' : 'none';
         setActiveMenu(view);
 
         // ===== SWITCH ADD / UPDATE ROOM FORM =====
@@ -108,6 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('menuManageEmployee')?.addEventListener('click', e => { e.preventDefault(); switchToView('manage-employee'); empLoadList(); });
     document.getElementById('menuRevenue')?.addEventListener('click',        e => { e.preventDefault(); switchToView('revenue'); });
     document.getElementById('menuService')?.addEventListener('click',        e => { e.preventDefault(); switchToView('service'); if (typeof svLoad === 'function') svLoad(); else if (typeof svLoadRooms === 'function') svLoadRooms(); });
+    document.getElementById('menuInformation')?.addEventListener('click',    e => { e.preventDefault(); switchToView('information'); });
 
     // Default: mở Booking Room khi load trang
     switchToView('booking');

@@ -9,6 +9,7 @@ import re.quanlykhachsan.dto.request.BookingRequest;
 import re.quanlykhachsan.dto.request.EmployeeBooking;
 import re.quanlykhachsan.dto.response.CheckInRespone;
 import re.quanlykhachsan.dto.response.CheckOutBookingRespone;
+import re.quanlykhachsan.dto.response.InfoBookedRespone;
 import re.quanlykhachsan.exception.ResourceNotFoundException;
 import re.quanlykhachsan.service.BookingService;
 
@@ -85,6 +86,9 @@ public class BookingController {
     public ResponseEntity<?> cancelbooking(@RequestParam Long bookingId) throws ResourceNotFoundException {
         return new  ResponseEntity<>(bookingService.cancelBooking(bookingId),HttpStatus.OK);
     }
-    // xem phòng đã được đặt trong tương lại
-
+    // xem phòng đã được đặt trong tương lạ
+    @GetMapping("/info")
+    public ResponseEntity<List<InfoBookedRespone>> getInfo(@RequestParam String workBranch,@RequestParam String roomName) throws ResourceNotFoundException {
+        return new ResponseEntity<>(bookingService.InfoBooked(workBranch,roomName),HttpStatus.OK);
+    }
 }

@@ -69,4 +69,18 @@ public interface BookingRespository extends JpaRepository<Booking,Long> {
     );
     // làm bất đồng bộ
     List<Booking> findByEnventCheckoutDateAndStatusBooking(LocalDate enventCheckoutDate, StatusBooking statusBooking);
+
+    // tra cứu thông phòng được đặt
+    @Query("SELECT b FROM Booking b " +
+            "JOIN FETCH b.room r " +
+            "LEFT JOIN FETCH r.roomType " +
+            "WHERE r.name = :roomName " +
+            "AND r.workBranch = :workBranch " +
+            "AND b.statusBooking NOT IN " +
+            "(re.quanlykhachsan.entity.StatusBooking.CANCELLED, " +
+            " re.quanlykhachsan.entity.StatusBooking.CHECKED_OUT)")
+    List<Booking> findActiveBookingsByRoomNameAndWorkBranch(
+            @Param("roomName") String roomName,
+            @Param("workBranch") String workBranch
+    );
 }
