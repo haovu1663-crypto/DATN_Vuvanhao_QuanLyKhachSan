@@ -1,0 +1,106 @@
+<!-- ===== MODAL CHỌN PHÒNG ===== -->
+<div class="modal-overlay" id="modal-room-picker-overlay" onclick="if(event.target===this)hideRoomPicker()" style="display:none;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:20px;max-width:520px;width:95%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(26,39,68,0.18);">
+        <div style="background:linear-gradient(135deg,#1a2744,#2d4a8a);padding:24px 28px 20px;border-radius:20px 20px 0 0;position:relative;">
+            <button onclick="hideRoomPicker()" style="position:absolute;top:14px;right:16px;background:rgba(255,255,255,0.15);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;">✕</button>
+            <h2 style="color:#fff;font-family:'Playfair Display',serif;margin:0 0 4px;font-size:20px;">Chọn phòng</h2>
+            <p id="room-picker-subtitle" style="color:rgba(255,255,255,0.75);font-size:13px;margin:0;"></p>
+        </div>
+        <div style="padding:20px 24px;">
+            <div id="room-picker-list" style="display:flex;flex-direction:column;gap:10px;min-height:80px;">
+                <div style="text-align:center;color:#aaa;padding:20px;font-size:13px;">Đang tải...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL ĐẶT PHÒNG ===== -->
+<div id="modal-booking-overlay" onclick="handleBookingOverlayClick(event)">
+    <div id="booking-section">
+        <div class="bk-card">
+            <!-- Banner -->
+            <div class="bk-banner">
+                <button class="bk-close" onclick="hideBooking()">✕</button>
+                <h2>Đặt phòng</h2>
+                <p>Hoàn tất thông tin bên dưới để xác nhận đặt phòng</p>
+                <div class="bk-room-info">
+                    <div class="bk-room-icon">🛏️</div>
+                    <div>
+                        <div class="bk-room-name" id="bk-room-name">—</div>
+                        <div class="bk-room-type" id="bk-room-type">—</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bk-body">
+
+                <!-- Ngày lấy từ thanh tìm kiếm -->
+                <div id="bk-date-info" style="background:#f0f4ff;border-radius:12px;padding:12px 16px;display:flex;gap:24px;margin-bottom:4px;">
+                    <div>
+                        <div style="font-size:11px;color:var(--gray);margin-bottom:2px;">🏠 Nhận phòng</div>
+                        <div id="bk-val-checkin" style="font-size:14px;font-weight:600;color:var(--navy);">—</div>
+                    </div>
+                    <div style="border-left:1.5px solid var(--border);"></div>
+                    <div>
+                        <div style="font-size:11px;color:var(--gray);margin-bottom:2px;">🚪 Trả phòng</div>
+                        <div id="bk-val-checkout" style="font-size:14px;font-weight:600;color:var(--navy);">—</div>
+                    </div>
+                    <div style="border-left:1.5px solid var(--border);"></div>
+                    <div>
+                        <div style="font-size:11px;color:var(--gray);margin-bottom:2px;">🌙 Số đêm</div>
+                        <div id="bk-nights-badge" style="font-size:14px;font-weight:600;color:var(--navy);">—</div>
+                    </div>
+                </div>
+
+                <!-- Email xác nhận -->
+                <label class="bk-label">✉️ Email xác nhận đặt phòng</label>
+                <div class="bk-email-wrap">
+                    <div class="bk-email-input-wrap">
+                        <span class="bk-email-icon">✉️</span>
+                        <input class="bk-email-input" id="bk-email" type="email" placeholder="example@email.com" oninput="bkOnEmailInput()">
+                    </div>
+                    <button class="btn-send-otp-bk" id="btn-bk-send-otp" onclick="bkSendOtp()" disabled style="display:none;">
+                        Gửi mã<br>xác nhận
+                    </button>
+                </div>
+                <div class="bk-otp-hint" id="bk-otp-hint"></div>
+
+                <!-- OTP 4 SỐ BOOKING -->
+                <div class="reg-otp-section" id="bk-otp-section">
+                    <div class="reg-otp-label">📩 Nhập mã 4 số vừa gửi đến email của bạn</div>
+                    <div class="reg-otp-inputs">
+                        <input class="reg-otp-digit" id="bk-otp-0" type="text" inputmode="numeric" maxlength="1" oninput="bkOtpInput(0)" onkeydown="bkOtpKey(event,0)">
+                        <input class="reg-otp-digit" id="bk-otp-1" type="text" inputmode="numeric" maxlength="1" oninput="bkOtpInput(1)" onkeydown="bkOtpKey(event,1)">
+                        <input class="reg-otp-digit" id="bk-otp-2" type="text" inputmode="numeric" maxlength="1" oninput="bkOtpInput(2)" onkeydown="bkOtpKey(event,2)">
+                        <input class="reg-otp-digit" id="bk-otp-3" type="text" inputmode="numeric" maxlength="1" oninput="bkOtpInput(3)" onkeydown="bkOtpKey(event,3)">
+                    </div>
+                    <div class="reg-otp-status" id="bk-otp-status"></div>
+                    <span class="reg-otp-resend" id="bk-otp-resend"></span>
+                </div>
+
+                <!-- Ghi chú -->
+                <label class="bk-label">📝 Yêu cầu đặc biệt (tùy chọn)</label>
+                <textarea class="bk-textarea" id="bk-notes" rows="3" placeholder="Ví dụ: phòng tầng cao, giường đôi, đến muộn..."></textarea>
+
+                <!-- Tóm tắt giá -->
+                <div class="bk-summary" id="bk-summary" style="display:none;">
+                    <div class="bk-summary-title">Tóm tắt chi phí</div>
+                    <div class="bk-sum-row"><span id="bk-sum-desc">—</span><span id="bk-sum-room">—</span></div>
+                    <div class="bk-sum-row"><span>Phí dịch vụ (5%)</span><span id="bk-sum-fee">—</span></div>
+                    <div class="bk-sum-row" style="color:var(--gray);font-size:13px;"><span>Tổng cộng</span><span id="bk-sum-total">—</span></div>
+                    <div class="bk-sum-row total">
+                        <span>💳 Tiền cọc thanh toán <span style="font-size:11px;font-weight:500;color:var(--gold);background:#fff8e1;padding:2px 7px;border-radius:20px;margin-left:4px;">30%</span></span>
+                        <span id="bk-sum-deposit" style="color:#e67e00;">—</span>
+                    </div>
+                    <div style="font-size:11px;color:var(--gray);margin-top:6px;line-height:1.5;">
+                        💡 Phần còn lại (<span id="bk-sum-remain">—</span>) sẽ thanh toán khi nhận phòng.
+                    </div>
+                </div>
+
+                <button class="btn-submit-booking" id="btn-submit-booking" onclick="submitBooking()" disabled>
+                    Chọn ngày để đặt phòng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

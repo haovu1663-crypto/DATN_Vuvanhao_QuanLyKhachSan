@@ -1,0 +1,195 @@
+<!-- ===== DANH SÁCH PHÒNG ===== -->
+<section id="room-section" style="max-width:1100px;margin:32px auto;padding:0 5%;display:none;">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+        <div>
+            <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--navy);margin:0 0 4px;">Phòng đang trống</h2>
+            <p id="room-count-text" style="font-size:13px;color:var(--gray);margin:0;">Đang tải danh sách phòng...</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div id="type-filter-wrap" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+            <select id="room-sort" onchange="sortAndRender()" style="font-family:'DM Sans',sans-serif;font-size:13px;padding:7px 12px;border:1.5px solid var(--border);border-radius:20px;background:var(--white);color:var(--navy);cursor:pointer;outline:none;">
+                <option value="price_asc">Giá tăng dần</option>
+                <option value="price_desc">Giá giảm dần</option>
+                <option value="name_asc">Tên A → Z</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="room-skeleton" style="display:flex;flex-direction:column;gap:14px;">
+        <div style="height:160px;border-radius:16px;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;"></div>
+        <div style="height:160px;border-radius:16px;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;"></div>
+        <div style="height:160px;border-radius:16px;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;"></div>
+    </div>
+
+    <div id="room-grid" style="display:none;flex-direction:column;gap:14px;"></div>
+
+    <!-- ===== PANEL CHI TIẾT PHÒNG (CHÌM - thay thế danh sách khi xem chi tiết) ===== -->
+    <div class="rtd-inline-panel" id="rtd-inline-panel">
+
+        <button class="rtd-back-btn" onclick="closeRoomDetail()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Quay lại danh sách phòng
+        </button>
+
+        <div class="rtd-modal" role="region" aria-labelledby="rtd-room-name">
+
+            <!-- Loading -->
+            <div class="rtd-loading" id="rtd-loading" style="display:none;">
+                <div class="rtd-spinner"></div>
+                <p>Đang tải thông tin phòng...</p>
+            </div>
+
+            <!-- Error -->
+            <div class="rtd-error" id="rtd-error" style="display:none;">
+                <span style="font-size:36px;">😔</span>
+                <p class="rtd-error-msg">Không thể tải thông tin phòng.</p>
+                <button class="rtd-btn-retry" onclick="closeRoomDetail()">Đóng</button>
+            </div>
+
+            <!-- Nội dung chính -->
+            <div class="rtd-content" id="rtd-content" style="display:none;">
+
+                <!-- ── CỘT TRÁI: Gallery ── -->
+                <div class="rtd-col-left">
+                    <div class="rtd-gallery">
+                        <div id="rtd-gallery-wrap" class="rtd-gallery-main"></div>
+                        <button class="rtd-gallery-arrow rtd-gallery-arrow--prev" id="rtd-gallery-prev" onclick="rtdPrevSlide()">&#8249;</button>
+                        <button class="rtd-gallery-arrow rtd-gallery-arrow--next" id="rtd-gallery-next" onclick="rtdNextSlide()">&#8250;</button>
+                        <span class="rtd-gallery-counter" id="rtd-gallery-counter"></span>
+                    </div>
+
+                    <!-- Thông tin nhanh (grid 2 cột) -->
+                    <div class="rtd-info-grid">
+                        <div class="rtd-info-item">
+                            <span class="rtd-info-icon">📐</span>
+                            <div>
+                                <div class="rtd-info-label">Diện tích</div>
+                                <div class="rtd-info-val" id="rtd-info-size">—</div>
+                            </div>
+                        </div>
+                        <div class="rtd-info-item">
+                            <span class="rtd-info-icon">🛏️</span>
+                            <div>
+                                <div class="rtd-info-label">Giường ngủ</div>
+                                <div class="rtd-info-val" id="rtd-info-bed">—</div>
+                            </div>
+                        </div>
+                        <div class="rtd-info-item">
+                            <span class="rtd-info-icon">🏢</span>
+                            <div>
+                                <div class="rtd-info-label">Tầng</div>
+                                <div class="rtd-info-val" id="rtd-info-floor">—</div>
+                            </div>
+                        </div>
+                        <div class="rtd-info-item">
+                            <span class="rtd-info-icon">🌅</span>
+                            <div>
+                                <div class="rtd-info-label">Hướng nhìn</div>
+                                <div class="rtd-info-val" id="rtd-info-view">—</div>
+                            </div>
+                        </div>
+                        <div class="rtd-info-item">
+                            <span class="rtd-info-icon">🕐</span>
+                            <div>
+                                <div class="rtd-info-label">Nhận phòng</div>
+                                <div class="rtd-info-val" id="rtd-info-checkin">—</div>
+                            </div>
+                        </div>
+                        <div class="rtd-info-item">
+                            <span class="rtd-info-icon">🕛</span>
+                            <div>
+                                <div class="rtd-info-label">Trả phòng</div>
+                                <div class="rtd-info-val" id="rtd-info-checkout">—</div>
+                            </div>
+                        </div>
+                        <div class="rtd-info-item">
+                            <span class="rtd-info-icon">☕</span>
+                            <div>
+                                <div class="rtd-info-label">Bữa sáng</div>
+                                <div class="rtd-info-val" id="rtd-info-breakfast">—</div>
+                            </div>
+                        </div>
+                        <div class="rtd-info-item">
+                            <span class="rtd-info-icon">➕</span>
+                            <div>
+                                <div class="rtd-info-label">Giường phụ</div>
+                                <div class="rtd-info-val" id="rtd-info-extrabeds">—</div>
+                            </div>
+                        </div>
+                        <div class="rtd-info-item">
+                            <span class="rtd-info-icon">🚭</span>
+                            <div>
+                                <div class="rtd-info-label">Hút thuốc</div>
+                                <div class="rtd-info-val" id="rtd-info-smoking">—</div>
+                            </div>
+                        </div>
+                        <div class="rtd-info-item">
+                            <span class="rtd-info-icon">👥</span>
+                            <div>
+                                <div class="rtd-info-label">Sức chứa</div>
+                                <div class="rtd-info-val" id="rtd-info-capacity">—</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── CỘT PHẢI: Nội dung ── -->
+                <div class="rtd-col-right">
+
+                    <!-- Tên phòng + tags -->
+                    <div class="rtd-tags" id="rtd-tags"></div>
+                    <h2 class="rtd-room-name" id="rtd-room-name">Chi tiết phòng</h2>
+                    <p class="rtd-short-desc" id="rtd-short-desc"></p>
+
+                    <!-- Giá -->
+                    <div class="rtd-price-block">
+                        <div class="rtd-price-label">Giá mỗi đêm</div>
+                        <div class="rtd-price" id="rtd-price">—</div>
+                    </div>
+
+                    <!-- Mô tả đầy đủ -->
+                    <div class="rtd-section">
+                        <h3 class="rtd-section-title">Mô tả</h3>
+                        <div class="rtd-full-desc" id="rtd-full-desc"></div>
+                    </div>
+
+                    <!-- Tiện nghi -->
+                    <div class="rtd-section">
+                        <h3 class="rtd-section-title">Tiện nghi bao gồm</h3>
+                        <ul class="rtd-list" id="rtd-amenities"></ul>
+                    </div>
+
+                    <!-- Chính sách -->
+                    <div class="rtd-section">
+                        <h3 class="rtd-section-title">Chính sách</h3>
+                        <ul class="rtd-list" id="rtd-policies"></ul>
+                    </div>
+
+                    <!-- Nút hành động -->
+                    <div class="rtd-actions">
+                        <button class="rtd-btn-book" id="rtd-btn-book">
+                            🛎️ &nbsp; Đặt phòng ngay
+                        </button>
+                        <button class="rtd-btn-close-text" onclick="closeRoomDetail()">
+                            Quay lại danh sách
+                        </button>
+                    </div>
+
+                </div><!-- end col-right -->
+            </div><!-- end rtd-content -->
+
+        </div><!-- end rtd-modal -->
+    </div><!-- end rtd-inline-panel -->
+
+    <div id="room-empty" style="display:none;text-align:center;padding:60px 0;">
+        <div style="font-size:48px;margin-bottom:12px;">🏨</div>
+        <p style="font-size:16px;font-weight:600;color:var(--navy);margin:0 0 6px;">Không có phòng trống</p>
+        <p style="font-size:13px;color:var(--gray);">Hiện tại tất cả phòng đang được sử dụng. Vui lòng thử lại sau.</p>
+    </div>
+    <div id="room-error" style="display:none;text-align:center;padding:60px 0;">
+        <div style="font-size:48px;margin-bottom:12px;">⚠️</div>
+        <p style="font-size:16px;font-weight:600;color:#dc2626;margin:0 0 6px;">Không thể tải danh sách phòng</p>
+        <p id="room-error-msg" style="font-size:13px;color:var(--gray);"></p>
+        <button onclick="loadRooms()" style="margin-top:14px;padding:10px 24px;background:var(--navy);color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Thử lại</button>
+    </div>

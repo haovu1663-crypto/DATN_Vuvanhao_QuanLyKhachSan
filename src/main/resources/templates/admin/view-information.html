@@ -1,0 +1,134 @@
+<!-- ===== VIEW INFORMATION ===== -->
+<main th:fragment="view-information" id="view-information" class="flex-1 flex-col overflow-y-auto relative" style="display:none;">
+    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-24 border-b border-slate-200 flex items-center justify-between px-10">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Thông Tin Đặt Phòng</h1>
+            <p class="text-xs text-slate-500 font-medium">Dashboard / Booking / Information</p>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="relative cursor-pointer text-slate-400 hover:text-blue-600 transition-colors" title="Thông báo">
+                <i class="far fa-bell text-xl"></i>
+                <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full border-2 border-white"></span>
+            </div>
+            <div class="h-8 w-[1px] bg-slate-200"></div>
+            <div class="flex items-center gap-3 bg-slate-50 p-1.5 pr-4 rounded-full border border-slate-100 hover:bg-slate-100 transition-all cursor-pointer" id="info-user-chip" onclick="sharedToggleUserMenu('info')">
+                <div id="info-avatar" class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm flex-shrink-0"
+                     style="background: linear-gradient(135deg, #3b6fd4, #5b8fe8);">??</div>
+                <span class="text-sm font-bold text-slate-700" id="info-greeting">Hi, ...</span>
+            </div>
+            <div id="info-user-menu" class="hidden absolute top-[80px] right-8 z-50 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden py-1">
+                <div class="px-4 py-3 border-b border-slate-100">
+                    <p class="text-xs text-slate-400 font-medium">Đăng nhập với tư cách</p>
+                    <p class="text-sm font-bold text-slate-800 mt-0.5 truncate" id="info-fullname-menu">—</p>
+                    <p class="text-xs text-blue-500 font-semibold mt-0.5" id="info-role-menu">—</p>
+                </div>
+                <a href="/demo" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                    <i class="fas fa-home w-4 text-slate-400"></i> Về trang chủ
+                </a>
+                <button onclick="rfLogout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
+                    <i class="fas fa-sign-out-alt w-4"></i> Đăng xuất
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="p-8 max-w-6xl mx-auto w-full">
+
+        <!-- Sub-menu: Booking / Room / RoomType / Customer -->
+        <div class="info-submenu" id="infoSubmenu">
+            <button class="info-submenu-btn active" data-target="booking" onclick="infoSwitchTab('booking', this)">
+                <i class="fas fa-calendar-check"></i> Booking
+            </button>
+            <button class="info-submenu-btn" data-target="room" onclick="infoSwitchTab('room', this)">
+                <i class="fas fa-door-open"></i> Room
+            </button>
+            <button class="info-submenu-btn" data-target="roomtype" onclick="infoSwitchTab('roomtype', this)">
+                <i class="fas fa-layer-group"></i> RoomType
+            </button>
+            <button class="info-submenu-btn" data-target="customer" onclick="infoSwitchTab('customer', this)">
+                <i class="fas fa-user"></i> Customer
+            </button>
+        </div>
+
+        <!-- Search Card -->
+        <div class="info-search-card">
+            <div class="info-search-title">
+                <div class="info-search-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div>
+                    <div class="info-search-label" id="infoSearchLabel">Tra cứu thông tin đặt phòng</div>
+                    <div class="info-search-sub" id="infoSearchSub">Nhập tên phòng và chọn chi nhánh để xem lịch đặt phòng</div>
+                </div>
+            </div>
+
+            <div class="info-search-row">
+                <!-- Ô nhập tên phòng -->
+                <div class="info-field" id="infoRoomNameField">
+                    <label class="info-label">
+                        <i class="fas fa-door-open"></i> Tên phòng
+                    </label>
+                    <input id="infoRoomName" type="text" class="info-input"
+                           placeholder="Nhập tên phòng (VD: Deluxe 401)..."
+                           onkeydown="if(event.key==='Enter') infoSearch()">
+                </div>
+
+                <!-- Combobox chi nhánh -->
+                <div class="info-field info-field-select" id="infoBranchField">
+                    <label class="info-label">
+                        <i class="fas fa-map-marker-alt"></i> Chi nhánh
+                    </label>
+                    <div class="info-select-wrap">
+                        <select id="infoBranchSelect" class="info-select">
+                            <option value="Số 1 đường Nguyễn Chí Thanh, Hà Nội">Số 1 đường Nguyễn Chí Thanh, Hà Nội</option>
+                            <option value="Số 2 Lê Đại Hành, Hà Nội">Số 2 Lê Đại Hành, Hà Nội</option>
+                            <option value="Số 3 đường Lê Lợi, Ninh Bình">Số 3 đường Lê Lợi, Ninh Bình</option>
+                            <option value="Số 4 Trần Quốc Nghiễn, Hạ Long">Số 4 Trần Quốc Nghiễn, Hạ Long</option>
+                        </select>
+                        <i class="fas fa-chevron-down info-select-arrow"></i>
+                    </div>
+                </div>
+
+                <!-- Nút tìm kiếm -->
+                <div id="infoSearchBtnField">
+                    <button class="info-search-btn" onclick="infoSearch()">
+                        <i class="fas fa-search"></i>
+                        Tìm kiếm
+                    </button>
+                </div>
+            </div>
+
+            <!-- Thông báo lỗi / loading -->
+            <div id="infoSearchMsg" class="info-msg"></div>
+        </div>
+
+        <!-- Kết quả -->
+        <div id="infoResultWrap" style="display:none;">
+            <div class="info-result-header">
+                <div class="info-result-title">
+                    <i class="fas fa-list-ul"></i>
+                    Kết quả tìm kiếm: <span id="infoResultCount" class="info-result-count"></span>
+                </div>
+                <div class="info-result-room" id="infoResultRoom"></div>
+            </div>
+
+            <!-- Trạng thái trống -->
+            <div id="infoEmptyState" class="info-empty" style="display:none;">
+                <i class="fas fa-calendar-times"></i>
+                <p>Không tìm thấy thông tin đặt phòng</p>
+                <span>Phòng này hiện chưa có lịch đặt nào đang hoạt động.</span>
+            </div>
+        </div>
+
+        <!-- DataGridView -->
+        <div id="infoGridWrap" style="display:none; margin-top:28px;">
+            <div class="info-result-header">
+                <div class="info-result-title">
+                    <i class="fas fa-th-large"></i> DataGridView
+                </div>
+            </div>
+            <div id="infoGrid" class="info-grid"></div>
+        </div>
+
+    </div>
+</main>

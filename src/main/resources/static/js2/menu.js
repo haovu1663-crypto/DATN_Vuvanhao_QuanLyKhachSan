@@ -4,6 +4,11 @@ function menuAction(action) {
 
     const token = localStorage.getItem('accessToken');
 
+    if (action === 'trang-chu') {
+        if (typeof showHomeSections === 'function') showHomeSections();
+        return;
+    }
+
     if (action === 'quan-ly-phong') {
         // Kiểm tra đăng nhập trước khi chuyển trang
         if (!token || !isTokenValid()) {

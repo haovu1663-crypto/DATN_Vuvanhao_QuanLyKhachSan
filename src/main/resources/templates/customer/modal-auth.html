@@ -1,0 +1,247 @@
+<!-- MODAL ĐĂNG KÝ (ĐÃ BỎ CCCD) -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+    <div id="register-section">
+        <div class="reg-card">
+            <div class="reg-banner">
+                <button class="reg-close" onclick="hideRegister()">✕</button>
+                <h2>Tạo tài khoản</h2>
+                <p>Tham gia StayViet để khám phá hàng nghìn điểm lưu trú tuyệt vời</p>
+            </div>
+            <div class="reg-body">
+                <div class="reg-field">
+                    <label class="reg-label">Họ và tên</label>
+                    <div class="reg-input-wrap">
+                        <span class="reg-input-icon">👤</span>
+                        <!-- Thêm id để JS lấy dữ liệu -->
+                        <input class="reg-input" id="reg-fullname" type="text" placeholder="Nguyễn Văn A">
+                    </div>
+                </div>
+
+                <div class="reg-field">
+                    <label class="reg-label">Địa chỉ Email</label>
+                    <div class="reg-email-wrap">
+                        <div class="reg-input-wrap">
+                            <span class="reg-input-icon">✉️</span>
+                            <input class="reg-input" id="reg-email" type="email" placeholder="example@email.com">
+                        </div>
+                        <div>
+                            <button class="btn-send-otp" id="btn-reg-send-otp" onclick="regSendOtp()">Gửi mã<br>xác nhận</button>
+                        </div>
+                    </div>
+                    <!-- OTP INPUT SECTION -->
+                    <div class="reg-otp-section" id="reg-otp-section">
+                        <div class="reg-otp-label">📩 Nhập mã 4 số vừa gửi đến email của bạn</div>
+                        <div class="reg-otp-inputs">
+                            <input class="reg-otp-digit" id="reg-otp-0" type="text" inputmode="numeric" maxlength="1" oninput="regOtpInput(0)" onkeydown="regOtpKey(event,0)">
+                            <input class="reg-otp-digit" id="reg-otp-1" type="text" inputmode="numeric" maxlength="1" oninput="regOtpInput(1)" onkeydown="regOtpKey(event,1)">
+                            <input class="reg-otp-digit" id="reg-otp-2" type="text" inputmode="numeric" maxlength="1" oninput="regOtpInput(2)" onkeydown="regOtpKey(event,2)">
+                            <input class="reg-otp-digit" id="reg-otp-3" type="text" inputmode="numeric" maxlength="1" oninput="regOtpInput(3)" onkeydown="regOtpKey(event,3)">
+                        </div>
+                        <div class="reg-otp-status" id="reg-otp-status"></div>
+                        <span class="reg-otp-resend" id="reg-otp-resend"></span>
+                    </div>
+                </div>
+
+                <div class="reg-row">
+                    <div class="reg-field">
+                        <label class="reg-label">Số điện thoại</label>
+                        <div class="reg-input-wrap">
+                            <span class="reg-input-icon">📱</span>
+                            <input class="reg-input" id="reg-phone" type="tel" placeholder="0912 345 678" maxlength="11">
+                        </div>
+                    </div>
+                    <div class="reg-field">
+                        <label class="reg-label">Tên đăng nhập</label>
+                        <div class="reg-input-wrap">
+                            <span class="reg-input-icon">🔖</span>
+                            <input class="reg-input" id="reg-username" type="text" placeholder="nguyenvana123">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reg-field">
+                    <label class="reg-label">Mật khẩu</label>
+                    <div class="reg-input-wrap">
+                        <span class="reg-input-icon">🔒</span>
+                        <input class="reg-input" id="reg-password" type="password" placeholder="Tối thiểu 8 ký tự">
+                    </div>
+                    <div class="pw-strength">
+                        <div class="pw-bar"></div><div class="pw-bar"></div><div class="pw-bar"></div><div class="pw-bar"></div>
+                    </div>
+                    <div class="pw-hint">Nhập mật khẩu để xem độ mạnh</div>
+                </div>
+
+                <hr class="reg-divider">
+                <!-- Thêm onclick để gọi hàm gửi dữ liệu -->
+                <button class="btn-submit-reg" id="btn-reg-submit" onclick="submitRegister()" disabled style="opacity:0.5;cursor:not-allowed;">🔒 &nbsp;Xác nhận email để tạo tài khoản</button>
+                <p class="reg-footer-note">Đã có tài khoản? <a href="#" onclick="hideRegister(); showLogin(); return false;">Đăng nhập ngay</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ĐĂNG NHẬP -->
+<div class="modal-overlay" id="modal-login-overlay" onclick="handleLoginOverlayClick(event)">
+    <div id="login-section">
+        <div class="reg-card">
+            <div class="reg-banner">
+                <button class="reg-close" onclick="hideLogin()">✕</button>
+                <h2>Chào mừng trở lại</h2>
+                <p>Đăng nhập để tiếp tục hành trình khám phá cùng StayViet</p>
+            </div>
+            <div class="reg-body">
+                <div class="reg-field">
+                    <label class="reg-label">Tên đăng nhập</label>
+                    <div class="reg-input-wrap">
+                        <span class="reg-input-icon">🔖</span>
+                        <input class="reg-input" id="login-username" type="text" placeholder="nguyenvana123">
+                    </div>
+                </div>
+
+                <div class="reg-field">
+                    <label class="reg-label">Mật khẩu</label>
+                    <div class="reg-input-wrap">
+                        <span class="reg-input-icon">🔒</span>
+                        <input class="reg-input" id="login-password" type="password" placeholder="••••••••">
+                    </div>
+                    <div style="text-align: right; margin-top: 8px;">
+                        <a href="#" onclick="showForgotPassword(); return false;" style="font-size: 12px; color: var(--blue); text-decoration: none; font-weight: 500;">Quên mật khẩu?</a>
+                    </div>
+                </div>
+
+                <hr class="reg-divider">
+                <button class="btn-submit-reg" onclick="submitLogin()">🚀 &nbsp;Đăng nhập ngay</button>
+                <p class="reg-footer-note">Chưa có tài khoản? <a href="#" onclick="hideLogin(); showRegister(); return false;">Đăng ký miễn phí</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ĐỔI MẬT KHẨU (QUÊN MẬT KHẨU) -->
+<div class="modal-overlay" id="modal-forgot-overlay" onclick="handleForgotOverlayClick(event)">
+    <div id="forgot-section">
+        <div class="reg-card">
+
+            <!-- BƯỚC 1: Nhập email -->
+            <div id="fp-step-1">
+                <div class="reg-banner" style="background: linear-gradient(135deg,#1a2744 0%,#2d4a8a 100%);">
+                    <button class="reg-close" onclick="hideForgotPassword()">✕</button>
+                    <h2>Quên mật khẩu?</h2>
+                    <p>Nhập email của bạn — chúng tôi sẽ gửi mã OTP xác nhận</p>
+                </div>
+                <div class="reg-body">
+                    <div class="fp-step-indicator">
+                        <div class="fp-step active" id="fp-dot-1">1</div>
+                        <div class="fp-step-line"></div>
+                        <div class="fp-step" id="fp-dot-2">2</div>
+                        <div class="fp-step-line"></div>
+                        <div class="fp-step" id="fp-dot-3">3</div>
+                    </div>
+                    <p class="fp-step-label">Bước 1 / 3 — Xác nhận email</p>
+
+                    <div class="reg-field">
+                        <label class="reg-label">Email đã đăng ký</label>
+                        <div class="reg-input-wrap">
+                            <span class="reg-input-icon">✉️</span>
+                            <input class="reg-input" id="fp-email" type="email" placeholder="example@email.com">
+                        </div>
+                    </div>
+
+                    <div id="fp-email-msg" class="fp-msg"></div>
+
+                    <hr class="reg-divider">
+                    <button class="btn-submit-reg" id="fp-btn-send-otp" onclick="fpSendOtp()">
+                        📨 &nbsp;Gửi mã OTP
+                    </button>
+                    <p class="reg-footer-note">Nhớ mật khẩu rồi? <a href="#" onclick="hideForgotPassword(); showLogin(); return false;">Quay lại đăng nhập</a></p>
+                </div>
+            </div>
+
+            <!-- BƯỚC 2: Nhập OTP -->
+            <div id="fp-step-2" style="display:none;">
+                <div class="reg-banner" style="background: linear-gradient(135deg,#1a2744 0%,#2d4a8a 100%);">
+                    <button class="reg-close" onclick="hideForgotPassword()">✕</button>
+                    <h2>Nhập mã OTP</h2>
+                    <p id="fp-otp-subtitle">Mã 4 số đã gửi đến email của bạn</p>
+                </div>
+                <div class="reg-body">
+                    <div class="fp-step-indicator">
+                        <div class="fp-step done" id="fp-dot-1b">✓</div>
+                        <div class="fp-step-line fp-line-done"></div>
+                        <div class="fp-step active" id="fp-dot-2b">2</div>
+                        <div class="fp-step-line"></div>
+                        <div class="fp-step" id="fp-dot-3b">3</div>
+                    </div>
+                    <p class="fp-step-label">Bước 2 / 3 — Xác nhận OTP</p>
+
+                    <div class="reg-otp-section" style="display:block; margin-bottom:0;">
+                        <div class="reg-otp-label">📩 Nhập mã 4 số vừa gửi đến email</div>
+                        <div class="reg-otp-inputs">
+                            <input class="reg-otp-digit" id="fp-otp-0" type="text" inputmode="numeric" maxlength="1" oninput="fpOtpInput(0)" onkeydown="fpOtpKey(event,0)">
+                            <input class="reg-otp-digit" id="fp-otp-1" type="text" inputmode="numeric" maxlength="1" oninput="fpOtpInput(1)" onkeydown="fpOtpKey(event,1)">
+                            <input class="reg-otp-digit" id="fp-otp-2" type="text" inputmode="numeric" maxlength="1" oninput="fpOtpInput(2)" onkeydown="fpOtpKey(event,2)">
+                            <input class="reg-otp-digit" id="fp-otp-3" type="text" inputmode="numeric" maxlength="1" oninput="fpOtpInput(3)" onkeydown="fpOtpKey(event,3)">
+                        </div>
+                        <div class="reg-otp-status" id="fp-otp-status"></div>
+                    </div>
+
+                    <div id="fp-otp-msg" class="fp-msg" style="margin-top:10px;"></div>
+
+                    <div style="text-align:center; margin-top:12px;">
+                        <span style="font-size:12px; color:var(--gray);">Không nhận được mã? </span>
+                        <a href="#" id="fp-resend-link" onclick="fpSendOtp(true); return false;" style="font-size:12px; color:var(--blue); font-weight:600; text-decoration:none;">Gửi lại</a>
+                    </div>
+
+                    <hr class="reg-divider">
+                    <button class="btn-submit-reg" id="fp-btn-verify" onclick="fpVerifyOtp()">
+                        ✅ &nbsp;Xác nhận mã
+                    </button>
+                    <p class="reg-footer-note"><a href="#" onclick="fpGoStep(1); return false;">← Quay lại</a></p>
+                </div>
+            </div>
+
+            <!-- BƯỚC 3: Nhập mật khẩu mới -->
+            <div id="fp-step-3" style="display:none;">
+                <div class="reg-banner" style="background: linear-gradient(135deg,#065f46 0%,#059669 100%);">
+                    <button class="reg-close" onclick="hideForgotPassword()">✕</button>
+                    <h2>Đặt mật khẩu mới</h2>
+                    <p>OTP đã xác thực — hãy đặt mật khẩu mới cho tài khoản</p>
+                </div>
+                <div class="reg-body">
+                    <div class="fp-step-indicator">
+                        <div class="fp-step done">✓</div>
+                        <div class="fp-step-line fp-line-done"></div>
+                        <div class="fp-step done">✓</div>
+                        <div class="fp-step-line fp-line-done"></div>
+                        <div class="fp-step active">3</div>
+                    </div>
+                    <p class="fp-step-label">Bước 3 / 3 — Đặt mật khẩu mới</p>
+
+                    <div class="reg-field">
+                        <label class="reg-label">Mật khẩu mới</label>
+                        <div class="reg-input-wrap">
+                            <span class="reg-input-icon">🔒</span>
+                            <input class="reg-input" id="fp-new-password" type="password" placeholder="Tối thiểu 6 ký tự">
+                        </div>
+                    </div>
+
+                    <div class="reg-field">
+                        <label class="reg-label">Xác nhận mật khẩu</label>
+                        <div class="reg-input-wrap">
+                            <span class="reg-input-icon">🔐</span>
+                            <input class="reg-input" id="fp-confirm-password" type="password" placeholder="Nhập lại mật khẩu">
+                        </div>
+                    </div>
+
+                    <div id="fp-pw-msg" class="fp-msg"></div>
+
+                    <hr class="reg-divider">
+                    <button class="btn-submit-reg" id="fp-btn-save" onclick="fpSavePassword()" style="background:linear-gradient(135deg,#059669,#10b981);">
+                        🔑 &nbsp;Lưu mật khẩu mới
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

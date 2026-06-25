@@ -20,8 +20,8 @@ public interface EmployeeRepository extends JpaRepository<Employee,Long> {
     boolean existsByPhone(String phone);
     boolean existsByUserName(String userName);
     Optional<Employee> findByUserName(String username);
-    List<Employee> findByActive(boolean active);
+    List<Employee> findByActiveAndRoleNotOrderByIdAsc(boolean active, String role);
 
     // Lọc theo chi nhánh (active = true)
-    List<Employee> findByActiveTrueAndWorkBranch(String workBranch);
+    List<Employee> findByActiveTrueAndWorkBranchAndRoleNotOrderByIdAsc(String workBranch, String role);
 }

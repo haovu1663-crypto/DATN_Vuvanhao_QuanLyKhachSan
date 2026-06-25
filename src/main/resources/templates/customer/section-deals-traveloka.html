@@ -1,0 +1,77 @@
+<!-- ===== SECTION: KHUYẾN MẠI TRAVELOKA STYLE ===== -->
+<section class="promo-section promo-traveloka">
+    <div class="promo-inner">
+
+        <!-- Tabs -->
+        <div class="tvlk-tabs">
+            <button class="tvlk-tab" onclick="setPromoTab(this,'flight')">✈️ Vé máy bay</button>
+            <button class="tvlk-tab" onclick="setPromoTab(this,'hotel')">🏨 Khách sạn</button>
+            <button class="tvlk-tab" onclick="setPromoTab(this,'bus')">🚌 Bus &amp; Shuttle</button>
+            <button class="tvlk-tab" onclick="setPromoTab(this,'airport')">🚖 Đưa đón sân bay</button>
+            <button class="tvlk-tab active" onclick="setPromoTab(this,'attraction')">🎡 Điểm tham quan</button>
+        </div>
+
+        <!-- Carousel 3 banner -->
+        <div class="promo-carousel-wrap">
+            <div class="promo-carousel" id="promoCarousel">
+                <div class="promo-slide"><img src="https://res.cloudinary.com/dqsn1crl0/image/upload/v1780310355/cqb7ibaikb5w9zdghipu.png" alt="Deal 1" loading="lazy"></div>
+                <div class="promo-slide"><img src="https://res.cloudinary.com/dqsn1crl0/image/upload/v1780310422/unaquyltxfydqomfqiwk.png" alt="Deal 2" loading="lazy"></div>
+                <div class="promo-slide"><img src="https://res.cloudinary.com/dqsn1crl0/image/upload/v1780310426/kjmrishwjrhvzg4hpcir.png" alt="Deal 3" loading="lazy"></div>
+                <div class="promo-slide"><img src="https://res.cloudinary.com/dqsn1crl0/image/upload/v1780310429/el1m40dwviwwheveuxkz.png" alt="Deal 4" loading="lazy"></div>
+            </div>
+            <button class="promo-arrow promo-arrow--prev" onclick="promoSlide(-1)" aria-label="Trước">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button class="promo-arrow promo-arrow--next" onclick="promoSlide(1)" aria-label="Tiếp">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+            </button>
+        </div>
+
+        <!-- Nút See All Deals -->
+        <div class="deals-footer">
+            <a href="#" class="deals-btn-all">
+                See All Deals
+                <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><polyline stroke="#0194f3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" points="6 3 11 8 6 13"/></svg>
+            </a>
+        </div>
+
+    </div>
+</section>
+<script>
+    (function(){
+        const carousel = document.getElementById('promoCarousel');
+        const slides = carousel.querySelectorAll('.promo-slide');
+        const VISIBLE = 3;
+        const total = slides.length;
+        let current = 0, timer;
+
+        function getSlideWidth(){ return slides[0].getBoundingClientRect().width + 12; }
+
+        function goTo(n){
+            const maxIndex = total - VISIBLE;
+            current = Math.max(0, Math.min(n, maxIndex));
+            carousel.style.transform = 'translateX(-' + (current * getSlideWidth()) + 'px)';
+            document.querySelector('.promo-arrow--prev').style.opacity = current === 0 ? '0.3' : '1';
+            document.querySelector('.promo-arrow--next').style.opacity = current >= maxIndex ? '0.3' : '1';
+            resetTimer();
+        }
+
+        window.promoSlide = function(dir){ goTo(current + dir); };
+        window.setPromoTab = function(el, type){
+            document.querySelectorAll('.tvlk-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            current = 0; goTo(0);
+        };
+
+        function resetTimer(){
+            clearInterval(timer);
+            timer = setInterval(function(){
+                const maxIndex = total - VISIBLE;
+                goTo(current >= maxIndex ? 0 : current + 1);
+            }, 4000);
+        }
+
+        goTo(0);
+        resetTimer();
+    })();
+</script>

@@ -1,0 +1,49 @@
+<!-- ===== SECTION: ĐIỂM ĐẾN THU HÚT NHẤT ===== -->
+<section class="dest-section">
+    <div class="dest-inner">
+        <h2 class="dest-title">Các điểm đến thu hút nhất Việt Nam</h2>
+        <div class="dest-carousel-wrap">
+            <div class="dest-track" id="destTrack">
+                <div class="dest-card"><a href="#" onclick="selectDest('Vũng Tàu');return false;"><div class="dest-img-wrap"><img src="https://pix6.agoda.net/geo/city/17190/1_17190_02.jpg?ca=6&ce=1&s=600x&ar=1x1" alt="Vũng Tàu"></div><h3>Vũng Tàu</h3><span>6,329 chỗ ở</span></a></div>
+                <div class="dest-card"><a href="#" onclick="selectDest('Hồ Chí Minh');return false;"><div class="dest-img-wrap"><img src="https://pix6.agoda.net/geo/city/13170/1_13170_02.jpg?ca=6&ce=1&s=600x&ar=1x1" alt="Hồ Chí Minh"></div><h3>Hồ Chí Minh</h3><span>15,546 chỗ ở</span></a></div>
+                <div class="dest-card"><a href="#" onclick="selectDest('Đà Nẵng');return false;"><div class="dest-img-wrap"><img src="https://pix6.agoda.net/geo/city/16440/1_16440_02.jpg?ca=6&ce=1&s=600x&ar=1x1" alt="Đà Nẵng"></div><h3>Đà Nẵng</h3><span>5,534 chỗ ở</span></a></div>
+                <div class="dest-card"><a href="#" onclick="selectDest('Hà Nội');return false;"><div class="dest-img-wrap"><img src="https://pix6.agoda.net/geo/city/2758/065f4f2c9fa263611ab65239ecbeaff7.jpg?ce=0&s=600x&ar=1x1" alt="Hà Nội"></div><h3>Hà Nội</h3><span>10,744 chỗ ở</span></a></div>
+                <div class="dest-card"><a href="#" onclick="selectDest('Nha Trang');return false;"><div class="dest-img-wrap"><img src="https://pix6.agoda.net/geo/city/2679/1_2679_02.jpg?ca=6&ce=1&s=600x&ar=1x1" alt="Nha Trang"></div><h3>Nha Trang</h3><span>4,098 chỗ ở</span></a></div>
+                <div class="dest-card"><a href="#" onclick="selectDest('Đà Lạt');return false;"><div class="dest-img-wrap"><img src="https://pix6.agoda.net/geo/city/15932/1_15932_02.jpg?ca=6&ce=1&s=600x&ar=1x1" alt="Đà Lạt"></div><h3>Đà Lạt</h3><span>5,165 chỗ ở</span></a></div>
+                <div class="dest-card"><a href="#" onclick="selectDest('Phan Thiết');return false;"><div class="dest-img-wrap"><img src="https://pix6.agoda.net/geo/city/16264/1_16264_02.jpg?ca=6&ce=1&s=600x&ar=1x1" alt="Phan Thiết"></div><h3>Phan Thiết</h3><span>1,605 chỗ ở</span></a></div>
+                <div class="dest-card"><a href="#" onclick="selectDest('Hạ Long');return false;"><div class="dest-img-wrap"><img src="https://pix6.agoda.net/geo/city/17182/1_17182_02.jpg?ca=6&ce=1&s=600x&ar=1x1" alt="Hạ Long"></div><h3>Hạ Long</h3><span>2,981 chỗ ở</span></a></div>
+                <div class="dest-card"><a href="#" onclick="selectDest('Huế');return false;"><div class="dest-img-wrap"><img src="https://pix6.agoda.net/geo/city/3738/1_3738_02.jpg?ca=6&ce=1&s=600x&ar=1x1" alt="Huế"></div><h3>Huế</h3><span>1,093 chỗ ở</span></a></div>
+                <div class="dest-card"><a href="#" onclick="selectDest('Đảo Phú Quốc');return false;"><div class="dest-img-wrap"><img src="https://pix6.agoda.net/geo/city/17188/1_17188_02.jpg?ca=6&ce=1&s=600x&ar=1x1" alt="Phú Quốc"></div><h3>Đảo Phú Quốc</h3><span>2,236 chỗ ở</span></a></div>
+                <div class="dest-card"><a href="#" onclick="selectDest('Sapa');return false;"><div class="dest-img-wrap"><img src="https://pix6.agoda.net/geo/city/17160/1_17160_02.jpg?ca=6&ce=1&s=600x&ar=1x1" alt="Sapa"></div><h3>Sapa</h3><span>996 chỗ ở</span></a></div>
+            </div>
+            <button class="dest-arrow dest-arrow--prev" id="destPrev" onclick="slideDestCarousel(-1)" aria-label="Trước">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button class="dest-arrow dest-arrow--next" id="destNext" onclick="slideDestCarousel(1)" aria-label="Tiếp">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 6 15 12 9 18"/></svg>
+            </button>
+        </div>
+    </div>
+</section>
+<script>
+    (function(){
+        const track = document.getElementById('destTrack');
+        const cards = Array.from(track.querySelectorAll('.dest-card'));
+        const VISIBLE = 5;
+        let cur = 0;
+        function cardW(){ return cards[0].getBoundingClientRect().width + 16; }
+        function update(){
+            const max = cards.length - VISIBLE;
+            cur = Math.max(0, Math.min(cur, max));
+            track.style.transform = 'translateX(-' + (cur * cardW()) + 'px)';
+            document.getElementById('destPrev').style.opacity = cur === 0 ? '0.3' : '1';
+            document.getElementById('destNext').style.opacity = cur >= max ? '0.3' : '1';
+        }
+        window.slideDestCarousel = function(d){ cur += d; update(); };
+        window.selectDest = function(name){
+            const el = document.getElementById('destVal');
+            if(el){ el.textContent = name; el.classList.remove('placeholder'); }
+        };
+        update();
+    })();
+</script>

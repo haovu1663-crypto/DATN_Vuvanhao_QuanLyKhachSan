@@ -1,0 +1,42 @@
+<header>
+    <a class="logo" href="#">
+        <div class="logo-icon">🏨</div>
+        <span class="logo-text">Stay<span>Viet</span></span>
+    </a>
+    <div class="header-auth">
+
+        <button class="btn-login" id="btnLogin" onclick="showLogin()">Đăng nhập</button>
+        <button class="btn-register" id="btnRegister" onclick="showRegister()">Đăng ký</button>
+
+        <!-- Thông tin user (hiện sau khi đăng nhập) -->
+        <div class="user-info" id="userInfo" style="display:none;">
+            <div class="user-avatar" id="userAvatar">?</div>
+            <span class="user-fullname" id="userFullname"></span>
+        </div>
+
+        <div class="menu-wrap" id="menuWrap" style="display:none;">
+            <button class="btn-menu" id="btnMenu" onclick="toggleMenu()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                    <line x1="3" y1="6"  x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+                Menu
+            </button>
+
+            <div class="menu-dropdown" id="menuDropdown" onclick="event.stopPropagation()">
+                <div class="menu-section-title">Chuyến đi</div>
+                <button class="menu-item" onclick="menuAction('dat-phong')"><span class="menu-icon">🛏️</span>Đặt phòng</button>
+                <button class="menu-item" onclick="menuAction('lich-su')"><span class="menu-icon">🕐</span>Lịch sử đặt phòng</button>
+                <button class="menu-item" onclick="menuAction('yeu-thich')"><span class="menu-icon">❤️</span>Yêu thích</button>
+                <button class="menu-item" onclick="openServiceModal()"><span class="menu-icon">🛎️</span>Dịch vụ</button>
+                <hr class="menu-divider">
+                <div class="menu-section-title">Quản lý</div>
+                <button class="menu-item" id="menu-quan-ly-phong" onclick="menuAction('quan-ly-phong')"><span class="menu-icon">🏨</span>Quản lý phòng</button>
+                <button class="menu-item" onclick="menuAction('ho-tro')"><span class="menu-icon">💬</span>Hỗ trợ & Trợ giúp</button>
+                <hr class="menu-divider">
+                <button class="menu-item danger" onclick="handleLogout()"><span class="menu-icon">🚪</span>Đăng xuất</button>
+            </div>
+        </div>
+    </div>
+</header>

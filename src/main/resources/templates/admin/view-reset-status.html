@@ -1,0 +1,59 @@
+<!-- ===== VIEW RESET STATUS ===== -->
+<main th:fragment="view-reset-status" id="view-reset-status" class="flex-1 flex-col overflow-y-auto relative">
+    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-24 border-b border-slate-200 flex items-center justify-between px-10">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Reset Status Phòng</h1>
+            <p class="text-xs text-slate-500 font-medium">Dashboard / Rooms / Reset Status</p>
+            <p class="text-xs font-semibold mt-0.5 flex items-center gap-1.5" style="color:#2563eb;">
+                <i class="fas fa-map-marker-alt" style="font-size:10px;"></i>
+                <span id="rs-branch-text">—</span>
+            </p>
+        </div>
+        <div class="flex items-center gap-4">
+            <button onclick="rsReload()" class="flex items-center gap-2 px-5 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl font-semibold text-sm transition-all">
+                <i class="fas fa-sync-alt"></i> Tải lại
+            </button>
+            <div class="h-8 w-[1px] bg-slate-200"></div>
+            <div class="relative cursor-pointer text-slate-400 hover:text-blue-600 transition-colors" title="Thông báo">
+                <i class="far fa-bell text-xl"></i>
+                <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full border-2 border-white"></span>
+            </div>
+            <div class="h-8 w-[1px] bg-slate-200"></div>
+            <div class="flex items-center gap-3 bg-slate-50 p-1.5 pr-4 rounded-full border border-slate-100 hover:bg-slate-100 transition-all cursor-pointer" id="rs-user-chip" onclick="sharedToggleUserMenu('rs')">
+                <div id="rs-avatar" class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm flex-shrink-0"
+                     style="background: linear-gradient(135deg, #3b6fd4, #5b8fe8);">??</div>
+                <span class="text-sm font-bold text-slate-700" id="rs-greeting">Hi, ...</span>
+            </div>
+            <div id="rs-user-menu" class="hidden absolute top-[72px] right-8 z-50 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden py-1">
+                <div class="px-4 py-3 border-b border-slate-100">
+                    <p class="text-xs text-slate-400 font-medium">Đăng nhập với tư cách</p>
+                    <p class="text-sm font-bold text-slate-800 mt-0.5 truncate" id="rs-fullname-menu">—</p>
+                    <p class="text-xs text-blue-500 font-semibold mt-0.5" id="rs-role-menu">—</p>
+                </div>
+                <a href="/demo" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                    <i class="fas fa-home w-4 text-slate-400"></i> Về trang chủ
+                </a>
+                <button onclick="rfLogout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
+                    <i class="fas fa-sign-out-alt w-4"></i> Đăng xuất
+                </button>
+            </div>
+        </div>
+    </header>
+    <div class="p-10 w-full">
+        <div class="glass-card rounded-[2rem] shadow-2xl shadow-slate-200/50 p-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-700">Danh sách phòng</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Chọn trạng thái mới cho từng phòng rồi bấm <b>Lưu</b></p>
+                </div>
+                <span class="text-xs bg-blue-50 text-blue-600 font-semibold px-3 py-1.5 rounded-full" id="rs-count"></span>
+            </div>
+            <div class="rs-grid" id="rs-grid">
+                <div class="rs-loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    Đang tải danh sách phòng...
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

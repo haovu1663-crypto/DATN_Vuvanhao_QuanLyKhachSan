@@ -1,0 +1,34 @@
+<!-- ===== MODAL LỊCH SỬ ĐẶT PHÒNG ===== -->
+<div id="bh-backdrop" onclick="handleBHBackdropClick(event)">
+    <div class="bh-drawer">
+
+        <div class="bh-drawer-header">
+            <div class="bh-header-top">
+                <div>
+                    <div class="bh-header-title">Lịch Sử Đặt Phòng</div>
+                    <div class="bh-header-subtitle" id="bh-customerLabel">Đang tải...</div>
+                </div>
+                <button class="bh-close-btn" onclick="closeBookingHistory()">✕</button>
+            </div>
+            <div class="bh-tabs">
+                <button class="bh-tab-btn active" data-tab="checkout" onclick="switchTabBH('checkout', this)">
+                    <span class="bh-tab-dot"></span>Đã Trả Phòng
+                </button>
+                <button class="bh-tab-btn" data-tab="checkin" onclick="switchTabBH('checkin', this)">
+                    <span class="bh-tab-dot"></span>Đang Ở
+                </button>
+                <button class="bh-tab-btn" data-tab="pending" onclick="switchTabBH('pending', this)">
+                    <span class="bh-tab-dot"></span>Chờ Xác Nhận
+                </button>
+            </div>
+        </div>
+
+        <div class="bh-drawer-body" id="bh-drawerBody">
+            <div class="bh-state-box">
+                <div class="bh-spinner"></div>
+                <div class="bh-state-text">Đang tải dữ liệu...</div>
+            </div>
+        </div>
+
+    </div>
+</div>

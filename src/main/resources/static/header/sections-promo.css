@@ -1,0 +1,364 @@
+/* ===== PROMO SECTION: 3 BƯỚC + CAROUSEL ===== */
+.promo-section {
+    margin-top: 0;
+    background: var(--white);
+    padding: 48px 0 44px;
+    border-bottom: 1px solid var(--border);
+}
+.promo-inner { max-width: 1100px; margin: 0 auto; padding: 0 5%; }
+
+
+
+/* --- HEADER --- */
+.promo-header { text-align: center; margin-bottom: 20px; }
+.promo-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px; font-weight: 700; color: var(--navy); line-height: 1.25;
+}
+.promo-title span { color: var(--gold); position: relative; }
+.promo-title span::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: -3px;
+    height: 2px; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 2px;
+}
+
+/* --- CAROUSEL 3 ẢNH SONG SONG, TRƯỢT NGANG --- */
+.promo-carousel-wrap {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 16px;
+    margin-bottom: 36px;
+}
+.promo-carousel {
+    display: flex;
+    gap: 12px;
+    transition: transform 0.45s cubic-bezier(0.4,0,0.2,1);
+    will-change: transform;
+}
+.promo-slide {
+    flex: 0 0 calc((100% - 24px) / 3);
+    border-radius: 14px;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+}
+.promo-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.promo-arrow {
+    position: absolute; top: 50%; transform: translateY(-50%); z-index: 10;
+    background: rgba(255,255,255,0.92); border: none;
+    width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 12px rgba(26,39,68,0.18); transition: all 0.2s; color: var(--navy);
+}
+.promo-arrow:hover { background: var(--white); transform: translateY(-50%) scale(1.07); }
+.promo-arrow svg { width: 18px; height: 18px; }
+.promo-arrow--prev { left: 10px; }
+.promo-arrow--next { right: 10px; }
+
+/* --- NÚT XEM THÊM --- */
+.promo-more-btn {
+    padding: 9px 28px; border-radius: 20px;
+    border: 1.5px solid var(--border); background: var(--white);
+    color: var(--navy); font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+}
+.promo-more-btn:hover { border-color: var(--blue); color: var(--blue); }
+
+/* --- 3 BƯỚC --- */
+.steps-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px; flex-wrap: wrap;
+}
+.step-card {
+    flex: 1; min-width: 180px; max-width: 240px;
+    background: #f7f8fc; border: 1.5px solid var(--border);
+    border-radius: 16px; padding: 24px 20px 20px; text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    position: relative; overflow: hidden;
+}
+.step-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 3px; background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    opacity: 0; transition: opacity 0.25s;
+}
+.step-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(26,39,68,0.1); border-color: var(--gold); }
+.step-card:hover::before { opacity: 1; }
+.step-num {
+    font-family: 'Cormorant Garamond', serif; font-size: 36px;
+    font-weight: 600; color: var(--gold); opacity: 0.35; line-height: 1; margin-bottom: 6px;
+}
+.step-icon { font-size: 28px; margin-bottom: 8px; display: block; }
+.step-label {
+    font-family: 'Playfair Display', serif; font-size: 16px;
+    font-weight: 700; color: var(--navy); margin-bottom: 6px;
+}
+.step-desc { font-size: 13px; color: var(--gray); line-height: 1.6; }
+.step-divider { color: var(--gold-light); flex-shrink: 0; display: flex; align-items: center; padding: 0 4px; }
+.step-divider svg { width: 36px; height: 12px; }
+
+@media (max-width: 700px) {
+    .promo-info-bar { flex-direction: column; }
+    .promo-info-item { border-right: none; border-bottom: 1px solid var(--border); }
+    .promo-carousel-3col { grid-template-columns: 1fr; }
+    .promo-title { font-size: 20px; }
+    .step-divider { display: none; }
+    .steps-row { gap: 12px; }
+    .step-card { min-width: 140px; }
+}
+
+
+
+
+
+/* ===== SECTION: ĐIỂM ĐẾN THU HÚT NHẤT ===== */
+.dest-section {
+    background: var(--white);
+    padding: 36px 0 40px;
+    border-bottom: 1px solid var(--border);
+}
+.dest-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 5%;
+}
+.dest-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 20px;
+}
+.dest-carousel-wrap {
+    position: relative;
+    overflow: hidden;
+}
+.dest-track {
+    display: flex;
+    gap: 16px;
+    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+    will-change: transform;
+}
+.dest-card {
+    flex: 0 0 calc((100% - 64px) / 5);
+    min-width: 0;
+}
+.dest-card a {
+    display: block;
+    text-decoration: none;
+    color: var(--navy);
+}
+.dest-img-wrap {
+    width: 100%;
+    aspect-ratio: 1/1;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+.dest-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}
+.dest-card:hover .dest-img-wrap img {
+    transform: scale(1.05);
+}
+.dest-card h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--navy);
+    margin: 0 0 3px;
+}
+.dest-card span {
+    font-size: 12px;
+    color: var(--gray);
+}
+.dest-arrow {
+    position: absolute;
+    top: calc(50% - 28px);
+    transform: translateY(-50%);
+    background: var(--white);
+    border: 1px solid var(--border);
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 12px rgba(26,39,68,0.15);
+    transition: all 0.2s;
+    color: var(--navy);
+    z-index: 10;
+}
+.dest-arrow:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+.dest-arrow svg { width: 16px; height: 16px; }
+.dest-arrow--prev { left: -16px; }
+.dest-arrow--next { right: -16px; }
+
+/* ===== SECTION: KHUYẾN MẠI CHỖ Ở ===== */
+.deals-section {
+    background: var(--cream);
+    padding: 36px 0 40px;
+    border-bottom: 1px solid var(--border);
+}
+.deals-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 5%;
+}
+.deals-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+.deals-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--navy);
+}
+.deals-see-all {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--blue);
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+.deals-see-all:hover { opacity: 0.75; }
+
+.deals-carousel-wrap {
+    position: relative;
+    overflow: hidden;
+}
+.deals-track {
+    display: flex;
+    gap: 16px;
+    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+    will-change: transform;
+}
+.deals-card {
+    flex: 0 0 calc((100% - 32px) / 3);
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.deals-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(26,39,68,0.15);
+}
+.deals-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.deals-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--white);
+    border: 1px solid var(--border);
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 12px rgba(26,39,68,0.15);
+    transition: all 0.2s;
+    color: var(--navy);
+    z-index: 10;
+}
+.deals-arrow:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+.deals-arrow svg { width: 16px; height: 16px; }
+.deals-arrow--prev { left: -16px; }
+.deals-arrow--next { right: -16px; }
+
+/* ===== DEALS TABS & FOOTER ===== */
+.deals-tabs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+.deals-tab {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #0194f3;
+    background: #f7f9fa;
+    border: 1.5px solid #e0eefa;
+    border-radius: 24px;
+    padding: 8px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.deals-tab:hover {
+    background: #e0eefa;
+}
+.deals-tab.active {
+    background: #0194f3;
+    color: #fff;
+    border-color: #0194f3;
+}
+.deals-footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 28px;
+}
+.deals-btn-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #0194f3;
+    background: #f7f9fa;
+    border: 1.5px solid #d0e8fa;
+    border-radius: 24px;
+    padding: 10px 32px;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: 0 2px 10px rgba(1,148,243,0.08);
+}
+.deals-btn-all:hover {
+    background: #e0eefa;
+    box-shadow: 0 4px 16px rgba(1,148,243,0.15);
+}
+
+/* ===== TRAVELOKA STYLE TABS (promo section) ===== */
+.promo-traveloka { padding-top: 28px; }
+.tvlk-tabs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+.tvlk-tab {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #0194f3;
+    background: #f7f9fa;
+    border: 1.5px solid #d0e8fa;
+    border-radius: 24px;
+    padding: 8px 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.tvlk-tab:hover { background: #e0eefa; }
+.tvlk-tab.active {
+    background: #0194f3;
+    color: #fff;
+    border-color: #0194f3;
+}
+

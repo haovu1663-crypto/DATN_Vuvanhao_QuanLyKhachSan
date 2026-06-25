@@ -1,0 +1,138 @@
+/* ===== MODAL ĐẶT PHÒNG ===== */
+#modal-booking-overlay {
+    display: none; position: fixed; inset: 0; z-index: 600;
+    background: rgba(15,23,42,0.55); backdrop-filter: blur(4px);
+    align-items: center; justify-content: center; padding: 16px;
+}
+#modal-booking-overlay.show { display: flex; animation: fadeIn 0.2s ease; }
+
+#booking-section {
+    max-width: 540px; width: 100%;
+    animation: slideUp 0.35s cubic-bezier(.22,.68,0,1.2);
+    position: relative; max-height: 92vh; overflow-y: auto; border-radius: 20px;
+}
+.bk-card { background: var(--white); border-radius: 20px; box-shadow: 0 16px 60px rgba(26,39,68,0.25); overflow: hidden; }
+.bk-banner {
+    background: linear-gradient(135deg, var(--navy) 0%, #2d4a8a 100%);
+    padding: 26px 30px 22px; position: relative; overflow: hidden;
+}
+.bk-banner::before { content: '🛏️'; position: absolute; right: 24px; top: 50%; transform: translateY(-50%); font-size: 56px; opacity: 0.12; }
+.bk-banner h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--white); margin-bottom: 2px; }
+.bk-banner p  { font-size: 13px; color: rgba(255,255,255,0.55); }
+.bk-close {
+    position: absolute; top: 14px; right: 14px; width: 30px; height: 30px;
+    background: rgba(255,255,255,0.15); border: none; border-radius: 50%; color: white;
+    font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.bk-close:hover { background: rgba(255,255,255,0.3); }
+.bk-room-info {
+    display: flex; align-items: center; gap: 14px;
+    background: rgba(255,255,255,0.08); border-radius: 10px; padding: 10px 14px; margin-top: 14px;
+}
+.bk-room-icon { font-size: 28px; }
+.bk-room-name { font-size: 15px; font-weight: 700; color: #fff; }
+.bk-room-type { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 1px; }
+.bk-body { padding: 26px 30px; }
+.bk-label { font-size: 11px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase; color: var(--gray); margin-bottom: 8px; display: block; }
+.bk-date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.bk-date-box {
+    border: 1.5px solid var(--border); border-radius: 12px;
+    padding: 12px 14px; cursor: pointer; transition: all 0.2s; background: #fafafa;
+}
+.bk-date-box:hover { border-color: var(--blue); background: #fff; }
+.bk-date-box.active { border-color: var(--blue); background: #fff; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+.bk-date-icon { font-size: 16px; margin-bottom: 4px; display: block; }
+.bk-date-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--gray); }
+.bk-date-val { font-size: 15px; font-weight: 700; color: var(--navy); margin-top: 2px; }
+.bk-date-val.empty { font-size: 13px; font-weight: 400; color: #bbb; }
+.bk-cal-popup {
+    display: none; border: 1.5px solid var(--border); border-radius: 14px;
+    padding: 16px; margin-bottom: 14px; background: #fafafa;
+}
+.bk-cal-popup.open { display: block; animation: fadeDown 0.15s ease; }
+.bk-cal-months { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.bk-cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.bk-cal-nav {
+    width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border);
+    background: var(--white); cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center; color: var(--navy); transition: all 0.15s;
+}
+.bk-cal-nav:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+.bk-cal-title { font-family: 'Playfair Display', serif; font-size: 13px; font-weight: 700; color: var(--navy); }
+.bk-cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 1px; }
+.bk-dow { text-align: center; font-size: 9px; font-weight: 700; color: var(--gray); letter-spacing: 0.4px; padding: 3px 0; }
+.bk-day {
+    text-align: center; font-size: 12px; font-weight: 500; padding: 6px 2px;
+    border-radius: 6px; cursor: pointer; color: var(--navy); transition: all 0.12s; position: relative;
+}
+.bk-day:hover:not(.bk-disabled):not(.bk-empty) { background: #e8efff; }
+.bk-day.bk-disabled { color: #ddd; cursor: default; }
+.bk-day.bk-empty { cursor: default; }
+.bk-day.bk-start, .bk-day.bk-end { background: var(--blue) !important; color: #fff !important; font-weight: 700; border-radius: 6px !important; }
+.bk-day.bk-in-range { background: #dbeafe; color: var(--blue); border-radius: 0; }
+.bk-day.bk-range-s  { border-radius: 6px 0 0 6px; }
+.bk-day.bk-range-e  { border-radius: 0 6px 6px 0; }
+.bk-day.bk-today::after {
+    content: ''; position: absolute; bottom: 1px; left: 50%; transform: translateX(-50%);
+    width: 3px; height: 3px; border-radius: 50%; background: var(--gold);
+}
+.bk-nights-badge {
+    display: none; text-align: center; font-size: 12px; color: var(--blue);
+    font-weight: 600; padding: 6px; background: #eff6ff; border-radius: 8px; margin-bottom: 14px;
+}
+.bk-nights-badge.show { display: block; }
+.bk-guests-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.bk-guest-box { border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; background: #fafafa; }
+.bk-guest-ctrl { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+.bk-counter-btn {
+    width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--border);
+    background: var(--white); cursor: pointer; font-size: 16px; font-weight: 300;
+    display: flex; align-items: center; justify-content: center; color: var(--navy); transition: all 0.15s;
+}
+.bk-counter-btn:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
+.bk-counter-btn:disabled { opacity: 0.3; cursor: default; }
+.bk-counter-val { font-size: 17px; font-weight: 700; color: var(--navy); min-width: 22px; text-align: center; }
+.bk-textarea {
+    width: 100%; border: 1.5px solid var(--border); border-radius: 12px;
+    padding: 12px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--navy);
+    background: #fafafa; resize: none; outline: none; transition: all 0.2s; margin-bottom: 20px;
+}
+.bk-textarea:focus { border-color: var(--blue); background: var(--white); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+.bk-summary { background: #f0f4ff; border-radius: 12px; padding: 16px 18px; margin-bottom: 20px; }
+.bk-summary-title { font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--gray); margin-bottom: 12px; }
+.bk-sum-row { display: flex; justify-content: space-between; font-size: 14px; color: var(--navy); margin-bottom: 8px; }
+.bk-sum-row.total { font-weight: 700; font-size: 16px; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 4px; }
+.bk-sum-row.total span:last-child { color: var(--blue); }
+.btn-submit-booking {
+    width: 100%; padding: 14px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--navy), #2d4a8a);
+    color: white; font-family: 'DM Sans', sans-serif;
+    font-size: 15px; font-weight: 700; border: none; cursor: pointer;
+    transition: all 0.2s; letter-spacing: 0.3px;
+}
+.btn-submit-booking:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(26,39,68,0.35); }
+.btn-submit-booking:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* ===== EMAIL OTP TRONG FORM ĐẶT PHÒNG ===== */
+.bk-email-wrap { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 20px; }
+.bk-email-input-wrap { position: relative; flex: 1; }
+.bk-email-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 15px; pointer-events: none; }
+.bk-email-input {
+    width: 100%; padding: 12px 14px 12px 36px;
+    border: 1.5px solid var(--border); border-radius: 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--navy);
+    background: #fafafa; outline: none; transition: all 0.2s;
+}
+.bk-email-input:focus { border-color: var(--blue); background: var(--white); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+.bk-email-input.error { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220,38,38,0.1); }
+.btn-send-otp-bk {
+    flex-shrink: 0; padding: 12px 14px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--navy); font-family: 'DM Sans', sans-serif;
+    font-size: 12px; font-weight: 700; border: none; border-radius: 12px;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap; line-height: 1.4; text-align: center;
+}
+.btn-send-otp-bk:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(201,168,76,0.4); }
+.btn-send-otp-bk:disabled { background: #e0e0e0; color: #999; cursor: not-allowed; transform: none; box-shadow: none; }
+.bk-otp-hint { font-size: 11px; color: var(--gray); margin-top: -14px; margin-bottom: 16px; }
+.bk-otp-hint.success { color: #16a34a; font-weight: 600; }

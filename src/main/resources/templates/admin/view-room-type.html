@@ -1,0 +1,479 @@
+<main th:fragment="view-add-room-type" id="view-add-room-type" class="flex-1 flex-col overflow-y-auto relative">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-20 border-b border-slate-200 flex items-center justify-between px-10">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                 style="background:linear-gradient(135deg,#10b981,#059669);">
+                <i class="fas fa-plus text-white text-sm"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-slate-800">Thêm loại phòng mới</h1>
+                <p class="text-xs text-slate-400 font-medium">Dashboard / Loại phòng / Tạo mới</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="h-8 w-[1px] bg-slate-200"></div>
+            <div class="relative cursor-pointer text-slate-400 hover:text-blue-600 transition-colors">
+                <i class="far fa-bell text-xl"></i>
+                <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full border-2 border-white"></span>
+            </div>
+            <div class="h-8 w-[1px] bg-slate-200"></div>
+            <div class="flex items-center gap-3 bg-slate-50 p-1.5 pr-4 rounded-full border border-slate-100 hover:bg-slate-100 transition-all cursor-pointer" id="art-user-chip" onclick="sharedToggleUserMenu('art')">
+                <div id="art-avatar" class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm flex-shrink-0"
+                     style="background:linear-gradient(135deg,#3b6fd4,#5b8fe8);">??</div>
+                <span class="text-sm font-bold text-slate-700" id="art-greeting">Hi, ...</span>
+            </div>
+            <div id="art-user-menu" class="hidden absolute top-[72px] right-8 z-50 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden py-1">
+                <div class="px-4 py-3 border-b border-slate-100">
+                    <p class="text-xs text-slate-400 font-medium">Đăng nhập với tư cách</p>
+                    <p class="text-sm font-bold text-slate-800 mt-0.5 truncate" id="art-fullname-menu">—</p>
+                    <p class="text-xs text-blue-500 font-semibold mt-0.5" id="art-role-menu">—</p>
+                </div>
+                <a href="/demo" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                    <i class="fas fa-home w-4 text-slate-400"></i> Về trang chủ
+                </a>
+                <button onclick="rfLogout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
+                    <i class="fas fa-sign-out-alt w-4"></i> Đăng xuất
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Body -->
+    <div class="rtnew-body">
+
+        <!-- LEFT -->
+        <div class="rtnew-main">
+
+            <!-- Banner -->
+            <div class="rtnew-banner rtnew-banner-add">
+                <div class="rtnew-banner-icon" style="background:rgba(16,185,129,.15);color:#10b981;">
+                    <i class="fas fa-layer-group"></i>
+                </div>
+                <div>
+                    <div class="rtnew-banner-title">Tạo loại phòng mới</div>
+                    <div class="rtnew-banner-sub">Điền đầy đủ thông tin để thêm loại phòng vào hệ thống</div>
+                </div>
+            </div>
+
+            <!-- Section: Thông tin cơ bản -->
+            <div class="rtnew-section">
+                <div class="rtnew-section-header">
+                    <div class="rtnew-section-icon" style="background:#dbeafe;color:#1d4ed8;"><i class="fas fa-info-circle"></i></div>
+                    <span>Thông tin cơ bản</span>
+                </div>
+
+                <div class="rtnew-two-col">
+                    <div class="rtnew-field">
+                        <label class="rtnew-label">
+                            <i class="fas fa-tag" style="color:#3b82f6;"></i> Tên loại phòng <span class="rtnew-req">*</span>
+                        </label>
+                        <input id="rt-name" type="text" class="rtnew-input" placeholder="VD: Deluxe, Suite, Standard..."
+                               oninput="rtCharCount('rt-name','rt-name-count',60)" maxlength="60">
+                        <div class="rtnew-char"><span id="rt-name-count">0</span>/60</div>
+                    </div>
+                    <div class="rtnew-field">
+                        <label class="rtnew-label">
+                            <i class="fas fa-dollar-sign" style="color:#10b981;"></i> Giá mỗi đêm (VNĐ) <span class="rtnew-req">*</span>
+                        </label>
+                        <div class="rtnew-price-wrap">
+                            <span class="rtnew-price-prefix">₫</span>
+                            <input id="rt-price" type="text" class="rtnew-input" placeholder="0" oninput="rtFormatPrice(this)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rtnew-field" style="margin-top:16px;">
+                    <label class="rtnew-label">
+                        <i class="fas fa-couch" style="color:#f59e0b;"></i> Nội thất / Tiện nghi <span class="rtnew-req">*</span>
+                    </label>
+                    <input id="rt-amenities" type="text" class="rtnew-input" placeholder="VD: TV, Điều hòa, Bồn tắm, Minibar..."
+                           oninput="rtCharCount('rt-amenities','rt-amenities-count',200)" maxlength="200">
+                    <div class="rtnew-char"><span id="rt-amenities-count">0</span>/200</div>
+                </div>
+
+                <div class="rtnew-field" style="margin-top:16px;">
+                    <label class="rtnew-label">
+                        <i class="fas fa-align-left" style="color:#8b5cf6;"></i> Mô tả
+                    </label>
+                    <textarea id="rt-description" class="rtnew-textarea" placeholder="Mô tả chi tiết về loại phòng, đặc điểm nổi bật..."
+                              oninput="rtCharCount('rt-description','rt-desc-count',500)" maxlength="500"></textarea>
+                    <div class="rtnew-char"><span id="rt-desc-count">0</span>/500</div>
+                </div>
+            </div>
+
+            <!-- Section: Sức chứa -->
+            <div class="rtnew-section">
+                <div class="rtnew-section-header">
+                    <div class="rtnew-section-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-users"></i></div>
+                    <span>Sức chứa</span>
+                </div>
+                <div class="rtnew-capacity-wrap">
+                    <div class="rtnew-cap-display">
+                        <button class="rtnew-cap-btn rtnew-cap-minus" onclick="rtCapChange(-1)" type="button">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <div class="rtnew-cap-center">
+                            <span class="rtnew-cap-num" id="rt-cap-num">2</span>
+                            <span class="rtnew-cap-unit">khách</span>
+                        </div>
+                        <button class="rtnew-cap-btn rtnew-cap-plus" onclick="rtCapChange(1)" type="button">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="rtnew-cap-bar">
+                        <div class="rtnew-cap-dots" id="rt-cap-dots"></div>
+                        <div class="rtnew-cap-hint">Tối đa 15 khách</div>
+                    </div>
+                </div>
+                <input type="hidden" id="rt-capacity" value="2">
+            </div>
+
+            <!-- Section: Ảnh -->
+            <div class="rtnew-section">
+                <div class="rtnew-section-header">
+                    <div class="rtnew-section-icon" style="background:#ede9fe;color:#7c3aed;"><i class="fas fa-images"></i></div>
+                    <span>Ảnh loại phòng</span>
+                    <span class="rtnew-img-count-badge" id="rt-img-count">0 / 5</span>
+                </div>
+                <div class="rtnew-upload-zone" onclick="document.getElementById('rt-file-input').click()" id="rt-upload-zone">
+                    <input type="file" id="rt-file-input" class="hidden" multiple accept="image/png,image/jpeg,image/webp" onchange="rtHandleFiles(this.files)">
+                    <div class="rtnew-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="rtnew-upload-title">Kéo thả hoặc nhấn để chọn ảnh</div>
+                    <div class="rtnew-upload-sub">PNG, JPG, WEBP · Tối đa 5 ảnh</div>
+                </div>
+                <div class="rt-preview-grid" id="rt-preview-grid"></div>
+            </div>
+
+            <!-- Actions -->
+            <div class="rtnew-actions">
+                <button class="rtnew-btn-cancel" onclick="rtCancel()" type="button">
+                    <i class="fas fa-times"></i> Huỷ
+                </button>
+                <button class="rtnew-btn-reset" onclick="rtResetForm()" type="button">
+                    <i class="fas fa-undo"></i> Đặt lại
+                </button>
+                <button class="rtnew-btn-save" id="rt-btn-save" onclick="rtSubmit()" type="button">
+                    <i class="fas fa-paper-plane"></i> Lưu loại phòng
+                </button>
+            </div>
+        </div>
+
+        <!-- RIGHT: tips -->
+        <div class="rtnew-side">
+            <div class="rtnew-tips-card">
+                <div class="rtnew-tips-header">
+                    <i class="fas fa-lightbulb"></i> Hướng dẫn
+                </div>
+                <div class="rtnew-tips-list">
+                    <div class="rtnew-tip-item">
+                        <div class="rtnew-tip-icon" style="background:#dbeafe;color:#1d4ed8;">1</div>
+                        <div class="rtnew-tip-text">Đặt tên loại phòng ngắn gọn, dễ nhớ (VD: <b>Deluxe</b>, <b>Suite</b>)</div>
+                    </div>
+                    <div class="rtnew-tip-item">
+                        <div class="rtnew-tip-icon" style="background:#d1fae5;color:#065f46;">2</div>
+                        <div class="rtnew-tip-text">Giá nhập theo đơn vị <b>VNĐ/đêm</b>, không cần ký tự ₫</div>
+                    </div>
+                    <div class="rtnew-tip-item">
+                        <div class="rtnew-tip-icon" style="background:#fef3c7;color:#92400e;">3</div>
+                        <div class="rtnew-tip-text">Tiện nghi liệt kê cách nhau bằng dấu phẩy để dễ đọc</div>
+                    </div>
+                    <div class="rtnew-tip-item">
+                        <div class="rtnew-tip-icon" style="background:#ede9fe;color:#5b21b6;">4</div>
+                        <div class="rtnew-tip-text">Ảnh nên có tỉ lệ <b>16:9</b> hoặc <b>4:3</b> để hiển thị đẹp nhất</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick stats placeholder -->
+            <div class="rtnew-stat-card">
+                <div class="rtnew-stat-icon"><i class="fas fa-layer-group"></i></div>
+                <div class="rtnew-stat-label">Điền đủ thông tin bắt buộc <span style="color:#ef4444;">*</span> trước khi lưu</div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<!-- ===== VIEW: UPDATE ROOM TYPE ===== -->
+<main th:fragment="view-update-room-type" id="view-update-room-type" class="flex-1 flex-col overflow-y-auto relative" style="display:none;">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-20 border-b border-slate-200 flex items-center justify-between px-10">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                 style="background:linear-gradient(135deg,#f59e0b,#d97706);">
+                <i class="fas fa-pencil-alt text-white text-sm"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-slate-800">Cập nhật loại phòng</h1>
+                <p class="text-xs text-slate-400 font-medium">Dashboard / Loại phòng / Cập nhật</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="h-8 w-[1px] bg-slate-200"></div>
+            <div class="relative cursor-pointer text-slate-400 hover:text-blue-600 transition-colors">
+                <i class="far fa-bell text-xl"></i>
+                <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full border-2 border-white"></span>
+            </div>
+            <div class="h-8 w-[1px] bg-slate-200"></div>
+            <div class="flex items-center gap-3 bg-slate-50 p-1.5 pr-4 rounded-full border border-slate-100 hover:bg-slate-100 transition-all cursor-pointer" id="urt-user-chip" onclick="sharedToggleUserMenu('urt')">
+                <div id="urt-avatar" class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm flex-shrink-0"
+                     style="background:linear-gradient(135deg,#3b6fd4,#5b8fe8);">??</div>
+                <span class="text-sm font-bold text-slate-700" id="urt-greeting">Hi, ...</span>
+            </div>
+            <div id="urt-user-menu" class="hidden absolute top-[72px] right-8 z-50 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden py-1">
+                <div class="px-4 py-3 border-b border-slate-100">
+                    <p class="text-xs text-slate-400 font-medium">Đăng nhập với tư cách</p>
+                    <p class="text-sm font-bold text-slate-800 mt-0.5 truncate" id="urt-fullname-menu">—</p>
+                    <p class="text-xs text-blue-500 font-semibold mt-0.5" id="urt-role-menu">—</p>
+                </div>
+                <a href="/demo" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                    <i class="fas fa-home w-4 text-slate-400"></i> Về trang chủ
+                </a>
+                <button onclick="rfLogout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
+                    <i class="fas fa-sign-out-alt w-4"></i> Đăng xuất
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Body -->
+    <div class="rtnew-body">
+
+        <!-- LEFT -->
+        <div class="rtnew-main">
+
+            <!-- Banner update -->
+            <div class="rtnew-banner rtnew-banner-update">
+                <div class="rtnew-banner-icon" style="background:rgba(245,158,11,.15);color:#f59e0b;">
+                    <i class="fas fa-pencil-alt"></i>
+                </div>
+                <div>
+                    <div class="rtnew-banner-title">Cập nhật loại phòng</div>
+                    <div class="rtnew-banner-sub">Tìm kiếm theo ID rồi chỉnh sửa thông tin bên dưới</div>
+                </div>
+            </div>
+
+            <!-- Search -->
+            <div class="rtnew-search-section">
+                <div class="rtnew-search-label">
+                    <i class="fas fa-search"></i> Tìm loại phòng theo ID
+                </div>
+                <div class="rtnew-search-row">
+                    <div class="rtnew-search-input-wrap">
+                        <i class="fas fa-hashtag rtnew-search-icon"></i>
+                        <input id="rtu-search-id" type="number" class="rtnew-search-input" placeholder="Nhập ID loại phòng...">
+                    </div>
+                    <button onclick="rtuFetchById()" type="button" class="rtnew-search-btn">
+                        <i class="fas fa-cloud-download-alt"></i> Tải dữ liệu
+                    </button>
+                </div>
+            </div>
+
+            <!-- Hidden ID -->
+            <input type="hidden" id="rtu-id">
+
+            <!-- Section: Thông tin cơ bản -->
+            <div class="rtnew-section">
+                <div class="rtnew-section-header">
+                    <div class="rtnew-section-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-info-circle"></i></div>
+                    <span>Thông tin cơ bản</span>
+                </div>
+
+                <div class="rtnew-two-col">
+                    <div class="rtnew-field">
+                        <label class="rtnew-label">
+                            <i class="fas fa-tag" style="color:#3b82f6;"></i> Tên loại phòng <span class="rtnew-req">*</span>
+                        </label>
+                        <input id="rtu-name" type="text" class="rtnew-input" placeholder="VD: Deluxe, Suite, Standard..."
+                               oninput="rtCharCount('rtu-name','rtu-name-count',60)" maxlength="60">
+                        <div class="rtnew-char"><span id="rtu-name-count">0</span>/60</div>
+                    </div>
+                    <div class="rtnew-field">
+                        <label class="rtnew-label">
+                            <i class="fas fa-dollar-sign" style="color:#10b981;"></i> Giá mỗi đêm (VNĐ) <span class="rtnew-req">*</span>
+                        </label>
+                        <div class="rtnew-price-wrap">
+                            <span class="rtnew-price-prefix">₫</span>
+                            <input id="rtu-price" type="text" class="rtnew-input" placeholder="0" oninput="rtuFormatPrice(this)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rtnew-field" style="margin-top:16px;">
+                    <label class="rtnew-label">
+                        <i class="fas fa-couch" style="color:#f59e0b;"></i> Nội thất / Tiện nghi <span class="rtnew-req">*</span>
+                    </label>
+                    <input id="rtu-amenities" type="text" class="rtnew-input" placeholder="VD: TV, Điều hòa, Bồn tắm, Minibar..."
+                           oninput="rtCharCount('rtu-amenities','rtu-amenities-count',200)" maxlength="200">
+                    <div class="rtnew-char"><span id="rtu-amenities-count">0</span>/200</div>
+                </div>
+
+                <div class="rtnew-field" style="margin-top:16px;">
+                    <label class="rtnew-label">
+                        <i class="fas fa-align-left" style="color:#8b5cf6;"></i> Mô tả
+                    </label>
+                    <textarea id="rtu-description" class="rtnew-textarea" placeholder="Mô tả chi tiết về loại phòng..."
+                              oninput="rtCharCount('rtu-description','rtu-desc-count',500)" maxlength="500"></textarea>
+                    <div class="rtnew-char"><span id="rtu-desc-count">0</span>/500</div>
+                </div>
+            </div>
+
+            <!-- Section: Sức chứa -->
+            <div class="rtnew-section">
+                <div class="rtnew-section-header">
+                    <div class="rtnew-section-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-users"></i></div>
+                    <span>Sức chứa</span>
+                </div>
+                <div class="rtnew-capacity-wrap">
+                    <div class="rtnew-cap-display">
+                        <button class="rtnew-cap-btn rtnew-cap-minus" onclick="rtuCapChange(-1)" type="button">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <div class="rtnew-cap-center">
+                            <span class="rtnew-cap-num" id="rtu-cap-num">2</span>
+                            <span class="rtnew-cap-unit">khách</span>
+                        </div>
+                        <button class="rtnew-cap-btn rtnew-cap-plus" onclick="rtuCapChange(1)" type="button">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="rtnew-cap-bar">
+                        <div class="rtnew-cap-dots" id="rtu-cap-dots"></div>
+                        <div class="rtnew-cap-hint">Tối đa 15 khách</div>
+                    </div>
+                </div>
+                <input type="hidden" id="rtu-capacity" value="2">
+            </div>
+
+            <!-- Section: Ảnh -->
+            <div class="rtnew-section">
+                <div class="rtnew-section-header">
+                    <div class="rtnew-section-icon" style="background:#ede9fe;color:#7c3aed;"><i class="fas fa-images"></i></div>
+                    <span>Ảnh loại phòng</span>
+                    <span class="rtnew-img-count-badge" id="rtu-img-count">0 / 5</span>
+                </div>
+                <div class="rtnew-upload-zone" onclick="document.getElementById('rtu-file-input').click()" id="rtu-upload-zone">
+                    <input type="file" id="rtu-file-input" class="hidden" multiple accept="image/png,image/jpeg,image/webp" onchange="rtuHandleFiles(this.files)">
+                    <div class="rtnew-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <div class="rtnew-upload-title">Kéo thả hoặc nhấn để chọn ảnh mới</div>
+                    <div class="rtnew-upload-sub">PNG, JPG, WEBP · Tối đa 5 ảnh</div>
+                </div>
+                <div class="rt-preview-grid" id="rtu-preview-grid"></div>
+            </div>
+
+            <!-- Actions -->
+            <div class="rtnew-actions">
+                <button class="rtnew-btn-delete" id="rtu-btn-delete" onclick="rtuDeleteRoomType()" type="button">
+                    <i class="fas fa-trash-alt"></i> Xoá loại phòng
+                </button>
+                <button class="rtnew-btn-save rtnew-btn-update" id="rtu-btn-save" onclick="rtuSubmit()" type="button">
+                    <i class="fas fa-sync-alt"></i> Cập nhật
+                </button>
+            </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="rtnew-side">
+            <div class="rtnew-tips-card">
+                <div class="rtnew-tips-header" style="color:#b45309;border-color:#fde68a;">
+                    <i class="fas fa-pencil-alt"></i> Lưu ý khi cập nhật
+                </div>
+                <div class="rtnew-tips-list">
+                    <div class="rtnew-tip-item">
+                        <div class="rtnew-tip-icon" style="background:#fef3c7;color:#92400e;">1</div>
+                        <div class="rtnew-tip-text">Nhập đúng <b>ID loại phòng</b> rồi nhấn <b>Tải dữ liệu</b></div>
+                    </div>
+                    <div class="rtnew-tip-item">
+                        <div class="rtnew-tip-icon" style="background:#fef3c7;color:#92400e;">2</div>
+                        <div class="rtnew-tip-text">Ảnh cũ hiện trong preview — nhấn <b>✕</b> để xoá từng ảnh</div>
+                    </div>
+                    <div class="rtnew-tip-item">
+                        <div class="rtnew-tip-icon" style="background:#fee2e2;color:#991b1b;">⚠</div>
+                        <div class="rtnew-tip-text"><b>Xoá loại phòng</b> là thao tác không thể hoàn tác</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ID badge -->
+            <div class="rtnew-id-badge" id="rtu-id-display">
+                <div class="rtnew-id-label"><i class="fas fa-hashtag"></i> ID đang chỉnh sửa</div>
+                <div class="rtnew-id-val" id="rtu-id-val-display">—</div>
+            </div>
+        </div>
+
+    </div>
+</main>
+<script>
+    // ===== CAPACITY DOTS VISUAL (add & update room type) =====
+    (function() {
+        function renderDots(dotContainerId, value) {
+            const el = document.getElementById(dotContainerId);
+            if (!el) return;
+            el.innerHTML = '';
+            for (let i = 1; i <= 15; i++) {
+                const d = document.createElement('div');
+                d.className = 'rtnew-cap-dot' + (i <= value ? ' active' : '');
+                el.appendChild(d);
+            }
+        }
+
+        // Patch rtCapChange để cập nhật dots
+        const _origRtCap = window.rtCapChange;
+        window.rtCapChange = function(delta) {
+            if (_origRtCap) _origRtCap(delta);
+            const val = parseInt(document.getElementById('rt-capacity')?.value || 2);
+            renderDots('rt-cap-dots', val);
+        };
+
+        // Patch rtuCapChange
+        const _origRtuCap = window.rtuCapChange;
+        window.rtuCapChange = function(delta) {
+            if (_origRtuCap) _origRtuCap(delta);
+            const val = parseInt(document.getElementById('rtu-capacity')?.value || 2);
+            renderDots('rtu-cap-dots', val);
+            // Update ID badge
+            const idEl = document.getElementById('rtu-id');
+            const badge = document.getElementById('rtu-id-val-display');
+            if (badge && idEl) badge.textContent = idEl.value || '—';
+        };
+
+        // Patch rtuFetchById để sau khi load xong cập nhật dots + ID badge
+        document.addEventListener('DOMContentLoaded', function() {
+            renderDots('rt-cap-dots', 2);
+            renderDots('rtu-cap-dots', 2);
+
+            // Observe rtu-id changes để cập nhật badge
+            const rtuIdEl = document.getElementById('rtu-id');
+            if (rtuIdEl) {
+                const observer = new MutationObserver(function() {
+                    const badge = document.getElementById('rtu-id-val-display');
+                    if (badge) badge.textContent = rtuIdEl.value || '—';
+                });
+                observer.observe(rtuIdEl, { attributes: true, attributeFilter: ['value'] });
+                // Cũng hook vào input event
+                rtuIdEl.addEventListener('change', function() {
+                    const badge = document.getElementById('rtu-id-val-display');
+                    if (badge) badge.textContent = rtuIdEl.value || '—';
+                });
+            }
+
+            // Hook rtuFetchById success: sau 300ms cập nhật dots & badge
+            const _origFetch = window.rtuFetchById;
+            if (typeof _origFetch === 'function') {
+                window.rtuFetchById = async function() {
+                    await _origFetch();
+                    setTimeout(function() {
+                        const cap = parseInt(document.getElementById('rtu-capacity')?.value || 2);
+                        renderDots('rtu-cap-dots', cap);
+                        const idEl = document.getElementById('rtu-id');
+                        const badge = document.getElementById('rtu-id-val-display');
+                        if (badge && idEl) badge.textContent = idEl.value || '—';
+                    }, 400);
+                };
+            }
+        });
+    })();
+</script>

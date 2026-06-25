@@ -1,0 +1,60 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --navy: #1a2744;
+    --gold: #c9a84c;
+    --gold-light: #f0d080;
+    --cream: #faf8f4;
+    --white: #ffffff;
+    --gray: #8a8fa8;
+    --border: #e8e4dc;
+    --blue: #2563eb;
+    --blue-dark: #1d4ed8;
+    --shadow: 0 8px 40px rgba(26,39,68,0.13);
+    --radius: 16px;
+}
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    min-height: 100vh;
+}
+/* ===== ANIMATIONS ===== */
+@keyframes fadeDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideUp  { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn   { from { opacity: 0; } to { opacity: 1; } }
+
+/* overlay để đóng dropdown */
+.overlay { position: fixed; inset: 0; z-index: 150; display: none; }
+.overlay.active { display: block; }
+
+/* ===== DEMO CONTENT ===== */
+.demo-content { max-width: 900px; margin: 40px auto; padding: 0 20px; text-align: center; }
+.demo-content h2 { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--navy); margin-bottom: 8px; }
+.demo-content p { color: var(--gray); font-size: 14px; }
+
+/* ===== MODAL OVERLAY ===== */
+.modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(26,39,68,0.6); z-index: 999;
+    align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.show { display: flex; animation: fadeIn 0.2s ease; }
+/* ===== NAV ===== */
+.middle-nav {
+    display: flex; justify-content: center; gap: 12px;
+    padding: 8px 0;
+    background: transparent;
+    border-bottom: none;
+    position: relative;
+    z-index: 50;
+    margin-top: 0;
+}
+.btn-nav {
+    padding: 8px 18px; border: 1.5px solid rgba(255,255,255,0.45); border-radius: 25px;
+    background: rgba(255,255,255,0.18); font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    color: #fff; display: flex; align-items: center; gap: 6px;
+    backdrop-filter: blur(4px);
+}
+.btn-nav:hover, .btn-nav.active { background: var(--gold); color: var(--navy); border-color: var(--gold); }

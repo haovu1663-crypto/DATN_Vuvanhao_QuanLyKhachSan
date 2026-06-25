@@ -1,0 +1,174 @@
+<!-- ══════════ CONTACT OVERLAY ══════════ -->
+<div class="contact-overlay" id="contactOverlay" onclick="handleContactOverlayClick(event)">
+    <div class="contact-card" id="contactCard">
+
+        <button class="contact-close" onclick="closeContact()" title="Đóng">✕</button>
+
+        <div class="contact-body">
+            <!-- ── SIDEBAR ── -->
+            <aside class="contact-sidebar">
+                <div class="cs-logo">
+                    <div class="cs-logo-icon">🏨</div>
+                    <span class="cs-logo-text">Stay<span>Viet</span></span>
+                </div>
+                <p class="cs-tagline">Chúng tôi luôn sẵn sàng hỗ trợ bạn — từ tư vấn đặt phòng đến giải đáp mọi thắc mắc.</p>
+
+                <div class="cs-divider"></div>
+                <p class="cs-section-label">Liên hệ trực tiếp</p>
+
+                <ul class="cs-info-list">
+                    <li class="cs-info-item">
+                        <div class="cs-info-icon">👤</div>
+                        <div class="cs-info-content">
+                            <div class="cs-info-label">Người phụ trách</div>
+                            <div class="cs-info-value">Vũ Văn Hảo</div>
+                        </div>
+                    </li>
+                    <li class="cs-info-item">
+                        <div class="cs-info-icon">📞</div>
+                        <div class="cs-info-content">
+                            <div class="cs-info-label">Điện thoại</div>
+                            <div class="cs-info-value">
+                                <a href="tel:0965321129">0965 321 129</a>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cs-info-item">
+                        <div class="cs-info-icon">💬</div>
+                        <div class="cs-info-content">
+                            <div class="cs-info-label">Zalo</div>
+                            <div class="cs-info-value">
+                                <a href="https://zalo.me/0348425849" target="_blank" rel="noopener">0348 425 849</a>
+                                <br>
+                                <a class="zalo-badge" href="https://zalo.me/0348425849" target="_blank" rel="noopener">
+                                    <svg width="14" height="14" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#0068FF"/><text x="50%" y="53%" dominant-baseline="middle" text-anchor="middle" fill="#fff" font-size="13" font-weight="700" font-family="Arial">Z</text></svg>
+                                    Chat Zalo ngay
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cs-info-item">
+                        <div class="cs-info-icon">✉️</div>
+                        <div class="cs-info-content">
+                            <div class="cs-info-label">Email</div>
+                            <div class="cs-info-value">
+                                <a href="mailto:haovu1663@gmail.com">haovu1663@gmail.com</a>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cs-info-item">
+                        <div class="cs-info-icon">⏰</div>
+                        <div class="cs-info-content">
+                            <div class="cs-info-label">Giờ hỗ trợ</div>
+                            <div class="cs-info-value">Hàng ngày · 8:00 – 22:00</div>
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="cs-divider"></div>
+                <p class="cs-section-label">Địa chỉ</p>
+                <p style="font-size:12.5px;color:rgba(255,255,255,0.55);line-height:1.65;">
+                    Tầng 12, Tòa nhà Sun Tower<br>
+                    9 Đoàn Văn Bơ, Phường 13<br>
+                    Quận 4, TP. Hồ Chí Minh
+                </p>
+            </aside>
+
+            <!-- ── FORM ── -->
+            <div class="contact-form-area">
+                <div class="cf-form-inner" id="cfFormInner">
+                    <h2 class="cf-heading">Gửi tin nhắn</h2>
+                    <p class="cf-sub">Điền thông tin bên dưới — chúng tôi sẽ phản hồi trong vòng 30 phút.</p>
+
+                    <div style="margin-bottom:18px;">
+                        <p class="cf-label" style="margin-bottom:8px;">Chủ đề</p>
+                        <div class="cf-chips" id="cfChips">
+                            <button class="cf-chip active" onclick="selectChip(this)">Đặt phòng</button>
+                            <button class="cf-chip" onclick="selectChip(this)">Giá & Khuyến mãi</button>
+                            <button class="cf-chip" onclick="selectChip(this)">Hủy / Đổi phòng</button>
+                            <button class="cf-chip" onclick="selectChip(this)">Dịch vụ khác</button>
+                        </div>
+                    </div>
+
+                    <div class="cf-row">
+                        <div class="cf-field">
+                            <label class="cf-label" for="cfName">Họ và tên <span style="color:#e74c3c;">*</span></label>
+                            <input class="cf-input" type="text" id="cfName" placeholder="Nguyễn Văn A">
+                        </div>
+                        <div class="cf-field">
+                            <label class="cf-label" for="cfPhone">Số điện thoại <span style="color:#e74c3c;">*</span></label>
+                            <input class="cf-input" type="tel" id="cfPhone" placeholder="0912 345 678">
+                        </div>
+                    </div>
+
+                    <div class="cf-field">
+                        <label class="cf-label" for="cfEmail">Email</label>
+                        <input class="cf-input" type="email" id="cfEmail" placeholder="example@email.com">
+                    </div>
+
+                    <div class="cf-field">
+                        <label class="cf-label" for="cfMsg">Nội dung <span style="color:#e74c3c;">*</span></label>
+                        <textarea class="cf-textarea" id="cfMsg" placeholder="Mô tả yêu cầu hoặc câu hỏi của bạn..."></textarea>
+                    </div>
+
+                    <button class="cf-btn" onclick="submitContact()">
+                        ✉️ &nbsp; Gửi tin nhắn
+                    </button>
+                </div>
+
+                <!-- SUCCESS STATE -->
+                <div class="cf-success" id="cfSuccess">
+                    <div class="success-icon">✅</div>
+                    <p class="success-title">Đã gửi thành công!</p>
+                    <p class="success-desc">
+                        Cảm ơn bạn đã liên hệ.<br>
+                        <strong>Vũ Văn Hảo</strong> sẽ phản hồi sớm nhất có thể<br>
+                        qua số <strong>0965 321 129</strong> hoặc Zalo.
+                    </p>
+                    <button class="btn-back" onclick="resetContactForm()">← Gửi thêm tin nhắn</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function openContact() {
+        document.getElementById('contactOverlay').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeContact() {
+        document.getElementById('contactOverlay').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+    function handleContactOverlayClick(e) {
+        if (e.target === document.getElementById('contactOverlay')) closeContact();
+    }
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeContact();
+    });
+    function selectChip(el) {
+        document.querySelectorAll('.cf-chip').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+    }
+    function submitContact() {
+        const name  = document.getElementById('cfName').value.trim();
+        const phone = document.getElementById('cfPhone').value.trim();
+        const msg   = document.getElementById('cfMsg').value.trim();
+        if (!name)  { document.getElementById('cfName').style.borderColor  = '#e74c3c'; document.getElementById('cfName').focus();  return; }
+        if (!phone) { document.getElementById('cfPhone').style.borderColor = '#e74c3c'; document.getElementById('cfPhone').focus(); return; }
+        if (!msg)   { document.getElementById('cfMsg').style.borderColor   = '#e74c3c'; document.getElementById('cfMsg').focus();   return; }
+        /* TODO: fetch('/api/v1/contact', { method:'POST', body: JSON.stringify({name, phone, msg}) }) */
+        document.getElementById('cfFormInner').classList.add('hidden');
+        document.getElementById('cfSuccess').classList.add('show');
+    }
+    function resetContactForm() {
+        ['cfName','cfPhone','cfEmail','cfMsg'].forEach(id => {
+            document.getElementById(id).value = '';
+            document.getElementById(id).style.borderColor = '';
+        });
+        document.getElementById('cfFormInner').classList.remove('hidden');
+        document.getElementById('cfSuccess').classList.remove('show');
+    }
+</script>

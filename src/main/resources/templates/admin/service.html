@@ -1,0 +1,787 @@
+<main th:fragment="view-service" id="view-service" class="flex-1 flex-col overflow-y-auto relative" style="display:none;">
+
+    <!-- Sticky header đồng bộ với các tab khác -->
+    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-24 border-b border-slate-200 flex items-center justify-between px-10">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Service Room</h1>
+            <p class="text-xs text-slate-500 font-medium">Dashboard / Rooms / Service</p>
+            <p class="text-xs font-semibold mt-0.5 flex items-center gap-1.5" style="color:#2563eb;">
+                <i class="fas fa-map-marker-alt" style="font-size:10px;"></i>
+                <span id="sv-branch-text">—</span>
+            </p>
+        </div>
+        <div class="flex items-center gap-4">
+            <button onclick="svReload()" class="flex items-center gap-2 px-5 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl font-semibold text-sm transition-all">
+                <i class="fas fa-sync-alt"></i> Tải lại
+            </button>
+            <div class="h-8 w-[1px] bg-slate-200"></div>
+            <div class="relative cursor-pointer text-slate-400 hover:text-blue-600 transition-colors" title="Thông báo">
+                <i class="far fa-bell text-xl"></i>
+                <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full border-2 border-white"></span>
+            </div>
+            <div class="h-8 w-[1px] bg-slate-200"></div>
+            <div class="flex items-center gap-3 bg-slate-50 p-1.5 pr-4 rounded-full border border-slate-100 hover:bg-slate-100 transition-all cursor-pointer" id="sv-user-chip" onclick="sharedToggleUserMenu('sv')">
+                <div id="sv-avatar" class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm flex-shrink-0"
+                     style="background: linear-gradient(135deg, #3b6fd4, #5b8fe8);">??</div>
+                <span class="text-sm font-bold text-slate-700" id="sv-greeting">Hi, ...</span>
+            </div>
+            <div id="sv-user-menu" class="hidden absolute top-[72px] right-8 z-50 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden py-1">
+                <div class="px-4 py-3 border-b border-slate-100">
+                    <p class="text-xs text-slate-400 font-medium">Đăng nhập với tư cách</p>
+                    <p class="text-sm font-bold text-slate-800 mt-0.5 truncate" id="sv-fullname-menu">—</p>
+                    <p class="text-xs text-blue-500 font-semibold mt-0.5" id="sv-role-menu">—</p>
+                </div>
+                <a href="/demo" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                    <i class="fas fa-home w-4 text-slate-400"></i> Về trang chủ
+                </a>
+                <button onclick="rfLogout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
+                    <i class="fas fa-sign-out-alt w-4"></i> Đăng xuất
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div style="display:flex; flex-direction:column; gap:1.5rem; padding: 2rem;">
+
+        <!-- Header card (search + action buttons) -->
+        <div class="sv-header-card">
+            <div class="sv-header-left">
+                <span class="sv-header-icon"><i class="fas fa-concierge-bell"></i></span>
+                <div>
+                    <h2 class="sv-title">Phòng đang sử dụng dịch vụ</h2>
+                    <p class="sv-subtitle">Danh sách khách đang check-in tại chi nhánh</p>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div class="sv-search-wrap">
+                    <span class="sv-search-icon"><i class="fas fa-search"></i></span>
+                    <input
+                            type="text"
+                            id="svSearchInput"
+                            class="sv-search-input"
+                            placeholder="Tìm theo tên phòng..."
+                            oninput="svFilterRooms(this.value)"
+                    />
+                </div>
+                <button class="sv-add-service-header-btn" onclick="svOpenAddService(null, null)">
+                    <i class="fas fa-plus"></i>
+                    Add Service
+                </button>
+                <button class="sv-update-service-header-btn" onclick="svOpenUpdateService()">
+                    <i class="fas fa-pen"></i>
+                    Cập nhật dịch vụ
+                </button>
+            </div>
+        </div>
+
+        <!-- Bảng danh sách -->
+        <div class="sv-table-card">
+            <table class="sv-table">
+                <thead>
+                <tr>
+                    <th>ID Booking</th>
+                    <th>Tên phòng</th>
+                    <th>Tên khách</th>
+                    <th>Dịch vụ</th>
+                </tr>
+                </thead>
+                <tbody id="svTableBody">
+                <tr>
+                    <td colspan="4" class="sv-empty">
+                        <i class="fas fa-spinner fa-spin"></i> Đang tải dữ liệu...
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Trạng thái không có dữ liệu (ẩn/hiện bằng JS) -->
+        <div id="svEmptyState" class="sv-empty-state" style="display:none;">
+            <i class="fas fa-door-closed"></i>
+            <p>Không có phòng nào đang sử dụng dịch vụ.</p>
+        </div>
+
+    </div>
+</main>
+<!-- ===== ADD SERVICE MODAL ===== -->
+<div th:fragment="sv-modal-overlay" id="sv-modal-overlay" onclick="if(event.target===this)svCloseModal()">
+    <div id="sv-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="sv-modal-title">
+
+        <!-- ── Banner ── -->
+        <div class="sv-modal-banner">
+            <button class="sv-modal-close-btn" onclick="svCloseModal()" title="Đóng">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="sv-modal-banner-row">
+                <div class="sv-modal-banner-icon">
+                    <i class="fas fa-concierge-bell"></i>
+                </div>
+                <div>
+                    <h2 class="sv-modal-banner-title" id="sv-modal-title">Đăng ký dịch vụ</h2>
+                    <p class="sv-modal-banner-sub" id="sv-modal-banner-sub">Booking #— &nbsp;·&nbsp; Phòng: —</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Body ── -->
+        <div class="sv-modal-body">
+
+            <!-- Chọn loại dịch vụ (type) -->
+            <div class="sv-field" style="margin-bottom:4px;">
+                <label><i class="fas fa-tags"></i>&nbsp; Loại dịch vụ <span class="sv-required">*</span></label>
+                <div class="sv-type-bar" id="sv-type-bar">
+                    <button type="button" class="sv-type-pill active" data-type="Dịch vụ ăn uống"       onclick="svPickType(this)"><i class="fas fa-utensils"></i> Ăn uống</button>
+                    <button type="button" class="sv-type-pill"        data-type="Dịch vụ giặt ủi"       onclick="svPickType(this)"><i class="fas fa-tshirt"></i> Giặt ủi</button>
+                    <button type="button" class="sv-type-pill"        data-type="Dịch vụ spa & massage" onclick="svPickType(this)"><i class="fas fa-spa"></i> Spa &amp; Massage</button>
+                    <button type="button" class="sv-type-pill"        data-type="Dịch vụ đưa đón"       onclick="svPickType(this)"><i class="fas fa-car"></i> Đưa đón</button>
+                    <button type="button" class="sv-type-pill"        data-type="Dịch vụ thuê xe"       onclick="svPickType(this)"><i class="fas fa-motorcycle"></i> Thuê xe</button>
+                    <button type="button" class="sv-type-pill"        data-type="Dịch vụ khác"          onclick="svPickType(this)"><i class="fas fa-ellipsis-h"></i> Khác</button>
+                </div>
+            </div>
+
+            <!-- ── Tìm kiếm dịch vụ theo ID (chỉ hiện ở mode UPDATE) ── -->
+            <div id="sv-search-id-block" style="display:none; margin-top:10px;">
+                <div class="sv-search-id-wrap">
+                    <input id="sv-search-id-input"
+                           type="number" min="1"
+                           class="sv-input sv-search-id-input"
+                           placeholder="Nhập ID dịch vụ cần cập nhật..."
+                           onkeydown="if(event.key==='Enter') svSearchServiceById()">
+                    <button class="sv-search-id-btn" onclick="svSearchServiceById()">
+                        <span id="sv-search-id-spinner" class="sv-spinner" style="display:none;"></span>
+                        <i id="sv-search-id-icon" class="fas fa-search"></i>
+                        Tìm kiếm
+                    </button>
+                </div>
+                <p id="sv-search-id-msg" class="sv-search-id-msg" style="display:none;"></p>
+            </div>
+
+            <hr class="sv-divider">
+
+            <!-- Thông tin dịch vụ chung (ẩn khi chọn Giặt ủi) -->
+            <div id="sv-common-info">
+                <p class="sv-section-title"><i class="fas fa-info-circle"></i> Thông tin dịch vụ</p>
+
+                <div class="sv-field-group">
+                    <!-- Tên dịch vụ + Trạng thái -->
+                    <div class="sv-field-row">
+                        <div class="sv-field">
+                            <label for="sv-input-name">
+                                <i class="fas fa-tag"></i> Tên dịch vụ
+                                <span class="sv-required">*</span>
+                            </label>
+                            <input id="sv-input-name" class="sv-input"
+                                   type="text" placeholder="VD: Buffet sáng, Giặt hấp 5kg…"
+                                   autocomplete="off" required>
+                        </div>
+                        <div class="sv-field">
+                            <label for="sv-input-status">
+                                <i class="fas fa-circle-dot"></i> Trạng thái
+                            </label>
+                            <select id="sv-input-status" class="sv-select">
+                                <option value="true">✅ Đang hoạt động</option>
+                                <option value="false">⏸ Tạm ngừng</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Mô tả -->
+                    <div class="sv-field">
+                        <label for="sv-input-description">
+                            <i class="fas fa-align-left"></i> Mô tả
+                        </label>
+                        <textarea id="sv-input-description" class="sv-textarea"
+                                  placeholder="Mô tả ngắn về dịch vụ…"></textarea>
+                    </div>
+
+                    <!-- Giá -->
+                    <div class="sv-field">
+                        <label for="sv-input-price">
+                            <i class="fas fa-money-bill-wave"></i> Giá (VND)
+                            <span class="sv-required">*</span>
+                        </label>
+                        <div class="sv-price-wrap">
+                            <span class="sv-price-prefix">₫</span>
+                            <input id="sv-input-price" class="sv-input"
+                                   type="number" min="0" step="1000"
+                                   placeholder="0" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hình ảnh -->
+                <p class="sv-section-title"><i class="fas fa-images"></i> Hình ảnh</p>
+                <div class="sv-field" style="margin-bottom: 20px;">
+                    <div class="sv-upload-zone" id="sv-upload-zone">
+                        <input type="file" id="sv-input-images"
+                               accept="image/*" multiple
+                               onchange="svHandleImages(this.files)">
+                        <div class="sv-upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <p class="sv-upload-text">Kéo ảnh vào đây hoặc nhấn để chọn</p>
+                        <p class="sv-upload-hint">PNG, JPG, WEBP · Tối đa 5 ảnh · 5MB/ảnh</p>
+                    </div>
+                    <div class="sv-img-previews" id="sv-img-previews"></div>
+                </div>
+            </div><!-- /#sv-common-info -->
+
+            <!-- ══ PANEL GIẶT ỦI (chỉ hiện khi chọn tab Giặt ủi) ══ -->
+            <div id="sv-panel-laundry" style="display:none;">
+                <hr class="sv-divider">
+                <p class="sv-section-title"><i class="fas fa-tshirt"></i> Thông tin giặt ủi</p>
+
+                <div class="sv-field-group">
+                    <!-- Loại giặt + Đơn vị -->
+                    <div class="sv-field-row">
+                        <div class="sv-field">
+                            <label for="sv-laundry-type">
+                                <i class="fas fa-list-ul"></i> Loại dịch vụ giặt
+                                <span class="sv-required">*</span>
+                            </label>
+                            <input type="text" id="sv-laundry-type" class="sv-input"
+                                   placeholder="VD: Giặt thường, Giặt hấp, Ủi phẳng…"
+                                   oninput="svLaundryUpdatePreview && svLaundryUpdatePreview()"
+                                   autocomplete="off">
+                        </div>
+                        <div class="sv-field">
+                            <label for="sv-laundry-unit">
+                                <i class="fas fa-balance-scale"></i> Đơn vị tính
+                                <span class="sv-required">*</span>
+                            </label>
+                            <select id="sv-laundry-unit" class="sv-select" onchange="svLaundrySyncUnit && svLaundrySyncUnit()">
+                                <option value="kg">⚖️ Theo kg</option>
+                                <option value="món">👕 Theo món</option>
+                                <option value="túi">🛍️ Theo túi</option>
+                                <option value="bộ">👗 Theo bộ</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Định lượng + Thời gian hoàn thành -->
+                    <div class="sv-field-row">
+                        <div class="sv-field">
+                            <label for="sv-laundry-weight">
+                                <i class="fas fa-money-bill-wave"></i> Giá (VND)
+                                <span class="sv-required">*</span>
+                            </label>
+                            <div class="sv-price-wrap">
+                                <span class="sv-price-prefix">₫</span>
+                                <input id="sv-laundry-weight" class="sv-input"
+                                       type="number" min="0" step="1000"
+                                       placeholder="0"
+                                       style="padding-left: 30px;"
+                                       oninput="svLaundryUpdatePreview && svLaundryUpdatePreview()">
+                            </div>
+                        </div>
+                        <div class="sv-field">
+                            <label for="sv-laundry-duration">
+                                <i class="fas fa-clock"></i> Thời gian hoàn thành
+                            </label>
+                            <select id="sv-laundry-duration" class="sv-select" onchange="svLaundryUpdatePreview && svLaundryUpdatePreview()">
+                                <option value="">-- Chọn --</option>
+                                <option value="2">⚡ 2 giờ (nhanh)</option>
+                                <option value="4">🕓 4 giờ</option>
+                                <option value="8">🕗 8 giờ (tiêu chuẩn)</option>
+                                <option value="24">📅 24 giờ</option>
+                                <option value="48">📅 48 giờ</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Ghi chú đặc biệt -->
+                    <div class="sv-field">
+                        <label for="sv-laundry-note">
+                            <i class="fas fa-sticky-note"></i> Ghi chú đặc biệt
+                        </label>
+                        <textarea id="sv-laundry-note" class="sv-textarea"
+                                  placeholder="VD: Không sấy nóng, chỉ giặt tay, phân loại màu sáng/tối…"
+                                  style="height:70px;"></textarea>
+                    </div>
+
+                    <!-- Tags nhanh -->
+                    <div class="sv-field">
+                        <label><i class="fas fa-tag"></i> Tuỳ chọn nhanh</label>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;" id="sv-laundry-tags">
+                            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:#475569;cursor:pointer;">
+                                <input type="checkbox" id="sv-laundry-express" style="accent-color:#2563eb;width:14px;height:14px;" onchange="svLaundryUpdatePreview && svLaundryUpdatePreview()">
+                                ⚡ Dịch vụ khẩn
+                            </label>
+                            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:#475569;cursor:pointer;">
+                                <input type="checkbox" id="sv-laundry-delivery" style="accent-color:#2563eb;width:14px;height:14px;" onchange="svLaundryUpdatePreview && svLaundryUpdatePreview()">
+                                🚚 Giao tận phòng
+                            </label>
+                            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:#475569;cursor:pointer;">
+                                <input type="checkbox" id="sv-laundry-fold" style="accent-color:#2563eb;width:14px;height:14px;">
+                                👔 Gấp/treo gọn gàng
+                            </label>
+                            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:#475569;cursor:pointer;">
+                                <input type="checkbox" id="sv-laundry-eco" style="accent-color:#2563eb;width:14px;height:14px;">
+                                🌿 Dùng nước giặt xanh
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview tóm tắt nhỏ -->
+                <div id="sv-laundry-preview"
+                     style="display:none;margin-top:8px;padding:12px 16px;background:#eff6ff;
+                            border:1.5px solid #bfdbfe;border-radius:12px;font-size:12.5px;color:#1e40af;
+                            line-height:1.65;">
+                    <i class="fas fa-info-circle" style="margin-right:6px;"></i>
+                    <span id="sv-laundry-preview-text"></span>
+                </div>
+            </div>
+            <!-- ══ END PANEL GIẶT ỦI ══ -->
+
+        </div><!-- /.sv-modal-body -->
+
+        <!-- ── Footer ── -->
+        <div class="sv-modal-footer">
+            <button class="sv-btn-cancel" onclick="svCloseModal()">
+                <i class="fas fa-times"></i> Hủy
+            </button>
+            <button class="sv-btn-submit" id="sv-submit-btn" onclick="svSubmitService()">
+                <span class="sv-spinner"></span>
+                <i id="sv-submit-icon" class="fas fa-plus-circle sv-btn-icon"></i>
+                <span id="sv-submit-label">Đăng ký dịch vụ</span>
+            </button>
+        </div>
+
+    </div>
+</div>
+
+!-- ===== MODAL ĐẶT DỊCH VỤ CHO PHÒNG ===== -->
+<div id="sv-order-overlay"
+     onclick="if(event.target===this)svOrderClose()"
+     style="display:none;position:fixed;inset:0;z-index:10000;
+            background:rgba(15,23,42,0.55);backdrop-filter:blur(5px);
+            align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:24px;width:96%;max-width:620px;
+                max-height:90vh;overflow:hidden;display:flex;flex-direction:column;
+                box-shadow:0 28px 70px rgba(0,0,0,0.22);animation:svOrderIn .18s ease;">
+
+        <!-- Banner -->
+        <div style="background:linear-gradient(135deg,#1e3a8a,#2563eb);
+                    padding:22px 24px 18px;position:relative;flex-shrink:0;">
+            <button onclick="svOrderClose()"
+                    style="position:absolute;top:14px;right:16px;background:rgba(255,255,255,0.15);
+                           border:none;color:#fff;width:32px;height:32px;border-radius:50%;
+                           cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;">✕</button>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
+                <div style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,0.18);
+                            display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-concierge-bell" style="color:#fff;font-size:18px;"></i>
+                </div>
+                <div>
+                    <h2 style="color:#fff;font-size:17px;font-weight:800;margin:0;">Đặt dịch vụ</h2>
+                    <p id="sv-order-banner-sub" style="color:rgba(255,255,255,0.72);font-size:12px;margin:0;"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thanh tìm kiếm + Tab loại dịch vụ -->
+        <div style="padding:14px 20px 0;flex-shrink:0;">
+            <!-- Search -->
+            <div style="position:relative;margin-bottom:12px;">
+                <i class="fas fa-search" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:13px;"></i>
+                <input id="sv-order-search" type="text" placeholder="Tìm dịch vụ..."
+                       oninput="svOrderSearch(this.value)"
+                       style="width:100%;padding:10px 14px 10px 38px;border:1.5px solid #e2e8f0;
+                              border-radius:12px;font-size:13px;font-family:inherit;color:#1e293b;
+                              background:#f8fafc;outline:none;box-sizing:border-box;transition:border-color .15s;"
+                       onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e2e8f0'">
+            </div>
+            <!-- Tabs loại -->
+            <div id="sv-order-tabs" class="sv-type-bar" style="margin-bottom:4px;">
+                <div style="color:#94a3b8;font-size:12px;padding:6px 8px;">Đang tải...</div>
+            </div>
+        </div>
+
+        <!-- Danh sách sản phẩm -->
+        <div style="padding:14px 20px;overflow-y:auto;flex:1;">
+            <div id="sv-order-list" style="display:flex;flex-direction:column;gap:10px;min-height:80px;">
+                <div style="text-align:center;padding:40px 0;color:#94a3b8;">
+                    <i class="fas fa-spinner fa-spin" style="font-size:22px;margin-bottom:10px;display:block;"></i>
+                    Đang tải danh sách dịch vụ...
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer: tóm tắt + nút đặt hàng -->
+        <div style="flex-shrink:0;border-top:1.5px solid #f1f5f9;padding:16px 20px;background:#fff;">
+            <div id="sv-order-summary" style="display:none;background:#f8fafc;border:1.5px solid #e2e8f0;
+                 border-radius:14px;padding:12px 16px;margin-bottom:14px;">
+                <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;
+                             letter-spacing:.06em;margin-bottom:8px;">
+                    <i class="fas fa-receipt"></i> Tóm tắt đơn
+                </div>
+                <div id="sv-order-summary-lines" style="display:flex;flex-direction:column;gap:5px;"></div>
+                <div style="height:1px;background:#e2e8f0;margin:10px 0;"></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-size:12px;font-weight:700;color:#1e293b;">Tổng tiền</span>
+                    <span id="sv-order-total" style="font-size:15px;font-weight:800;color:#2563eb;"></span>
+                </div>
+            </div>
+            <div style="display:flex;gap:10px;">
+                <button onclick="svOrderClose()"
+                        style="flex:0 0 auto;padding:11px 20px;border-radius:12px;border:1.5px solid #e2e8f0;
+                               background:#fff;font-size:13px;font-weight:700;color:#64748b;cursor:pointer;
+                               transition:background .15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">
+                    Huỷ
+                </button>
+                <button id="sv-order-submit-btn" onclick="svOrderSubmit()"
+                        style="flex:1;padding:11px 20px;border-radius:12px;border:none;
+                               background:linear-gradient(135deg,#2563eb,#1d4ed8);
+                               font-size:13px;font-weight:700;color:#fff;cursor:pointer;
+                               box-shadow:0 4px 14px rgba(37,99,235,0.35);
+                               transition:opacity .15s;" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+                    <i class="fas fa-check-circle"></i> Xác nhận đặt dịch vụ
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    @keyframes svOrderIn { from { transform:scale(.93);opacity:0; } to { transform:scale(1);opacity:1; } }
+</style>
+<script>
+    (function () {
+        'use strict';
+
+        let _svOrderBookingId = null;
+        let _svOrderRoomName  = '';
+        let _svOrderAll       = [];   // toàn bộ danh sách từ API
+        let _svOrderFiltered  = [];   // sau khi lọc
+        let _svOrderQty       = {};   // { serviceId: quantity }
+        let _svOrderActiveType = 'ALL'; // tab đang chọn
+
+        /* ---------- MỞ MODAL ---------- */
+        window.svOpenOrderModal = async function (bookingId, roomName) {
+            _svOrderBookingId = bookingId;
+            _svOrderRoomName  = roomName;
+            _svOrderQty       = {};
+
+            const sub = document.getElementById('sv-order-banner-sub');
+            if (sub) sub.textContent = `Booking #${bookingId}  ·  Phòng: ${roomName}`;
+
+            _svOrderActiveType = 'ALL';
+
+            svOrderSummaryUpdate();
+
+            const overlay = document.getElementById('sv-order-overlay');
+            overlay.style.display = 'flex';
+
+            await svOrderLoad();
+        };
+
+        /* ---------- ĐÓNG ---------- */
+        window.svOrderClose = function () {
+            document.getElementById('sv-order-overlay').style.display = 'none';
+        };
+
+        /* ---------- LOAD DANH SÁCH TỪ API ---------- */
+        async function svOrderLoad() {
+            svOrderListHtml('<div style="text-align:center;padding:40px 0;color:#94a3b8;"><i class="fas fa-spinner fa-spin" style="font-size:22px;margin-bottom:10px;display:block;"></i>Đang tải...</div>');
+            try {
+                const token = localStorage.getItem('accessToken');
+                const res = await fetch('/api/v1/services', {
+                    headers: token ? { Authorization: 'Bearer ' + token } : {}
+                });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const json = await res.json();
+                _svOrderAll = Array.isArray(json) ? json : (Array.isArray(json.data) ? json.data : []);
+                _svOrderFiltered = [..._svOrderAll];
+                svOrderRenderTabs();
+                svOrderRender();
+            } catch (e) {
+                svOrderListHtml('<div style="text-align:center;padding:40px 0;color:#ef4444;"><i class="fas fa-exclamation-circle" style="font-size:22px;margin-bottom:10px;display:block;"></i>Không thể tải dịch vụ. Thử lại sau.</div>');
+            }
+        }
+
+        /* ---------- ICON THEO TYPE ---------- */
+        function svTypeIcon(t) {
+            if (!t || t === 'ALL')  return 'fas fa-th-large';
+            const l = t.toLowerCase();
+            if (l.includes('ăn') || l.includes('uống') || l.includes('food')) return 'fas fa-utensils';
+            if (l.includes('giặt') || l.includes('ủi') || l.includes('laundry')) return 'fas fa-tshirt';
+            if (l.includes('spa') || l.includes('massage'))  return 'fas fa-spa';
+            if (l.includes('đưa đón') || l.includes('transfer')) return 'fas fa-car';
+            if (l.includes('thuê xe') || l.includes('xe'))   return 'fas fa-motorcycle';
+            return 'fas fa-concierge-bell';
+        }
+
+        /* ---------- RENDER TABS ---------- */
+        function svOrderRenderTabs() {
+            const types  = ['ALL', ...new Set(_svOrderAll.map(s => s.type || 'Khác').filter(Boolean))];
+            const tabsEl = document.getElementById('sv-order-tabs');
+            if (!tabsEl) return;
+            tabsEl.innerHTML = types.map(t => {
+                const active = t === _svOrderActiveType;
+                const label  = t === 'ALL' ? 'Tất cả' : t;
+                return `<button type="button"
+                class="sv-type-pill${active ? ' active' : ''}"
+                data-sv-tab="${t}"
+                onclick="svOrderFilterByType('${t}')"
+            ><i class="${svTypeIcon(t)}"></i> ${label}</button>`;
+            }).join('');
+        }
+
+        /* ---------- LỌC THEO TYPE ---------- */
+        window.svOrderFilterByType = function (type) {
+            _svOrderActiveType = type;
+            svOrderApplyFilter();
+            svOrderRenderTabs();
+            svOrderRender();
+        };
+
+        /* ---------- TÌM KIẾM ---------- */
+        window.svOrderSearch = function (kw) {
+            svOrderApplyFilter(kw);
+            svOrderRender();
+        };
+
+        /* ---------- ÁP DỤNG CẢ 2 BỘ LỌC ---------- */
+        function svOrderApplyFilter(kw) {
+            const search = (kw !== undefined ? kw : (document.getElementById('sv-order-search') || {}).value || '').toLowerCase().trim();
+            _svOrderFiltered = _svOrderAll.filter(s => {
+                const matchType = _svOrderActiveType === 'ALL' || (s.type || 'Khác') === _svOrderActiveType;
+                const matchKw   = !search || (s.name || '').toLowerCase().includes(search);
+                return matchType && matchKw;
+            });
+        }
+
+        /* ---------- RENDER DANH SÁCH ---------- */
+        function svOrderRender() {
+            if (!_svOrderFiltered.length) {
+                svOrderListHtml('<div style="text-align:center;padding:32px 0;color:#94a3b8;font-size:13px;"><i class="fas fa-search" style="font-size:20px;display:block;margin-bottom:8px;"></i>Không tìm thấy dịch vụ nào.</div>');
+                return;
+            }
+
+            const html = _svOrderFiltered.map(s => {
+                const img    = (Array.isArray(s.images) && s.images[0]) ? s.images[0] : '';
+                const price  = new Intl.NumberFormat('vi-VN').format(s.price || 0);
+                const qty    = _svOrderQty[s.id] || 0;
+
+                // Kiểm tra xem có phải dịch vụ giặt ủi không
+                const isLaundry = (s.type || '').toLowerCase().includes('giặt') ||
+                    (s.type || '').toLowerCase().includes('ủi') ||
+                    (s.type || '').toLowerCase().includes('laundry');
+
+                const isSelected = _svOrderQty[s.id] ? true : false;
+
+                // ===== DỊCH VỤ GIẶT ỦI: CLICK TOGGLE (BỎ SỐ LƯỢNG) =====
+                if (isLaundry) {
+                    return `
+            <div onclick="svOrderToggleService(${s.id})"
+                 style="display:flex;align-items:center;gap:14px;padding:12px 14px;
+                        border:1.5px solid ${isSelected ? '#2563eb' : '#e2e8f0'};
+                        border-radius:16px;
+                        background:${isSelected ? '#eff6ff' : '#fafbff'};
+                        transition:border-color .15s,box-shadow .15s,background .15s;
+                        cursor:pointer;position:relative;"
+                 onmouseover="this.style.borderColor='#bfdbfe';this.style.boxShadow='0 2px 12px rgba(37,99,235,0.08)'"
+                 onmouseout="this.style.borderColor='${isSelected ? '#2563eb' : '#e2e8f0'}';this.style.boxShadow='none'">
+
+                <!-- Ảnh -->
+                <div style="width:60px;height:60px;border-radius:12px;overflow:hidden;flex-shrink:0;
+                            background:#f1f5f9;display:flex;align-items:center;justify-content:center;position:relative;">
+                    ${img
+                        ? `<img src="${img}" alt="${s.name}" style="width:100%;height:100%;object-fit:cover;">`
+                        : `<i class="fas fa-concierge-bell" style="color:#94a3b8;font-size:22px;"></i>`
+                    }
+                    ${isSelected ? `<div style="position:absolute;inset:0;background:rgba(37,99,235,0.15);display:flex;align-items:center;justify-content:center;">
+                                    <i class="fas fa-check" style="color:#2563eb;font-size:24px;font-weight:900;"></i>
+                                </div>` : ''}
+                </div>
+
+                <!-- Thông tin -->
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:2px;
+                                white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name || '—'}</div>
+                    <div style="font-size:11px;color:#64748b;margin-bottom:4px;">${s.type || ''}</div>
+                    <div style="font-size:13px;font-weight:800;color:#2563eb;">${price} ₫</div>
+                </div>
+
+                <!-- Dấu hiệu chọn -->
+                ${isSelected ? `<div style="width:32px;height:32px;border-radius:50%;background:#2563eb;
+                                            display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <i class="fas fa-check" style="color:#fff;font-size:16px;font-weight:900;"></i>
+                                </div>` : ''}
+            </div>`;
+                }
+
+                // ===== DỊCH VỤ KHÁC: GIỮ NÚT +/- NHƯ CŨ =====
+                return `
+            <div style="display:flex;align-items:center;gap:14px;padding:12px 14px;
+                        border:1.5px solid #e2e8f0;border-radius:16px;background:#fafbff;
+                        transition:border-color .15s,box-shadow .15s;"
+                 onmouseover="this.style.borderColor='#bfdbfe';this.style.boxShadow='0 2px 12px rgba(37,99,235,0.08)'"
+                 onmouseout="this.style.borderColor='#e2e8f0';this.style.boxShadow='none'">
+
+                <!-- Ảnh -->
+                <div style="width:60px;height:60px;border-radius:12px;overflow:hidden;flex-shrink:0;
+                            background:#f1f5f9;display:flex;align-items:center;justify-content:center;">
+                ${img
+                ? `<img src="${img}" alt="${s.name}" style="width:100%;height:100%;object-fit:cover;">`
+                : `<i class="fas fa-concierge-bell" style="color:#94a3b8;font-size:22px;"></i>`
+                }
+                </div>
+
+                    <!-- Thông tin -->
+                <div style="flex:1;min-width:0;">
+                <div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:2px;
+                                white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name || '—'}</div>
+                <div style="font-size:11px;color:#64748b;margin-bottom:4px;">${s.type || ''}</div>
+                <div style="font-size:13px;font-weight:800;color:#2563eb;">${price} ₫</div>
+                </div>
+
+                <!-- Bộ chọn số lượng (nút +/-) -->
+                <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+                <button onclick="svOrderChangeQty(${s.id}, -1)"
+                style="width:30px;height:30px;border-radius:8px;border:1.5px solid #e2e8f0;
+                                   background:#fff;font-size:16px;font-weight:700;color:#64748b;
+                                   cursor:pointer;display:flex;align-items:center;justify-content:center;
+                                   transition:background .1s;" ${qty === 0 ? 'disabled style="width:30px;height:30px;border-radius:8px;border:1.5px solid #e2e8f0;background:#f8fafc;font-size:16px;font-weight:700;color:#cbd5e1;cursor:not-allowed;display:flex;align-items:center;justify-content:center;"' : ''}>−</button>
+
+                <span id="sv-order-qty-${s.id}"
+                style="min-width:28px;text-align:center;font-size:14px;font-weight:800;
+                                 color:${qty > 0 ? '#2563eb' : '#94a3b8'};">${qty}</span>
+
+                <button onclick="svOrderChangeQty(${s.id}, 1)"
+                style="width:30px;height:30px;border-radius:8px;border:1.5px solid #2563eb;
+                                   background:linear-gradient(135deg,#2563eb,#1d4ed8);font-size:16px;font-weight:700;
+                                   color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;
+                                   transition:opacity .1s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">+</button>
+                </div>
+                </div>`;
+            }).join('');
+
+            svOrderListHtml(html);
+        }
+
+        /* ---------- TOGGLE DỊCH VỤ GIẶT ỦI (CHỌN/BỎ CHỌN) ---------- */
+        window.svOrderToggleService = function (serviceId) {
+            const isSelected = _svOrderQty[serviceId] ? true : false;
+            if (isSelected) {
+                delete _svOrderQty[serviceId];
+            } else {
+                _svOrderQty[serviceId] = 1; // Mặc định là 1 cho giặt ủi
+            }
+
+            // Re-render danh sách để cập nhật visual
+            svOrderRender();
+            svOrderSummaryUpdate();
+        };
+
+        /* ---------- THAY ĐỔI SỐ LƯỢNG ---------- */
+        window.svOrderChangeQty = function (serviceId, delta) {
+            const current = _svOrderQty[serviceId] || 0;
+            const next    = Math.max(0, current + delta);
+            if (next === 0) delete _svOrderQty[serviceId];
+            else _svOrderQty[serviceId] = next;
+
+            // Cập nhật inline không cần re-render toàn bộ
+            const qtyEl = document.getElementById('sv-order-qty-' + serviceId);
+            if (qtyEl) {
+                qtyEl.textContent = next;
+                qtyEl.style.color = next > 0 ? '#2563eb' : '#94a3b8';
+            }
+
+            svOrderSummaryUpdate();
+        };
+
+        /* ---------- CẬP NHẬT TÓM TẮT ---------- */
+        function svOrderSummaryUpdate() {
+            const ids  = Object.keys(_svOrderQty);
+            const box  = document.getElementById('sv-order-summary');
+            const lines= document.getElementById('sv-order-summary-lines');
+            const tot  = document.getElementById('sv-order-total');
+
+            if (!ids.length) {
+                if (box) box.style.display = 'none';
+                return;
+            }
+
+            let total = 0;
+            const lineHtml = ids.map(id => {
+                const svc = _svOrderAll.find(s => String(s.id) === String(id));
+                if (!svc) return '';
+                const qty     = _svOrderQty[id];
+                const subtotal= (svc.price || 0) * qty;
+                total += subtotal;
+                return `<div style="display:flex;justify-content:space-between;font-size:12px;color:#475569;">
+                <span>${svc.name} × ${qty}</span>
+                <span style="font-weight:600;">${new Intl.NumberFormat('vi-VN').format(subtotal)} ₫</span>
+                </div>`;
+            }).join('');
+
+            if (lines) lines.innerHTML = lineHtml;
+            if (tot)   tot.textContent = new Intl.NumberFormat('vi-VN').format(total) + ' ₫';
+            if (box)   box.style.display = 'block';
+        }
+
+        /* ---------- ĐẶT HÀNG ---------- */
+        // API: POST /api/v1/orders  — @ModelAttribute OrderRequest { bookingId, serviceId, quantity }
+        // Mỗi sản phẩm được chọn → gửi 1 request riêng (song song)
+        window.svOrderSubmit = async function () {
+            const ids = Object.keys(_svOrderQty);
+            if (!ids.length) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({ icon: 'warning', title: 'Chưa chọn dịch vụ',
+                        text: 'Vui lòng chọn ít nhất 1 dịch vụ.', confirmButtonColor: '#2563eb' });
+                } else alert('Vui lòng chọn ít nhất 1 dịch vụ.');
+                return;
+            }
+
+            const btn = document.getElementById('sv-order-submit-btn');
+            if (btn) { btn.disabled = true; btn.style.opacity = '.6'; }
+
+            try {
+                const token = localStorage.getItem('accessToken');
+                const headers = token ? { Authorization: 'Bearer ' + token } : {};
+
+                // Gửi song song — mỗi dịch vụ 1 request POST /api/v1/orders
+                const requests = ids.map(id => {
+                    const fd = new FormData();
+                    fd.append('bookingId', _svOrderBookingId);
+                    fd.append('serviceId', id);
+                    fd.append('quantity',  _svOrderQty[id]);
+                    return fetch('/api/v1/orders', {
+                        method:  'POST',
+                        headers: headers,
+                        body:    fd
+                    });
+                });
+
+                const results = await Promise.all(requests);
+                const failed  = results.filter(r => !r.ok);
+
+                if (failed.length > 0) {
+                    throw new Error(`${failed.length} đơn gửi thất bại`);
+                }
+
+                svOrderClose();
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({ toast:true, position:'top-end', icon:'success',
+                        title: `Đặt ${ids.length} dịch vụ thành công!`,
+                        showConfirmButton:false, timer:2500, timerProgressBar:true });
+                }
+            } catch (e) {
+                console.error('[svOrderSubmit]', e);
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({ icon:'error', title:'Lỗi', text: e.message || 'Đặt dịch vụ thất bại. Vui lòng thử lại.',
+                        confirmButtonColor:'#2563eb' });
+                } else alert('Đặt dịch vụ thất bại: ' + e.message);
+            } finally {
+                if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+            }
+        };
+
+        /* ---------- HELPER ---------- */
+        function svOrderListHtml(html) {
+            const el = document.getElementById('sv-order-list');
+            if (el) el.innerHTML = html;
+        }
+    })();
+</script>

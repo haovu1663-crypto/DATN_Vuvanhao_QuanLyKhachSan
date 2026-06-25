@@ -1,0 +1,98 @@
+<!-- ===== HERO SECTION ===== -->
+<div class="hero-section">
+    <div class="hero-banner">
+        <img src="https://res.cloudinary.com/dqsn1crl0/image/upload/v1780300672/bkrtwwp4rqzhtejzzabd.jpg"
+             alt="StayViet Banner" class="hero-banner__img">
+        <div class="hero-banner__overlay">
+            <div class="hero-banner__content">
+                <p class="hero-banner__sub">Chào mừng đến với</p>
+                <h1 class="hero-banner__title">Stay<span>Viet</span></h1>
+                <p class="hero-banner__desc">Khám phá không gian lưu trú đẳng cấp trên khắp Việt Nam</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="search-bar-wrapper">
+        <div class="search-bar" id="searchBar">
+            <div class="search-field" id="fieldDest" onclick="toggleDropdown('dest')">
+                <span class="field-label">📍 Điểm đến</span>
+                <span class="field-value placeholder" id="destVal">Chọn điểm đến</span>
+                <div class="dropdown-dest" id="dropDest" onclick="event.stopPropagation()">
+                    <div class="dest-search">
+                        <input type="text" placeholder="🔍  Tìm điểm đến..." id="destSearch" oninput="filterDest(this.value)">
+                    </div>
+                    <div id="destList"></div>
+                </div>
+            </div>
+            <div class="search-field" id="fieldDate" onclick="toggleDropdown('date')">
+                <span class="field-label">📅 Nhận / Trả phòng</span>
+                <span class="field-value placeholder" id="dateVal">Chọn ngày</span>
+                <div class="datepicker-popup" id="dropDate" onclick="event.stopPropagation()">
+                    <div class="cal-header">
+                        <button class="cal-nav-btn" onclick="changeMonth(-1)">&#8249;</button>
+                        <div style="display:flex;gap:60px;font-size:13px;color:var(--gray);" id="calMonthLabels"></div>
+                        <button class="cal-nav-btn" onclick="changeMonth(1)">&#8250;</button>
+                    </div>
+                    <div class="cal-months" id="calMonths"></div>
+                    <div class="cal-shortcuts">
+                        <button class="cal-shortcut" onclick="setShortcut(0)">📅 Tối nay</button>
+                        <button class="cal-shortcut" onclick="setShortcut(1)">🌙 Tối mai</button>
+                        <button class="cal-shortcut" onclick="setShortcutWeekend(0)">🏖️ Cuối tuần này</button>
+                        <button class="cal-shortcut" onclick="setShortcutWeekend(1)">✨ Cuối tuần tới</button>
+                    </div>
+                </div>
+            </div>
+            <div class="search-field" id="fieldGuests" onclick="toggleDropdown('guests')" style="border-right:none;">
+                <span class="field-label">👥 Số khách & Phòng</span>
+                <span class="field-value" id="guestsVal">2 khách, 1 phòng</span>
+                <div class="guests-popup" id="dropGuests" onclick="event.stopPropagation()">
+                    <div class="guest-row">
+                        <div class="guest-info"><div class="guest-label">Người lớn</div><div class="guest-sub">Từ 18 tuổi trở lên</div></div>
+                        <div class="counter">
+                            <button class="counter-btn" id="adultMinus" onclick="changeCount('adults',-1)">−</button>
+                            <span class="counter-val" id="adultVal">2</span>
+                            <button class="counter-btn" onclick="changeCount('adults',1)">+</button>
+                        </div>
+                    </div>
+                    <div class="guest-row">
+                        <div class="guest-info"><div class="guest-label">Trẻ em</div><div class="guest-sub">Dưới 18 tuổi</div></div>
+                        <div class="counter">
+                            <button class="counter-btn" id="childMinus" onclick="changeCount('children',-1)">−</button>
+                            <span class="counter-val" id="childVal">0</span>
+                            <button class="counter-btn" onclick="changeCount('children',1)">+</button>
+                        </div>
+                    </div>
+                    <div class="guest-row">
+                        <div class="guest-info"><div class="guest-label">Phòng</div></div>
+                        <div class="counter">
+                            <button class="counter-btn" id="roomMinus" onclick="changeCount('rooms',-1)">−</button>
+                            <span class="counter-val" id="roomVal">1</span>
+                            <button class="counter-btn" onclick="changeCount('rooms',1)">+</button>
+                        </div>
+                    </div>
+                    <div class="pet-row">
+                        <div class="guest-info"><div class="guest-label">Cho phép mang thú cưng</div><div class="guest-sub">Chỉ hiển thị nơi lưu trú cho phép thú cưng</div></div>
+                        <div class="toggle-switch" id="petToggle" onclick="togglePet()" style="margin-left:12px;"></div>
+                    </div>
+                    <div class="guests-footer">
+                        <button class="btn-reset" onclick="resetGuests()">Chọn lại</button>
+                        <button class="btn-apply" onclick="applyGuests()">Áp dụng</button>
+                    </div>
+                </div>
+            </div>
+            <button class="search-btn" onclick="doSearch()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <nav class="middle-nav">
+        <button class="btn-nav active" onclick="setActive(this); menuAction('trang-chu')">🏠 Trang chủ</button>
+        <button class="btn-nav" onclick="setActive(this)">🏊 Hồ bơi</button>
+        <button class="btn-nav" onclick="setActive(this)">🍽️ Nhà hàng</button>
+        <button class="btn-nav" onclick="setActive(this)">🌿 Spa & Thư giãn</button>
+        <button class="btn-nav" onclick="setActive(this); openContact()">📞 Liên hệ</button>
+    </nav>
+</div><!-- end .hero-section -->

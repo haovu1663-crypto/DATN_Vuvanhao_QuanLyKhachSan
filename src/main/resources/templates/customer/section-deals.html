@@ -1,0 +1,63 @@
+<!-- ===== SECTION: KHUYẾN MẠI CHỖ Ở ===== -->
+<section class="deals-section">
+    <div class="deals-inner">
+
+        <!-- Header -->
+        <div class="deals-header">
+            <h2 class="deals-title">Chương trình khuyến mại chỗ ở</h2>
+            <a href="#" class="deals-see-all">Xem tất cả <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="9 6 15 12 9 18"/></svg></a>
+        </div>
+
+        <!-- Tabs -->
+        <div class="deals-tabs">
+            <button class="deals-tab" onclick="setDealsTab(this,'flight')">✈️ Vé máy bay</button>
+            <button class="deals-tab" onclick="setDealsTab(this,'hotel')">🏨 Khách sạn</button>
+            <button class="deals-tab" onclick="setDealsTab(this,'bus')">🚌 Bus &amp; Shuttle</button>
+            <button class="deals-tab" onclick="setDealsTab(this,'airport')">🚖 Đưa đón sân bay</button>
+            <button class="deals-tab active" onclick="setDealsTab(this,'attraction')">🎡 Điểm tham quan</button>
+        </div>
+
+        <!-- Carousel -->
+        <div class="deals-carousel-wrap">
+            <div class="deals-track" id="dealsTrack">
+                <div class="deals-card"><img src="https://cdn6.agoda.net/images/WebCampaign/dealspagebanner_hp_web/vi-vn.png" alt="Deal 1"></div>
+                <div class="deals-card"><img src="https://cdn6.agoda.net/images/WebCampaign/20260330_ss_agp/home_banner_web/en-us.png" alt="Deal 2"></div>
+                <div class="deals-card"><img src="https://cdn6.agoda.net/images/WebCampaign/wcSS20230525/home_banner_web/vi-vn.png" alt="Deal 3"></div>
+                <div class="deals-card"><img src="https://cdn6.agoda.net/images/WebCampaign/2026_Q2_SS_DoubleDay66/home_banner_web/en-us.png" alt="Deal 4"></div>
+                <div class="deals-card"><img src="https://cdn6.agoda.net/images/WebCampaign/pulse_globalcampaign_asiatotheworld/home_banner_web/vi-vn.png" alt="Deal 5"></div>
+                <div class="deals-card"><img src="https://cdn6.agoda.net/images/WebCampaign/20260312_eu_getawaydeal/home_banner_web/vi-vn.png" alt="Deal 6"></div>
+                <div class="deals-card"><img src="https://cdn6.agoda.net/images/WebCampaign/2026_Q2_VN_SummerVibes/home_banner_web/vi-vn.png" alt="Deal 7"></div>
+            </div>
+            <button class="deals-arrow deals-arrow--prev" id="dealsPrev" onclick="slideDeals(-1)" aria-label="Trước">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button class="deals-arrow deals-arrow--next" id="dealsNext" onclick="slideDeals(1)" aria-label="Tiếp">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 6 15 12 9 18"/></svg>
+            </button>
+        </div>
+
+    </div>
+</section>
+<script>
+    (function(){
+        const track = document.getElementById('dealsTrack');
+        const cards = Array.from(track.querySelectorAll('.deals-card'));
+        const VISIBLE = 3;
+        let cur = 0;
+        function cardW(){ return cards[0].getBoundingClientRect().width + 16; }
+        function update(){
+            const max = Math.max(0, cards.length - VISIBLE);
+            cur = Math.max(0, Math.min(cur, max));
+            track.style.transform = 'translateX(-' + (cur * cardW()) + 'px)';
+            document.getElementById('dealsPrev').style.opacity = cur === 0 ? '0.3' : '1';
+            document.getElementById('dealsNext').style.opacity = cur >= max ? '0.3' : '1';
+        }
+        window.slideDeals = function(d){ cur += d; update(); };
+        window.setDealsTab = function(el, type){
+            document.querySelectorAll('.deals-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            cur = 0; update();
+        };
+        update();
+    })();
+</script>

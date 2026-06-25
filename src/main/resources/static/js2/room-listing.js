@@ -3,6 +3,27 @@ var allRooms    = [];   // dữ liệu gốc từ API (RoomTypeResponse[])
 var filterTypeId = null; // null = tất cả
 
 // ---- Gọi API lấy danh sách loại phòng (mặc định, không lọc) ----
+// ===== KIỂM TRA QUYỀN ĐẶT PHÒNG =====
+// Chỉ tài khoản khách hàng (ROLE_USER) hoặc chưa đăng nhập mới được đặt phòng.
+// Nhân viên / quản lý (ROLE_EMPLOYEE, ROLE_MANAGER...) sẽ bị chặn và nhận thông báo.
+function ensureCanBookRoom() {
+    const role = localStorage.getItem('userRole');
+    if (role && role !== 'ROLE_USER') {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Không thể đặt phòng',
+                text: 'Bạn không thể đặt phòng với tài khoản này.',
+                confirmButtonColor: '#1a2744'
+            });
+        } else {
+            alert('Bạn không thể đặt phòng với tài khoản này.');
+        }
+        return false;
+    }
+    return true;
+}
+
 async function loadRooms() {
     window._searchMode = false;
     showState('skeleton');
@@ -422,6 +443,7 @@ function _openRoomDetailByIdx(idx) {
 }
 
 function _openBookingByIdx(idx) {
+    if (!ensureCanBookRoom()) return;
     if (!window._roomCards || idx < 0 || idx >= window._roomCards.length) return;
     var rt = window._roomCards[idx];
     openBooking(rt);

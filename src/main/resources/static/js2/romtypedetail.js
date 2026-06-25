@@ -153,6 +153,8 @@ function renderRoomDetail(d, roomTypeName) {
     const btnBook = document.getElementById('rtd-btn-book');
     if (btnBook && d.roomType) {
         btnBook.onclick = function() {
+            if (!ensureCanBookRoom()) return;
+
             // Đảm bảo _searchMode = true để openBooking không bị chặn
             window._searchMode = true;
 

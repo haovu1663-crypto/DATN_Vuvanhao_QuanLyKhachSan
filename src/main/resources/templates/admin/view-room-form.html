@@ -1,0 +1,396 @@
+<!-- ===== MAIN: ADD / UPDATE FORM ===== -->
+<main th:fragment="view-form" id="view-form" class="flex-1 flex flex-col overflow-y-auto relative" style="display:none;">
+
+    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-20 border-b border-slate-200 flex items-center justify-between px-10">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800" id="rf-header-title">Add New Room</h1>
+            <p class="text-xs text-slate-500 font-medium" id="rf-header-breadcrumb">Dashboard / Rooms / Create</p>
+        </div>
+        <div class="flex items-center gap-6">
+            <div class="relative cursor-pointer text-slate-400 hover:text-blue-600 transition-colors" title="Thông báo">
+                <i class="far fa-bell text-xl"></i>
+                <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full border-2 border-white"></span>
+            </div>
+            <div class="h-10 w-[1px] bg-slate-200"></div>
+            <div class="flex items-center gap-3 bg-slate-50 p-1.5 pr-4 rounded-full border border-slate-100 hover:bg-slate-100 transition-all cursor-pointer" id="rf-user-chip" onclick="rfToggleUserMenu()">
+                <div id="rf-avatar" class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm flex-shrink-0"
+                     style="background: linear-gradient(135deg, #3b6fd4, #5b8fe8);">??</div>
+                <span class="text-sm font-bold text-slate-700" id="rf-greeting">Hi, ...</span>
+            </div>
+            <div id="rf-user-menu" class="hidden absolute top-[72px] right-8 z-50 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden py-1">
+                <div class="px-4 py-3 border-b border-slate-100">
+                    <p class="text-xs text-slate-400 font-medium">Đăng nhập với tư cách</p>
+                    <p class="text-sm font-bold text-slate-800 mt-0.5 truncate" id="rf-fullname-menu">—</p>
+                    <p class="text-xs text-blue-500 font-semibold mt-0.5" id="rf-role-menu">—</p>
+                </div>
+                <a href="/demo" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                    <i class="fas fa-home w-4 text-slate-400"></i> Về trang chủ
+                </a>
+                <button onclick="rfLogout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
+                    <i class="fas fa-sign-out-alt w-4"></i> Đăng xuất
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== FORM BODY ===== -->
+    <div class="rf-form-page">
+
+        <!-- Mode banner -->
+        <div id="rf-mode-banner" class="rf-mode-banner rf-mode-add">
+            <div class="rf-mode-banner-icon" id="rf-banner-icon">
+                <i class="fas fa-plus-circle"></i>
+            </div>
+            <div>
+                <div class="rf-mode-banner-title" id="rf-banner-title">Thêm phòng mới</div>
+                <div class="rf-mode-banner-sub" id="rf-banner-sub">Điền đầy đủ thông tin bên dưới để tạo phòng mới trong hệ thống.</div>
+            </div>
+            <!-- Room ID badge (update mode only) -->
+            <div id="rf-id-badge" class="rf-id-badge hidden">
+                <span class="rf-id-badge-label"><i class="fas fa-fingerprint"></i> Room ID</span>
+                <span class="rf-id-badge-val" id="rf-id-badge-val">—</span>
+            </div>
+        </div>
+
+        <div class="rf-form-layout">
+            <!-- LEFT: form card -->
+            <div class="rf-form-card">
+                <form id="addRoomForm" enctype="multipart/form-data">
+                    <input type="hidden" name="id" id="roomId">
+
+                    <!-- Search section (update mode) -->
+                    <div id="searchSection" class="hidden rf-search-section">
+                        <div class="rf-search-label">
+                            <i class="fas fa-magnifying-glass"></i> Tìm phòng theo ID
+                        </div>
+                        <div class="rf-search-row">
+                            <div class="relative flex-1">
+                                <i class="fas fa-hashtag absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                                <input type="number" id="inputSearchId" placeholder="Nhập ID phòng..."
+                                       class="input-focus rf-input rf-search-input">
+                            </div>
+                            <button type="button" onclick="fetchRoomDetail()" class="rf-btn-load">
+                                <i class="fas fa-cloud-download-alt"></i> Tải dữ liệu
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Fields grid -->
+                    <div class="rf-fields">
+
+                        <!-- Room Name — full width -->
+                        <div class="rf-field rf-field-full">
+                            <label class="rf-label">
+                                <i class="fas fa-door-open rf-label-icon" style="color:#6366f1;"></i>
+                                Tên phòng <span class="rf-required">*</span>
+                            </label>
+                            <input type="text" name="name" required
+                                   class="input-focus rf-input"
+                                   placeholder="VD: Royal Suite 702">
+                        </div>
+
+                        <!-- Branch — full width -->
+                        <div class="rf-field rf-field-full">
+                            <label class="rf-label">
+                                <i class="fas fa-map-marker-alt rf-label-icon" style="color:#3b82f6;"></i>
+                                Chi nhánh <span class="rf-required">*</span>
+                            </label>
+                            <div class="rf-select-wrap">
+                                <div class="rf-select-prefix">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <select id="workBranchSelect" name="workBranch" required class="input-focus rf-select">
+                                    <option value="">— Chọn chi nhánh —</option>
+                                    <option value="Số 1 đường Nguyễn Chí Thanh, Hà Nội">Số 1 đường Nguyễn Chí Thanh, Hà Nội</option>
+                                    <option value="Số 2 Lê Đại Hành, Hà Nội">Số 2 Lê Đại Hành, Hà Nội</option>
+                                    <option value="Số 3 đường Lê Lợi, Ninh Bình">Số 3 đường Lê Lợi, Ninh Bình</option>
+                                    <option value="Số 4 Trần Quốc Nghiễn, Hạ Long">Số 4 Trần Quốc Nghiễn, Hạ Long</option>
+                                </select>
+                                <i class="fas fa-chevron-down rf-select-arrow"></i>
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="rf-field">
+                            <label class="rf-label">
+                                <i class="fas fa-circle-dot rf-label-icon" style="color:#10b981;"></i>
+                                Trạng thái
+                            </label>
+                            <div class="rf-select-wrap">
+                                <select id="roomStatusSelect" name="status" class="input-focus rf-select rf-select-noprefix">
+                                    <option value="AVAILABLE">✅ Available</option>
+                                    <option value="CURRENTLY_TENANT">🏠 Currently Tenant</option>
+                                    <option value="CHECKED">🔑 Checked In</option>
+                                    <option value="MAINTENANCE">🔧 Maintenance</option>
+                                    <option value="CLEANING">🧹 Cleaning</option>
+                                </select>
+                                <i class="fas fa-chevron-down rf-select-arrow"></i>
+                            </div>
+                        </div>
+
+                        <!-- Category -->
+                        <div class="rf-field">
+                            <label class="rf-label">
+                                <i class="fas fa-layer-group rf-label-icon" style="color:#f59e0b;"></i>
+                                Loại phòng <span class="rf-required">*</span>
+                            </label>
+                            <div class="rf-select-wrap">
+                                <select id="roomTypeSelect" name="type_room_id" required class="input-focus rf-select rf-select-noprefix">
+                                    <option value="">Đang tải danh sách...</option>
+                                </select>
+                                <i class="fas fa-chevron-down rf-select-arrow"></i>
+                            </div>
+                        </div>
+
+                    </div><!-- /rf-fields -->
+
+                    <!-- Actions bar -->
+                    <div class="rf-actions">
+                        <button type="reset" id="btnReset" onclick="clearPreview()" class="rf-btn rf-btn-ghost">
+                            <i class="fas fa-rotate-left"></i> Reset
+                        </button>
+                        <button type="button" id="btnDelete" onclick="handleDelete()" class="hidden rf-btn rf-btn-danger">
+                            <i class="fas fa-trash"></i> Xoá phòng
+                        </button>
+                        <button type="submit" id="btnSubmit" class="rf-btn rf-btn-submit">
+                            <span id="submitText">Lưu phòng</span>
+                            <i id="submitIcon" class="fas fa-arrow-right text-xs"></i>
+                        </button>
+                    </div>
+
+                </form>
+            </div><!-- /rf-form-card -->
+
+            <!-- RIGHT: sidebar tips -->
+            <aside class="rf-aside">
+                <div class="rf-aside-card" id="rf-aside-add">
+                    <div class="rf-aside-header" style="color:#6366f1;">
+                        <i class="fas fa-lightbulb"></i> Lưu ý khi thêm phòng
+                    </div>
+                    <ul class="rf-aside-list">
+                        <li><span class="rf-aside-dot" style="background:#6366f1;"></span>Tên phòng nên ngắn gọn, dễ nhận diện (VD: "Deluxe 401").</li>
+                        <li><span class="rf-aside-dot" style="background:#3b82f6;"></span>Chọn đúng chi nhánh để phòng xuất hiện đúng khu vực.</li>
+                        <li><span class="rf-aside-dot" style="background:#f59e0b;"></span>Loại phòng ảnh hưởng đến giá và tiện nghi hiển thị.</li>
+                        <li><span class="rf-aside-dot" style="background:#10b981;"></span>Trạng thái mặc định là <b>Available</b> — có thể đổi sau.</li>
+                    </ul>
+                </div>
+
+                <div class="rf-aside-card rf-aside-card-update hidden" id="rf-aside-update">
+                    <div class="rf-aside-header" style="color:#f59e0b;">
+                        <i class="fas fa-pencil"></i> Đang chỉnh sửa phòng
+                    </div>
+                    <ul class="rf-aside-list">
+                        <li><span class="rf-aside-dot" style="background:#f59e0b;"></span>Nhập ID và bấm <b>Tải dữ liệu</b> để load thông tin cũ.</li>
+                        <li><span class="rf-aside-dot" style="background:#ef4444;"></span>Xoá phòng sẽ không thể hoàn tác — hãy chắc chắn trước khi xoá.</li>
+                        <li><span class="rf-aside-dot" style="background:#10b981;"></span>Chỉ cần sửa những trường cần thay đổi, rồi bấm <b>Cập nhật</b>.</li>
+                    </ul>
+                </div>
+
+                <div class="rf-aside-stat">
+                    <i class="fas fa-shield-check" style="color:#10b981;font-size:20px;"></i>
+                    <div>
+                        <div style="font-size:12px;font-weight:700;color:#065f46;">Dữ liệu được bảo vệ</div>
+                        <div style="font-size:11px;color:#6b7280;margin-top:2px;">Mọi thay đổi đều được lưu vào cơ sở dữ liệu tức thì.</div>
+                    </div>
+                </div>
+            </aside>
+
+        </div><!-- /rf-form-layout -->
+    </div><!-- /rf-form-page -->
+</main>
+<script>
+    /* ══════════ PANEL GIẶT ỦI ══════════
+       Hook vào svPickType của service.js để show/hide panel
+       và cập nhật live preview
+    ═══════════════════════════════════════ */
+    (function () {
+        'use strict';
+
+        const LAUNDRY_TYPE = 'Dịch vụ giặt ủi';
+
+        /* ── Hiện/ẩn panel theo loại dịch vụ ── */
+        function svLaundryTogglePanel(type) {
+            const panel = document.getElementById('sv-panel-laundry');
+            if (!panel) return;
+            const show = (type === LAUNDRY_TYPE);
+            panel.style.display = show ? 'block' : 'none';
+            if (show) svLaundryUpdatePreview();
+        }
+
+        /* ── Ghi đè / wrap svPickType sau khi service.js load ── */
+        function hookSvPickType() {
+            const _orig = window.svPickType;
+            window.svPickType = function (btn) {
+                if (typeof _orig === 'function') _orig(btn);
+                const type = btn ? btn.getAttribute('data-type') : '';
+                svLaundryTogglePanel(type);
+            };
+        }
+
+        /* ── Live preview ── */
+        function svLaundryUpdatePreview() {
+            const type     = document.getElementById('sv-laundry-type')?.value      || '';
+            const unit     = document.getElementById('sv-laundry-unit')?.value      || 'kg';
+            const weight   = document.getElementById('sv-laundry-weight')?.value    || '';
+            const duration = document.getElementById('sv-laundry-duration')?.value  || '';
+            const express  = document.getElementById('sv-laundry-express')?.checked;
+            const delivery = document.getElementById('sv-laundry-delivery')?.checked;
+
+            const preview  = document.getElementById('sv-laundry-preview');
+            const preText  = document.getElementById('sv-laundry-preview-text');
+            if (!preview || !preText) return;
+
+            if (!type) { preview.style.display = 'none'; return; }
+
+            let parts = [type];
+            if (weight) parts.push(`${weight} ${unit}`);
+            if (duration) parts.push(`hoàn thành trong ${duration}h`);
+            if (express) parts.push('dịch vụ khẩn');
+            if (delivery) parts.push('giao tận phòng');
+
+            preText.textContent = parts.join(' · ');
+            preview.style.display = 'block';
+        }
+
+        /* ── Đồng bộ suffix đơn vị vào ô định lượng ── */
+        function syncUnitSuffix() {
+            const unitEl  = document.getElementById('sv-laundry-unit');
+            const suffix  = document.getElementById('sv-laundry-unit-suffix');
+            if (unitEl && suffix) suffix.textContent = unitEl.value || 'kg';
+        }
+
+        /* ── Reset panel khi đóng modal ── */
+        function svLaundryReset() {
+            ['sv-laundry-type','sv-laundry-unit','sv-laundry-duration'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = el.tagName === 'SELECT' && el.options.length ? el.options[0].value : '';
+            });
+            ['sv-laundry-weight','sv-laundry-note'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            ['sv-laundry-express','sv-laundry-delivery','sv-laundry-fold','sv-laundry-eco'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.checked = false;
+            });
+            const preview = document.getElementById('sv-laundry-preview');
+            if (preview) preview.style.display = 'none';
+            syncUnitSuffix();
+        }
+
+        /* ── Gắn sự kiện live preview ── */
+        function bindEvents() {
+            ['sv-laundry-type','sv-laundry-unit','sv-laundry-duration',
+                'sv-laundry-weight','sv-laundry-express','sv-laundry-delivery'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', svLaundryUpdatePreview);
+                if (el && el.type === 'number') el.addEventListener('input', svLaundryUpdatePreview);
+            });
+
+            /* Sync suffix khi đổi đơn vị */
+            const unitEl = document.getElementById('sv-laundry-unit');
+            if (unitEl) unitEl.addEventListener('change', syncUnitSuffix);
+        }
+
+        /* ── Hook svCloseModal để reset ── */
+        function hookSvCloseModal() {
+            const _origClose = window.svCloseModal;
+            window.svCloseModal = function () {
+                if (typeof _origClose === 'function') _origClose();
+                svLaundryReset();
+                const panel = document.getElementById('sv-panel-laundry');
+                if (panel) panel.style.display = 'none';
+            };
+        }
+
+        /* ── Init sau khi DOM + service.js sẵn sàng ── */
+        function init() {
+            bindEvents();
+            hookSvPickType();
+            hookSvCloseModal();
+            syncUnitSuffix();
+
+            /* Nếu tab Giặt ủi đang active ngay lúc mở → hiện panel */
+            const activeBtn = document.querySelector('#sv-type-bar .sv-type-pill.active');
+            if (activeBtn && activeBtn.getAttribute('data-type') === LAUNDRY_TYPE) {
+                document.getElementById('sv-panel-laundry').style.display = 'block';
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            /* service.js có thể chưa load xong → chờ 1 tick */
+            setTimeout(init, 0);
+        }
+    })();
+</script>
+<script th:src="@{/js/sidebar.js}"></script>
+<script th:src="@{/js/room-form.js}"></script>
+<script>
+    // ===== ROOM FORM MODE BANNER (Add vs Update) =====
+    (function rfModeBanner() {
+        function setMode(isUpdate) {
+            const banner      = document.getElementById('rf-mode-banner');
+            const bannerIcon  = document.getElementById('rf-banner-icon');
+            const bannerTitle = document.getElementById('rf-banner-title');
+            const bannerSub   = document.getElementById('rf-banner-sub');
+            const idBadge     = document.getElementById('rf-id-badge');
+            const headerTitle = document.getElementById('rf-header-title');
+            const headerBread = document.getElementById('rf-header-breadcrumb');
+            const asideAdd    = document.getElementById('rf-aside-add');
+            const asideUpd    = document.getElementById('rf-aside-update');
+            const submitBtn   = document.getElementById('btnSubmit');
+
+            if (!banner) return;
+
+            if (isUpdate) {
+                banner.className     = 'rf-mode-banner rf-mode-update';
+                bannerIcon.innerHTML = '<i class="fas fa-pen-to-square"></i>';
+                bannerTitle.textContent = 'Cập nhật phòng';
+                bannerSub.textContent   = 'Nhập ID phòng và tải dữ liệu cũ, sau đó chỉnh sửa và lưu lại.';
+                if (idBadge)     idBadge.classList.remove('hidden');
+                if (headerTitle) headerTitle.textContent = 'Update Room';
+                if (headerBread) headerBread.textContent = 'Dashboard / Rooms / Edit';
+                if (asideAdd)    asideAdd.classList.add('hidden');
+                if (asideUpd)    asideUpd.classList.remove('hidden');
+                if (submitBtn)   submitBtn.style.background = 'linear-gradient(135deg,#d97706,#f59e0b)';
+                if (submitBtn)   submitBtn.style.boxShadow  = '0 4px 14px rgba(217,119,6,.30)';
+            } else {
+                banner.className     = 'rf-mode-banner rf-mode-add';
+                bannerIcon.innerHTML = '<i class="fas fa-plus-circle"></i>';
+                bannerTitle.textContent = 'Thêm phòng mới';
+                bannerSub.textContent   = 'Điền đầy đủ thông tin bên dưới để tạo phòng mới trong hệ thống.';
+                if (idBadge)     idBadge.classList.add('hidden');
+                if (headerTitle) headerTitle.textContent = 'Add New Room';
+                if (headerBread) headerBread.textContent = 'Dashboard / Rooms / Create';
+                if (asideAdd)    asideAdd.classList.remove('hidden');
+                if (asideUpd)    asideUpd.classList.add('hidden');
+                if (submitBtn)   submitBtn.style.background = 'linear-gradient(135deg,#4f46e5,#6366f1)';
+                if (submitBtn)   submitBtn.style.boxShadow  = '0 4px 14px rgba(99,102,241,.30)';
+            }
+        }
+
+        // Hook into the Room ID field to keep ID badge in sync
+        function syncIdBadge() {
+            const valEl  = document.getElementById('rf-id-badge-val');
+            const roomId = document.getElementById('roomId');
+            if (valEl && roomId) valEl.textContent = roomId.value || '—';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuAdd    = document.getElementById('menuAdd');
+            const menuUpdate = document.getElementById('menuUpdate');
+            if (menuAdd)    menuAdd.addEventListener('click',    function() { setTimeout(function() { setMode(false); }, 50); });
+            if (menuUpdate) menuUpdate.addEventListener('click', function() { setTimeout(function() { setMode(true);  }, 50); });
+
+            // Observe roomId changes (set by room-form.js after fetch)
+            const roomIdEl = document.getElementById('roomId');
+            if (roomIdEl) {
+                const obs = new MutationObserver(syncIdBadge);
+                obs.observe(roomIdEl, { attributes: true, attributeFilter: ['value'] });
+                roomIdEl.addEventListener('input', syncIdBadge);
+            }
+        });
+    })();
+</script>

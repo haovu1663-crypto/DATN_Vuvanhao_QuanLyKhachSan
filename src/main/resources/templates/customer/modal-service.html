@@ -1,0 +1,31 @@
+<!-- ===== MODAL DỊCH VỤ (sv-*) ===== -->
+<div id="sv-backdrop" onclick="handleSVBackdropClick(event)">
+    <div class="sv-drawer">
+
+        <div class="sv-drawer-header">
+            <div class="sv-header-top">
+                <div>
+                    <div class="sv-header-title">Dịch Vụ Khách Sạn</div>
+                    <div class="sv-header-subtitle">Tiện ích bổ sung dành cho khách lưu trú</div>
+                </div>
+                <button class="sv-close-btn" onclick="closeServiceModal()">✕</button>
+            </div>
+            <div class="sv-tabs">
+                <button class="sv-tab-btn active" data-tab="food" onclick="switchTabSV('food', this)">
+                    <span class="sv-tab-dot"></span>Dịch Vụ Ăn Uống
+                </button>
+                <button class="sv-tab-btn" data-tab="laundry" onclick="switchTabSV('laundry', this)">
+                    <span class="sv-tab-dot"></span>Dịch Vụ Giặt Ủi
+                </button>
+            </div>
+        </div>
+
+        <div class="sv-drawer-body" id="sv-drawerBody">
+            <div class="sv-state-box">
+                <div class="sv-spinner"></div>
+                <div class="sv-state-text">Đang tải dữ liệu...</div>
+            </div>
+        </div>
+
+    </div>
+</div>
