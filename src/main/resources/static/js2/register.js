@@ -1,20 +1,23 @@
 // ===== CẤU HÌNH API =====
-// Auto-detect API base URL từ domain hiện tại
-// Nếu frontend & backend ở Railway cùng domain, dùng window.location.origin
-// Nếu cần hardcode cho backend khác, sửa dòng dưới:
-// const API_BASE_URL = 'https://backend.railway.app';
 const API_BASE_URL = window.location.origin;
 
 // ===== TRẠNG THÁI OTP ĐĂNG KÝ =====
-let _regOtpCode    = null;   // Mã OTP từ server trả về
-let _regOtpVerified = false; // Đã xác minh thành công chưa
-let _regOtpTimer   = null;   // Interval đếm ngược
+let _regOtpCode    = null;
+let _regOtpVerified = false;
+let _regOtpTimer   = null;
 
 // ----- Gửi OTP -----
 function regSendOtp() {
     const email = document.getElementById('reg-email').value.trim();
+
+    // Validate email
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        Swal.fire({ icon: 'warning', title: 'Email không hợp lệ', text: 'Vui lòng nhập đúng địa chỉ email trước khi gửi mã.', confirmButtonColor: '#1a2744' });
+        Swal.fire({
+            icon: 'warning',
+            title: 'Email không hợp lệ',
+            text: 'Vui lòng nhập đúng địa chỉ email trước khi gửi mã.',
+            confirmButtonColor: '#1a2744'
+        });
         return;
     }
 
@@ -22,46 +25,63 @@ function regSendOtp() {
     btn.disabled = true;
     btn.innerHTML = 'Đang gửi...';
 
-    fetch(`${API_BASE_URL}/api/email/register?email=${encodeURIComponent(email)}`, { method: 'POST' })
+    // Sử dụng URL object để đảm bảo query param đúng
+    const url = new URL(`${API_BASE_URL}/api/email/register`);
+    url.searchParams.append('email', email);
+
+    console.log('Gửi OTP tới:', url.toString()); // Debug log
+
+    fetch(url.toString(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
         .then(async res => {
             const body = await res.text();
+            console.log('Response status:', res.status, 'Body:', body); // Debug log
+
             if (!res.ok) {
-                // Gắn status code vào error để catch phân biệt loại lỗi
                 const err = new Error(body);
                 err.status = res.status;
                 throw err;
             }
-            // body lúc này là số OTP dạng string (server trả ResponseEntity<Integer>)
-            return body;
+            return body.trim();
         })
         .then(otp => {
-            _regOtpCode     = otp.trim();
+            _regOtpCode = otp;
             _regOtpVerified = false;
 
             // Hiện khu vực nhập OTP
             const section = document.getElementById('reg-otp-section');
             section.classList.add('show');
+
             // Reset các ô
             [0,1,2,3].forEach(i => {
                 const el = document.getElementById('reg-otp-' + i);
                 el.value = '';
                 el.className = 'reg-otp-digit';
             });
+
             document.getElementById('reg-otp-status').textContent = '';
             document.getElementById('reg-otp-status').className = 'reg-otp-status';
             document.getElementById('reg-otp-0').focus();
 
-            // Đếm ngược 120 giây cho phép gửi lại
+            // Đếm ngược 120 giây
             regStartOtpCountdown(120);
 
-            Swal.fire({ icon: 'success', title: 'Đã gửi mã!', text: 'Kiểm tra hộp thư ' + email + ' và nhập mã 4 số.', confirmButtonColor: '#1a2744', timer: 2500, showConfirmButton: false });
+            Swal.fire({
+                icon: 'success',
+                title: 'Đã gửi mã!',
+                text: 'Kiểm tra hộp thư ' + email + ' và nhập mã 4 số.',
+                confirmButtonColor: '#1a2744',
+                timer: 2500,
+                showConfirmButton: false
+            });
         })
         .catch(err => {
             btn.disabled = false;
             btn.innerHTML = 'Gửi mã<br>xác nhận';
 
             if (err.status === 409) {
-                // Email đã tồn tại — DataConfickException trả plain text 409
                 document.getElementById('reg-email').classList.add('error');
                 Swal.fire({
                     icon: 'warning',
@@ -70,7 +90,12 @@ function regSendOtp() {
                     confirmButtonColor: '#1a2744'
                 });
             } else {
-                Swal.fire({ icon: 'error', title: 'Gửi mã thất bại', text: err.message || 'Vui lòng thử lại.', confirmButtonColor: '#dc2626' });
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gửi mã thất bại',
+                    text: err.message || 'Vui lòng thử lại.',
+                    confirmButtonColor: '#dc2626'
+                });
             }
         });
 }
@@ -108,12 +133,14 @@ function regOtpInput(idx) {
     const el  = document.getElementById('reg-otp-' + idx);
     const val = el.value.replace(/\D/g, '');
     el.value  = val ? val[0] : '';
+
     if (el.value) {
         el.classList.add('filled');
         if (idx < 3) document.getElementById('reg-otp-' + (idx+1)).focus();
     } else {
         el.classList.remove('filled');
     }
+
     // Kiểm tra ngay khi đủ 4 số
     const full = [0,1,2,3].map(i => document.getElementById('reg-otp-'+i).value).join('');
     if (full.length === 4) regVerifyOtp(full);
@@ -131,7 +158,7 @@ function regVerifyOtp(entered) {
     const submitBtn = document.getElementById('btn-reg-submit');
 
     if (entered === _regOtpCode) {
-        // ĐÚNG
+        // ✅ ĐÚNG
         _regOtpVerified = true;
         [0,1,2,3].forEach(i => {
             const el = document.getElementById('reg-otp-'+i);
@@ -140,13 +167,13 @@ function regVerifyOtp(entered) {
         });
         statusEl.textContent = '✅ Xác minh thành công! Bạn có thể tạo tài khoản.';
         statusEl.className   = 'reg-otp-status success';
-        // Mở khoá nút Tạo tài khoản
+
         submitBtn.disabled = false;
         submitBtn.style.opacity = '1';
         submitBtn.style.cursor  = 'pointer';
         submitBtn.innerHTML = '🚀 &nbsp;Tạo tài khoản';
     } else {
-        // SAI — chỉ nếu đã nhập đủ 4 số
+        // ❌ SAI
         _regOtpVerified = false;
         [0,1,2,3].forEach(i => {
             document.getElementById('reg-otp-'+i).className = 'reg-otp-digit error';
@@ -157,7 +184,7 @@ function regVerifyOtp(entered) {
         submitBtn.style.opacity = '0.5';
         submitBtn.style.cursor  = 'not-allowed';
         submitBtn.innerHTML = '🔒 &nbsp;Xác nhận email để tạo tài khoản';
-        // Xóa ô và focus lại ô đầu sau 800ms
+
         setTimeout(() => {
             [0,1,2,3].forEach(i => {
                 const el = document.getElementById('reg-otp-'+i);
@@ -172,18 +199,28 @@ function regVerifyOtp(entered) {
 // ----- Submit đăng ký -----
 function submitRegister() {
     if (!_regOtpVerified) {
-        Swal.fire({ icon: 'warning', title: 'Chưa xác minh email', text: 'Vui lòng gửi và nhập đúng mã OTP trước khi tạo tài khoản.', confirmButtonColor: '#1a2744' });
+        Swal.fire({
+            icon: 'warning',
+            title: 'Chưa xác minh email',
+            text: 'Vui lòng gửi và nhập đúng mã OTP trước khi tạo tài khoản.',
+            confirmButtonColor: '#1a2744'
+        });
         return;
     }
 
-    const fullname = document.getElementById('reg-fullname').value;
-    const email    = document.getElementById('reg-email').value;
-    const phone    = document.getElementById('reg-phone').value;
-    const username = document.getElementById('reg-username').value;
-    const password = document.getElementById('reg-password').value;
+    const fullname = document.getElementById('reg-fullname').value.trim();
+    const email    = document.getElementById('reg-email').value.trim();
+    const phone    = document.getElementById('reg-phone').value.trim();
+    const username = document.getElementById('reg-username').value.trim();
+    const password = document.getElementById('reg-password').value.trim();
 
     if (!fullname || !email || !phone || !username || !password) {
-        Swal.fire({ icon: 'warning', title: 'Thiếu thông tin', text: 'Vui lòng điền đầy đủ các trường bắt buộc!', confirmButtonColor: '#1a2744' });
+        Swal.fire({
+            icon: 'warning',
+            title: 'Thiếu thông tin',
+            text: 'Vui lòng điền đầy đủ các trường bắt buộc!',
+            confirmButtonColor: '#1a2744'
+        });
         return;
     }
 
@@ -206,19 +243,34 @@ function submitRegister() {
             return response.json();
         })
         .then(() => {
-            Swal.fire({ icon: 'success', title: 'Chúc mừng!', text: 'Tài khoản của bạn đã được tạo thành công.', confirmButtonColor: '#c9a84c', timer: 2500 });
+            Swal.fire({
+                icon: 'success',
+                title: 'Chúc mừng!',
+                text: 'Tài khoản của bạn đã được tạo thành công.',
+                confirmButtonColor: '#c9a84c',
+                timer: 2500
+            });
             hideRegister();
             document.querySelectorAll('.reg-input').forEach(input => input.value = '');
+
             // Reset OTP state
-            _regOtpCode = null; _regOtpVerified = false;
+            _regOtpCode = null;
+            _regOtpVerified = false;
             clearInterval(_regOtpTimer);
             document.getElementById('reg-otp-section').classList.remove('show');
+
             const submitBtn = document.getElementById('btn-reg-submit');
-            submitBtn.disabled = true; submitBtn.style.opacity = '0.5';
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.5';
             submitBtn.style.cursor = 'not-allowed';
             submitBtn.innerHTML = '🔒 &nbsp;Xác nhận email để tạo tài khoản';
         })
         .catch(error => {
-            Swal.fire({ icon: 'error', title: 'Đăng ký thất bại', text: error.message, confirmButtonColor: '#dc2626' });
+            Swal.fire({
+                icon: 'error',
+                title: 'Đăng ký thất bại',
+                text: error.message,
+                confirmButtonColor: '#dc2626'
+            });
         });
 }
