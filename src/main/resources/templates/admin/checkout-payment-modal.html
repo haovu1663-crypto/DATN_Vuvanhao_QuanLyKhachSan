@@ -1,0 +1,172 @@
+<!-- ===== CHECKOUT PAYMENT MODAL ===== -->
+<div id="co-payment-overlay">
+    <div id="co-payment-box">
+        <!-- Banner -->
+        <div class="co-pay-banner">
+            <button class="co-pay-close" onclick="coPayClose()">✕</button>
+            <div style="font-size:36px;margin-bottom:10px;" id="co-pay-banner-icon">💳</div>
+            <div class="co-pay-banner-title" id="co-pay-banner-title-txt">Thanh toán Check Out</div>
+            <div class="co-pay-banner-sub" id="co-pay-banner-sub">Chọn phương thức thanh toán phù hợp</div>
+        </div>
+
+        <!-- ===== BƯỚC 1: CHỌN PHƯƠNG THỨC ===== -->
+        <div id="co-pay-step-method" class="co-pay-method-step">
+            <!-- Tổng tiền -->
+            <div class="co-pay-total-box" style="margin-bottom:20px;">
+                <div>
+                    <div class="co-pay-total-label">Số tiền cần thanh toán</div>
+                    <div style="font-size:11px;color:#b45309;margin-top:2px;font-weight:500;" id="co-pay-amount-label-sub">Sau khi trừ tiền cọc</div>
+                </div>
+                <div class="co-pay-total-amount" id="co-pay-amount">—</div>
+            </div>
+
+            <!-- Breakdown chi tiết hóa đơn (hiện khi checkout có dịch vụ) -->
+            <div id="co-pay-breakdown" style="display:none;"></div>
+
+            <!-- Ô nhập tiền cọc (chỉ hiện khi đặt phòng offline) -->
+            <div id="bk-deposit-amount-row" style="display:none;margin-bottom:18px;">
+                <label style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Số tiền đặt cọc (₫)</label>
+                <input type="number" id="bk-deposit-amount-input" min="0" step="10000"
+                       placeholder="Nhập số tiền cọc..."
+                       style="width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;border-radius:12px;font-size:14px;font-family:inherit;color:#1e293b;background:#f8fafc;outline:none;box-sizing:border-box;"
+                       oninput="const v=parseFloat(this.value)||0; document.getElementById('co-pay-amount').textContent=new Intl.NumberFormat('vi-VN').format(v)+' ₫';">
+            </div>
+
+            <div class="co-pay-method-title">Chọn phương thức thanh toán</div>
+            <div class="co-pay-method-sub">Khách hàng muốn thanh toán bằng hình thức nào?</div>
+
+            <div class="co-pay-method-cards">
+                <div class="co-pay-method-card" onclick="coPaySelectMethod('BANK_TRANSFER')">
+                    <div class="co-pay-method-icon bank">🏦</div>
+                    <div>
+                        <div class="co-pay-method-name">Chuyển khoản ngân hàng</div>
+                        <div class="co-pay-method-desc">Hiển thị mã QR & thông tin tài khoản</div>
+                    </div>
+                    <i class="fas fa-chevron-right co-pay-method-arrow"></i>
+                </div>
+                <div class="co-pay-method-card" onclick="coPaySelectMethod('CASH')">
+                    <div class="co-pay-method-icon cash">💵</div>
+                    <div>
+                        <div class="co-pay-method-name">Tiền mặt</div>
+                        <div class="co-pay-method-desc">Thu tiền mặt trực tiếp tại quầy lễ tân</div>
+                    </div>
+                    <i class="fas fa-chevron-right co-pay-method-arrow"></i>
+                </div>
+                <div class="co-pay-method-card" onclick="coPaySelectMethod('CREDIT_CARD')">
+                    <div class="co-pay-method-icon" style="background:linear-gradient(135deg,#ede9fe,#ddd6fe);">💳</div>
+                    <div>
+                        <div class="co-pay-method-name">Thẻ tín dụng / Thẻ ATM</div>
+                        <div class="co-pay-method-desc">Quẹt thẻ qua máy POS tại quầy</div>
+                    </div>
+                    <i class="fas fa-chevron-right co-pay-method-arrow"></i>
+                </div>
+            </div>
+
+            <div style="margin-top:18px;">
+                <button class="co-pay-btn-cancel" style="width:100%;" onclick="coPayClose()">Huỷ bỏ</button>
+            </div>
+        </div>
+
+        <!-- ===== BƯỚC 2A: CHUYỂN KHOẢN (QR) ===== -->
+        <div id="co-pay-step-bank" class="co-pay-body" style="display:none;">
+            <button class="co-pay-back-btn" onclick="coPayGoBack()">
+                <i class="fas fa-arrow-left"></i> Quay lại chọn phương thức
+            </button>
+
+            <!-- QR Code -->
+            <div class="co-pay-qr-box">
+                <img id="co-pay-qr-img"
+                     src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=StayViet&bgcolor=ffffff"
+                     alt="QR Code thanh toán" class="co-pay-qr-img">
+                <div class="co-pay-qr-hint">📱 Quét mã QR qua ứng dụng Ngân hàng</div>
+            </div>
+
+            <!-- Thông tin tài khoản -->
+            <div>
+                <div class="co-pay-info-row">
+                    <span class="co-pay-info-label">Ngân hàng</span>
+                    <span class="co-pay-info-val">Vietcombank (VCB)</span>
+                </div>
+                <div class="co-pay-info-row">
+                    <span class="co-pay-info-label">Chủ tài khoản</span>
+                    <span class="co-pay-info-val">NGUYEN VAN A</span>
+                </div>
+                <div class="co-pay-info-row">
+                    <span class="co-pay-info-label">Số tài khoản</span>
+                    <div style="display:flex;align-items:center;">
+                        <span class="co-pay-info-val" id="co-pay-stk">1234567890</span>
+                        <button class="co-pay-copy-btn" onclick="coPayCopy('co-pay-stk')" title="Sao chép STK">📋</button>
+                    </div>
+                </div>
+                <div class="co-pay-info-row">
+                    <span class="co-pay-info-label">Số tiền</span>
+                    <div style="display:flex;align-items:center;">
+                        <span class="co-pay-info-val highlight" id="co-pay-amount-copy">—</span>
+                        <button class="co-pay-copy-btn" onclick="coPayCopy('co-pay-amount-copy')" title="Sao chép số tiền">📋</button>
+                    </div>
+                </div>
+                <div class="co-pay-info-row">
+                    <span class="co-pay-info-label">Nội dung CK</span>
+                    <div style="display:flex;align-items:center;">
+                        <span class="co-pay-info-val" id="co-pay-content">STAYVIET CHECKOUT</span>
+                        <button class="co-pay-copy-btn" onclick="coPayCopy('co-pay-content')" title="Sao chép nội dung">📋</button>
+                    </div>
+                </div>
+                <div class="co-pay-info-row">
+                    <span class="co-pay-info-label">Phương thức</span>
+                    <span class="co-pay-info-val" style="color:#3b82f6;">🏦 Chuyển khoản ngân hàng</span>
+                </div>
+            </div>
+
+            <div class="co-pay-guide">
+                ⏳ Sau khi chuyển khoản thành công, hệ thống sẽ tự động xác nhận trong vòng 1–3 phút.<br>
+                Giữ lại biên lai chuyển khoản để đối chiếu nếu cần.
+            </div>
+
+            <div class="co-pay-actions">
+                <button class="co-pay-btn-cancel" onclick="coPayClose()">Bỏ qua</button>
+                <button class="co-pay-btn-confirm" id="co-pay-confirm-btn" onclick="coPayConfirm()">
+                    <i class="fas fa-check-circle"></i> Tôi đã chuyển khoản
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== BƯỚC 2B: TIỀN MẶT / THẺ ===== -->
+        <div id="co-pay-step-cash" style="padding:24px 28px 28px;display:none;">
+            <button class="co-pay-back-btn" onclick="coPayGoBack()">
+                <i class="fas fa-arrow-left"></i> Quay lại chọn phương thức
+            </button>
+
+            <!-- Số tiền nổi bật -->
+            <div class="co-pay-cash-box">
+                <div class="co-pay-cash-icon" id="co-cash-icon">💵</div>
+                <div class="co-pay-cash-label" id="co-cash-method-label">Thanh toán tiền mặt</div>
+                <div class="co-pay-cash-amount" id="co-cash-amount-display">—</div>
+                <div class="co-pay-cash-note">Số tiền nhân viên cần thu từ khách</div>
+            </div>
+
+            <!-- Thông tin giao dịch -->
+            <div class="co-pay-cash-info">
+                <div class="co-pay-cash-info-row">
+                    <span class="co-pay-cash-info-label">Phương thức</span>
+                    <span class="co-pay-cash-info-val" id="co-cash-method-val">—</span>
+                </div>
+                <div class="co-pay-cash-info-row">
+                    <span class="co-pay-cash-info-label">Trạng thái</span>
+                    <span class="co-pay-cash-info-val" style="color:#16a34a;">✅ Đã thu tiền tại quầy</span>
+                </div>
+                <div class="co-pay-cash-info-row">
+                    <span class="co-pay-cash-info-label">Ghi chú</span>
+                    <span class="co-pay-cash-info-val" style="color:#64748b;font-size:12px;">Nhấn xác nhận để lưu giao dịch</span>
+                </div>
+            </div>
+
+            <div class="co-pay-actions">
+                <button class="co-pay-btn-cancel" onclick="coPayClose()">Huỷ bỏ</button>
+                <button class="co-pay-btn-confirm" id="co-pay-cash-confirm-btn" onclick="coPayCashConfirm()" style="background:linear-gradient(135deg,#16a34a,#15803d);box-shadow:0 4px 14px rgba(22,163,74,0.25);">
+                    <i class="fas fa-check-circle"></i> Xác nhận đã thu tiền
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

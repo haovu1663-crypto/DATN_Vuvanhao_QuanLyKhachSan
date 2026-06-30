@@ -144,7 +144,7 @@ public class SecurityConfig {
                                         // thống kê
                                         .requestMatchers("/api/v1/revenue/**").permitAll()
                                         .requestMatchers("/api/v1/employees/update/**").hasAuthority("ROLE_MANAGER")
-                                        .requestMatchers("/**.css", "/**.js", "/js/**", "/js2/**", "/images/**", "/static/**","/header/**").permitAll()
+                                        .requestMatchers("/**.css", "/**.js", "/js/**", "/js2/**", "/images/**", "/static/**","/header/**","/roomform/**").permitAll()
                                         .anyRequest().authenticated() // các api khác thì phải xác thực thì ms vào đc(đăng nhập)
 
 

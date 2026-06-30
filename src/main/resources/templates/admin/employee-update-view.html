@@ -1,0 +1,150 @@
+<!-- ===== VIEW UPDATE EMPLOYEE ===== -->
+<main id="view-update-employee" class="flex-1 flex-col overflow-y-auto relative" style="display:none;">
+    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-20 border-b border-slate-200 flex items-center justify-between px-10">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Cập nhật nhân viên</h1>
+            <p class="text-xs text-slate-500 font-medium">Dashboard / Employees / Update</p>
+        </div>
+        <button onclick="switchToView('manage-employee'); empLoadList();"
+                class="flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-semibold text-sm transition-all">
+            <i class="fas fa-arrow-left"></i> Quay lại danh sách
+        </button>
+    </header>
+
+    <div class="flex-1 w-full flex items-start justify-center py-10 px-4" style="background:var(--emp-cream,#f5f2ec);">
+        <div id="emp-update-form-card" class="emp-form-card" style="width:100%;max-width:680px;">
+            <!-- BANNER -->
+            <div class="emp-banner" style="background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 100%);">
+                <div class="emp-banner-inner">
+                    <div class="emp-banner-icon">✏️</div>
+                    <div class="emp-banner-text">
+                        <h2 id="eup-banner-name">Cập nhật nhân viên</h2>
+                        <p>Chỉnh sửa thông tin nhân viên — để trống mật khẩu nếu không muốn thay đổi</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FORM BODY -->
+            <div class="emp-form-body">
+                <input type="hidden" id="eup-id">
+
+                <div class="emp-section-label">Thông tin cơ bản</div>
+
+                <!-- Họ và tên -->
+                <div class="emp-field">
+                    <label for="eup-name">Họ và tên <span class="req">*</span></label>
+                    <div class="emp-input-wrap">
+                        <span class="emp-input-icon">👤</span>
+                        <input class="emp-input" id="eup-name" type="text" placeholder="Nguyễn Văn A" autocomplete="name">
+                    </div>
+                </div>
+
+                <!-- Chức vụ + Lương -->
+                <div class="emp-field-row">
+                    <div class="emp-field">
+                        <label for="eup-department">Chức vụ <span class="req">*</span></label>
+                        <div class="emp-input-wrap">
+                            <span class="emp-input-icon">🏷️</span>
+                            <select class="emp-select" id="eup-department" onchange="eupUpdateDeptBadge(this)">
+                                <option value="" disabled selected>Chọn chức vụ...</option>
+                                <option value="RECEPTIONIST">Lễ tân (Receptionist)</option>
+                                <option value="CLEANING_STAFF">Dọn phòng (Cleaning Staff)</option>
+                            </select>
+                            <span class="emp-select-arrow">▾</span>
+                        </div>
+                        <div class="emp-dept-badge" id="eup-dept-badge">
+                            <span id="eup-dept-badge-text"></span>
+                        </div>
+                    </div>
+                    <div class="emp-field">
+                        <label for="eup-salary">Lương (VNĐ/tháng) <span class="req">*</span></label>
+                        <div class="emp-input-wrap">
+                            <span class="emp-salary-prefix">₫</span>
+                            <input class="emp-input emp-salary-input" id="eup-salary" type="text"
+                                   placeholder="6,500,000" oninput="eupFormatSalary(this)" data-raw="">
+                        </div>
+                        <span class="emp-field-hint">Tối thiểu 6.500.000 ₫</span>
+                    </div>
+                </div>
+
+                <!-- Địa điểm làm việc -->
+                <div class="emp-field">
+                    <label for="eup-location">Địa điểm làm việc <span class="req">*</span></label>
+                    <div class="emp-input-wrap">
+                        <span class="emp-input-icon">📍</span>
+                        <select class="emp-select" id="eup-location">
+                            <option value="" disabled selected>Chọn địa điểm làm việc...</option>
+                            <option value="Số 1 đường Nguyễn Chí Thanh, Hà Nội">Số 1 đường Nguyễn Chí Thanh, Hà Nội</option>
+                            <option value="Số 2 Lê Đại Hành, Hà Nội">Số 2 Lê Đại Hành, Hà Nội</option>
+                            <option value="Số 3 đường Lê Lợi, Ninh Bình">Số 3 đường Lê Lợi, Ninh Bình</option>
+                            <option value="Số 4 Trần Quốc Nghiễn, Hạ Long">Số 4 Trần Quốc Nghiễn, Hạ Long</option>
+                        </select>
+                        <span class="emp-select-arrow">▾</span>
+                    </div>
+                </div>
+
+                <hr class="emp-divider">
+                <div class="emp-section-label">Thông tin liên hệ</div>
+
+                <!-- Email -->
+                <div class="emp-field">
+                    <label for="eup-email">Email <span class="req">*</span></label>
+                    <div class="emp-input-wrap">
+                        <span class="emp-input-icon">✉️</span>
+                        <input class="emp-input" id="eup-email" type="email" placeholder="nhanvien@grandhotel.vn" autocomplete="email">
+                    </div>
+                </div>
+
+                <!-- Số điện thoại -->
+                <div class="emp-field">
+                    <label for="eup-phone">Số điện thoại <span class="req">*</span></label>
+                    <div class="emp-input-wrap">
+                        <span class="emp-input-icon">📱</span>
+                        <input class="emp-input" id="eup-phone" type="tel" placeholder="0912 345 678" maxlength="11">
+                    </div>
+                </div>
+
+                <hr class="emp-divider">
+                <div class="emp-section-label">Tài khoản đăng nhập</div>
+
+                <!-- Username + Password -->
+                <div class="emp-field-row">
+                    <div class="emp-field">
+                        <label for="eup-username">Tên đăng nhập <span class="req">*</span></label>
+                        <div class="emp-input-wrap">
+                            <span class="emp-input-icon">🔖</span>
+                            <input class="emp-input" id="eup-username" type="text" placeholder="nguyenvana" autocomplete="username">
+                        </div>
+                        <span class="emp-field-hint">Chữ thường, số, dấu gạch dưới</span>
+                    </div>
+                    <div class="emp-field">
+                        <label for="eup-password">Mật khẩu mới</label>
+                        <div class="emp-input-wrap">
+                            <span class="emp-input-icon">🔒</span>
+                            <input class="emp-input" id="eup-password" type="password"
+                                   placeholder="Để trống = không đổi" autocomplete="new-password">
+                            <button class="emp-pw-toggle" type="button" onclick="eupTogglePassword()" id="eup-pw-toggle-btn">👁️</button>
+                        </div>
+                        <span class="emp-field-hint">Để trống nếu không muốn thay đổi mật khẩu</span>
+                    </div>
+                </div>
+
+            </div><!-- end emp-form-body -->
+
+            <!-- FOOTER -->
+            <div class="emp-form-footer" style="justify-content:space-between;">
+                <button class="emp-btn-cancel" type="button" id="eup-btn-delete" onclick="eupDeleteConfirm()"
+                        style="background:#fff0f0;color:#dc2626;border:1.5px solid #fca5a5;">
+                    <i class="fas fa-trash-alt" style="margin-right:6px;"></i> Xóa nhân viên
+                </button>
+                <div style="display:flex;gap:12px;">
+                    <button class="emp-btn-cancel" type="button"
+                            onclick="switchToView('manage-employee'); empLoadList();">Hủy</button>
+                    <button class="emp-btn-submit" type="button" id="eup-btn-submit" onclick="eupSubmit()">
+                        <span>💾</span> Cập nhật nhân viên
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

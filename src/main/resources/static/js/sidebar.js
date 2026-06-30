@@ -121,3 +121,24 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 100);
 
 });
+
+
+<!-- ===== SCRIPT: BẬT/TẮT SIDEBAR BẰNG NÚT 3 GẠCH ===== -->
+function toggleAppSidebar() {
+    const sidebar = document.getElementById('appSidebar');
+    const isCollapsed = sidebar.classList.toggle('sb-collapsed');
+    document.body.classList.toggle('sb-open', !isCollapsed);
+    localStorage.setItem('sidebarCollapsed', isCollapsed ? '1' : '0');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('appSidebar');
+    if (!sidebar) return;
+    const saved = localStorage.getItem('sidebarCollapsed');
+    if (saved === '1') {
+        sidebar.classList.add('sb-collapsed');
+        document.body.classList.remove('sb-open');
+    } else {
+        document.body.classList.add('sb-open');
+    }
+});

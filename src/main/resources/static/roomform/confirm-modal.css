@@ -1,0 +1,51 @@
+/* ===== CONFIRM MODAL ===== */
+#rs-confirm-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+}
+#rs-confirm-overlay.active { display: flex; }
+
+#rs-confirm-box {
+    background: #fff;
+    border-radius: 20px;
+    padding: 36px 32px 28px;
+    max-width: 400px; width: 90%;
+    box-shadow: 0 24px 60px rgba(15,23,42,0.18);
+    text-align: center;
+    animation: rsPopIn .22s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes rsPopIn {
+    from { transform: scale(.85); opacity: 0; }
+    to   { transform: scale(1);  opacity: 1; }
+}
+.rs-confirm-icon {
+    width: 60px; height: 60px; border-radius: 50%;
+    background: #dcfce7; margin: 0 auto 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+}
+.rs-confirm-title {
+    font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 8px;
+}
+.rs-confirm-desc {
+    font-size: 13px; color: #64748b; line-height: 1.6; margin-bottom: 24px;
+}
+.rs-confirm-actions { display: flex; gap: 10px; }
+.rs-confirm-cancel {
+    flex: 1; padding: 10px 0; border-radius: 12px;
+    border: 1.5px solid #e2e8f0; background: #f8fafc;
+    font-size: 13px; font-weight: 600; color: #64748b;
+    cursor: pointer; transition: background .15s;
+}
+.rs-confirm-cancel:hover { background: #f1f5f9; }
+.rs-confirm-ok {
+    flex: 1; padding: 10px 0; border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg,#16a34a,#15803d);
+    font-size: 13px; font-weight: 600; color: #fff;
+    cursor: pointer; transition: opacity .15s, transform .15s;
+}
+.rs-confirm-ok:hover { opacity: .9; transform: translateY(-1px); }

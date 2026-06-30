@@ -1,0 +1,539 @@
+/* ===== SERVICE ROOM VIEW ===== */
+#view-service { display: none; }
+#view-service table { border-collapse: collapse; }
+#view-service tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background .15s;
+}
+#view-service tbody tr:last-child { border-bottom: none; }
+#view-service tbody tr:hover { background: #f8fafc; }
+#view-service td { padding: 14px 20px; color: #334155; vertical-align: middle; }
+
+.sv-room-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #eff6ff; color: #2563eb;
+    font-size: 12px; font-weight: 700;
+    padding: 4px 12px; border-radius: 20px;
+}
+.sv-room-badge i { font-size: 11px; }
+
+.sv-customer {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; font-weight: 600; color: #1e293b;
+}
+.sv-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, #3b6fd4, #5b8fe8);
+    color: #fff; font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+
+.sv-empty {
+    text-align: center; padding: 48px 0;
+    color: #94a3b8; font-size: 14px;
+}
+.sv-empty i { display: block; font-size: 28px; margin-bottom: 10px; color: #cbd5e1; }
+
+/* ===== SERVICE ROOM — FULL STYLES ===== */
+
+/* Header card */
+.sv-header-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    background: #fff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 20px 24px;
+    box-shadow: 0 2px 12px rgba(15,23,42,0.06);
+}
+.sv-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.sv-header-icon {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+}
+.sv-header-icon i {
+    color: #fff;
+    font-size: 20px;
+}
+.sv-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 3px 0;
+}
+.sv-subtitle {
+    font-size: 12px;
+    color: #94a3b8;
+    margin: 0;
+}
+
+/* Search */
+.sv-search-wrap {
+    position: relative;
+    min-width: 260px;
+}
+.sv-search-icon {
+    position: absolute;
+    left: 14px; top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 13px;
+    pointer-events: none;
+}
+.sv-search-input {
+    width: 100%;
+    padding: 10px 14px 10px 38px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 13px;
+    font-family: inherit;
+    color: #1e293b;
+    background: #f8fafc;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+}
+.sv-search-input:focus {
+    border-color: #3b82f6;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(59,130,246,0.1);
+}
+
+/* Table card */
+.sv-table-card {
+    background: #fff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(15,23,42,0.06);
+}
+.sv-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+}
+.sv-table thead tr {
+    background: #f8fafc;
+    border-bottom: 1.5px solid #e2e8f0;
+}
+.sv-table thead th {
+    padding: 14px 20px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.sv-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background .15s;
+}
+.sv-table tbody tr:last-child { border-bottom: none; }
+.sv-table tbody tr:hover { background: #f8fafc; }
+.sv-table tbody td {
+    padding: 14px 20px;
+    color: #334155;
+    vertical-align: middle;
+}
+
+/* Empty state block */
+.sv-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 0;
+    color: #94a3b8;
+    font-size: 14px;
+    gap: 8px;
+}
+.sv-empty-state i {
+    font-size: 36px;
+    color: #cbd5e1;
+    margin-bottom: 4px;
+}
+.sv-empty-state p { margin: 0; }
+
+
+/* ===================================================
+   SERVICE — NÚT VÀ PILL BAR (chuyển từ <style> inline)
+   =================================================== */
+
+/* ── Nút Add dịch vụ (trong bảng) ── */
+.sv-add-service-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .15s, transform .1s;
+    white-space: nowrap;
+}
+.sv-add-service-btn:hover  { opacity: .88; transform: translateY(-1px); }
+.sv-add-service-btn:active { opacity: 1;   transform: translateY(0);    }
+.sv-add-service-btn i { font-size: 11px; }
+
+/* ── Nút Add Service (header) ── */
+.sv-add-service-header-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.35);
+    transition: opacity .15s, transform .1s, box-shadow .15s;
+}
+.sv-add-service-header-btn:hover  {
+    opacity: .9;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(37,99,235,0.45);
+}
+.sv-add-service-header-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+}
+.sv-add-service-header-btn i { font-size: 12px; }
+
+/* ── Nút Cập nhật dịch vụ (header) ── */
+.sv-update-service-header-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(245,158,11,0.35);
+    transition: opacity .15s, transform .1s, box-shadow .15s;
+}
+.sv-update-service-header-btn:hover  {
+    opacity: .9;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(245,158,11,0.45);
+}
+.sv-update-service-header-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(245,158,11,0.3);
+}
+.sv-update-service-header-btn i { font-size: 12px; }
+
+/* ── Ô tìm kiếm ID dịch vụ ── */
+.sv-search-id-wrap {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.sv-search-id-input {
+    flex: 1;
+    -moz-appearance: textfield;
+}
+.sv-search-id-input::-webkit-inner-spin-button,
+.sv-search-id-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.sv-search-id-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity .15s, transform .1s;
+}
+.sv-search-id-btn:hover  { opacity: .88; transform: translateY(-1px); }
+.sv-search-id-btn:active { transform: translateY(0); }
+.sv-search-id-msg {
+    margin-top: 6px;
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+.sv-search-id-msg.ok  { background: #dcfce7; color: #166534; }
+.sv-search-id-msg.err { background: #fee2e2; color: #991b1b; }
+
+/* ── Badge ảnh cũ / mới ── */
+.sv-img-thumb-badge {
+    position: absolute;
+    bottom: 4px; left: 4px;
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    pointer-events: none;
+}
+.sv-img-thumb-badge--new {
+    background: rgba(37,99,235,0.82);
+}
+
+/* ── Thanh chọn loại dịch vụ (pill bar) ── */
+.sv-type-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 6px 8px;
+    background: #f1f5f9;
+    border-radius: 14px;
+    border: 1.5px solid #e2e8f0;
+}
+.sv-type-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, color .15s, box-shadow .15s;
+    white-space: nowrap;
+}
+.sv-type-pill:hover {
+    background: #fff;
+    color: #1e293b;
+}
+.sv-type-pill.active {
+    background: #fff;
+    color: #2563eb;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.10), 0 0 0 1.5px #bfdbfe;
+}
+.sv-type-pill i { font-size: 12px; }
+
+/* ── Pill bar loại giặt ủi ── */
+.sv-laundry-type-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+}
+.sv-laundry-type-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 14px;
+    border-radius: 10px;
+    border: 1.5px solid #e2e8f0;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s, box-shadow .15s;
+    white-space: nowrap;
+}
+.sv-laundry-type-pill:hover {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1d4ed8;
+}
+.sv-laundry-type-pill.active {
+    background: #eff6ff;
+    border-color: #2563eb;
+    color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+/* ===== NÚT ADD DỊCH VỤ ===== */
+.sv-add-service-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .15s, transform .1s;
+    white-space: nowrap;
+}
+.sv-add-service-btn:hover  { opacity: .88; transform: translateY(-1px); }
+.sv-add-service-btn:active { opacity: 1;   transform: translateY(0);    }
+.sv-add-service-btn i { font-size: 11px; }
+
+/* ===== NÚT ADD SERVICE HEADER ===== */
+.sv-add-service-header-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.35);
+    transition: opacity .15s, transform .1s, box-shadow .15s;
+}
+.sv-add-service-header-btn:hover  {
+    opacity: .9;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(37,99,235,0.45);
+}
+.sv-add-service-header-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+}
+.sv-add-service-header-btn i { font-size: 12px; }
+
+/* ===== NÚT UPDATE SERVICE HEADER ===== */
+.sv-update-service-header-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(245,158,11,0.35);
+    transition: opacity .15s, transform .1s, box-shadow .15s;
+}
+.sv-update-service-header-btn:hover  {
+    opacity: .9;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(245,158,11,0.45);
+}
+.sv-update-service-header-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(245,158,11,0.3);
+}
+.sv-update-service-header-btn i { font-size: 12px; }
+
+/* ===== Ô TÌM KIẾM ID DỊCH VỤ ===== */
+.sv-search-id-wrap {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.sv-search-id-input {
+    flex: 1;
+    -moz-appearance: textfield;
+}
+.sv-search-id-input::-webkit-inner-spin-button,
+.sv-search-id-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.sv-search-id-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity .15s, transform .1s;
+}
+.sv-search-id-btn:hover  { opacity: .88; transform: translateY(-1px); }
+.sv-search-id-btn:active { transform: translateY(0); }
+.sv-search-id-msg {
+    margin-top: 6px;
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+.sv-search-id-msg.ok  { background:#dcfce7; color:#166534; }
+.sv-search-id-msg.err { background:#fee2e2; color:#991b1b; }
+
+/* ===== BADGE ẢNH CŨ / MỚI ===== */
+.sv-img-thumb-badge {
+    position: absolute;
+    bottom: 4px; left: 4px;
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    pointer-events: none;
+}
+.sv-img-thumb-badge--new {
+    background: rgba(37,99,235,0.82);
+}
+
+/* ===== THANH CHỌN LOẠI DỊCH VỤ (PILL BAR) ===== */
+.sv-type-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 6px 8px;
+    background: #f1f5f9;
+    border-radius: 14px;
+    border: 1.5px solid #e2e8f0;
+}
+.sv-type-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, color .15s, box-shadow .15s;
+    white-space: nowrap;
+}
+.sv-type-pill:hover {
+    background: #fff;
+    color: #1e293b;
+}
+.sv-type-pill.active {
+    background: #fff;
+    color: #2563eb;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.10), 0 0 0 1.5px #bfdbfe;
+}
+.sv-type-pill i { font-size: 12px; }

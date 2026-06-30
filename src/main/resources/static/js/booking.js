@@ -739,3 +739,131 @@ function bkHidePicker() {
     if (overlay) overlay.style.display = 'none';
     document.body.style.overflow = '';
 }
+
+
+
+
+
+
+
+
+
+
+// ===== ROOMTYPE GRID IN BOOKING TAB =====
+let _bkrtAll = [];
+let _bkrtFilter = null;
+const _bkrtCarousel = {};
+
+async function bkrtLoad() {
+    const grid = document.getElementById('bkrt-grid');
+    const countEl = document.getElementById('bkrt-count');
+    grid.innerHTML = '<div class="bkrt-loading"><i class="fas fa-spinner fa-spin"></i><span>Đang tải loại phòng...</span></div>';
+    countEl.textContent = '';
+    try {
+        const token = localStorage.getItem('accessToken');
+        const res = await fetch('/api/v1/roomtypes', {
+            headers: token ? { Authorization: 'Bearer ' + token } : {}
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const json = await res.json();
+        _bkrtAll = Array.isArray(json.data) ? json.data : (Array.isArray(json) ? json : []);
+        _bkrtFilter = null;
+        bkrtBuildChips();
+        bkrtRender();
+    } catch (err) {
+        grid.innerHTML = '<div class="bkrt-error"><i class="fas fa-exclamation-triangle"></i><span>Lỗi tải dữ liệu: ' + err.message + '</span></div>';
+    }
+}
+
+function bkrtBuildChips() {
+    const wrap = document.getElementById('bkrt-filter');
+    let html = '<button class="bkrt-chip active" onclick="bkrtSetFilter(null,this)">Tất cả</button>';
+    _bkrtAll.forEach(rt => {
+        if (rt.type) html += '<button class="bkrt-chip" onclick="bkrtSetFilter(' + rt.id + ',this)">' + rt.type + '</button>';
+    });
+    wrap.innerHTML = html;
+}
+
+function bkrtSetFilter(id, btn) {
+    _bkrtFilter = id;
+    document.querySelectorAll('.bkrt-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    bkrtRender();
+}
+
+function bkrtRender() {
+    const grid = document.getElementById('bkrt-grid');
+    const countEl = document.getElementById('bkrt-count');
+    const list = _bkrtFilter ? _bkrtAll.filter(r => r.id == _bkrtFilter) : _bkrtAll;
+    countEl.textContent = list.length + ' loại phòng';
+    if (!list.length) {
+        grid.innerHTML = '<div class="bkrt-empty"><i class="fas fa-door-open"></i><span>Không có loại phòng nào.</span></div>';
+        return;
+    }
+    grid.innerHTML = list.map(bkrtCard).join('');
+}
+
+function bkrtCard(rt) {
+    const name  = rt.type || ('Loại #' + rt.id);
+    const cap   = rt.capacity ? rt.capacity + ' người' : '—';
+    const price = rt.price ? new Intl.NumberFormat('vi-VN').format(rt.price) + ' ₫' : '—';
+    const desc  = rt.description || '';
+    const amenities = (rt.amenities || '').split(',').map(a => a.trim()).filter(Boolean).slice(0, 4);
+    const cid   = 'bkrt-c-' + rt.id;
+
+    const hasImg = Array.isArray(rt.images) && rt.images.length > 0;
+    let imgHtml;
+    if (hasImg) {
+        imgHtml = '<img id="' + cid + '-img" src="' + rt.images[0] + '" alt="' + name + '" loading="lazy">';
+        if (rt.images.length > 1) {
+            imgHtml += '<button class="bkrt-img-arrow left" onclick="bkrtSlide(event,\'' + cid + '\',' + JSON.stringify(rt.images).replace(/"/g,'&quot;') + ',-1)">&#8249;</button>'
+                + '<button class="bkrt-img-arrow right" onclick="bkrtSlide(event,\'' + cid + '\',' + JSON.stringify(rt.images).replace(/"/g,'&quot;') + ',1)">&#8250;</button>'
+                + '<span class="bkrt-img-badge" id="' + cid + '-badge">1 / ' + rt.images.length + '</span>';
+        }
+    } else {
+        imgHtml = '<div class="bkrt-img-ph"><i class="fas fa-bed"></i><span>Chưa có ảnh</span></div>';
+    }
+
+    const amenityHtml = amenities.map(a => '<span class="bkrt-amenity">' + a + '</span>').join('');
+
+    return '<div class="bkrt-card">'
+        + '<div class="bkrt-img">' + imgHtml + '</div>'
+        + '<div class="bkrt-body">'
+        + '<span class="bkrt-type-badge"><i class="fas fa-tag"></i>' + name + '</span>'
+        + '<div class="bkrt-name">' + name + '</div>'
+        + '<div class="bkrt-meta"><i class="fas fa-users"></i>Tối đa ' + cap + ' &nbsp;·&nbsp; <i class="fas fa-hashtag"></i>ID: ' + rt.id + '</div>'
+        + (amenityHtml ? '<div class="bkrt-amenities">' + amenityHtml + '</div>' : '')
+        + (desc ? '<div class="bkrt-desc">' + desc + '</div>' : '')
+        + '<div class="bkrt-footer">'
+        + '<div><div class="bkrt-price-label">Giá mỗi đêm</div><div class="bkrt-price">' + price + '</div></div>'
+        + '<button class="bkrt-btn" onclick="bkrtSelectType(' + JSON.stringify(rt).replace(/"/g,'&quot;') + ')"><i class="fas fa-calendar-plus"></i> Chọn</button>'
+        + '</div>'
+        + '</div>'
+        + '</div>';
+}
+
+function bkrtSlide(event, cid, images, dir) {
+    event.stopPropagation();
+    const total = images.length;
+    _bkrtCarousel[cid] = ((_bkrtCarousel[cid] || 0) + dir + total) % total;
+    const idx = _bkrtCarousel[cid];
+    const imgEl   = document.getElementById(cid + '-img');
+    const badgeEl = document.getElementById(cid + '-badge');
+    if (imgEl)   imgEl.src = images[idx];
+    if (badgeEl) badgeEl.textContent = (idx + 1) + ' / ' + total;
+}
+
+// Khi chọn loại phòng → cuộn xuống danh sách phòng trống và highlight
+// Auto load khi tab booking được mở
+document.addEventListener('DOMContentLoaded', function() {
+    // Gọi load ngay lập tức vì Booking Room là tab mặc định đầu tiên
+    bkrtLoad();
+
+    // Hook vào sự kiện click menu Booking để reload nếu cần
+    const menuBooking = document.getElementById('menuBooking');
+    if (menuBooking) {
+        menuBooking.addEventListener('click', function() {
+            if (!_bkrtAll.length) bkrtLoad();
+        });
+    }
+});

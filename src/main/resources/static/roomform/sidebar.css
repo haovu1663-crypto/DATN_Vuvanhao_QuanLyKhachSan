@@ -1,0 +1,121 @@
+/* ============================================================
+   NÚT 3 GẠCH BẬT/TẮT SIDEBAR — thiết kế lại theo brand (blue/slate)
+   ============================================================ */
+#appSidebar {
+    transition: margin-left .32s cubic-bezier(.4,0,.2,1), opacity .25s ease;
+    flex-shrink: 0;
+    position: relative; /* để nút có thể "neo" theo sidebar khi mở */
+}
+#appSidebar.sb-collapsed {
+    margin-left: -288px; /* = w-72 (18rem) */
+    opacity: 0;
+    pointer-events: none;
+}
+
+#sbToggleBtn {
+    position: fixed;
+    top: 16px;
+    left: 18px;
+    z-index: 1100;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: none;
+    transition: left .32s cubic-bezier(.4,0,.2,1),
+    top .32s cubic-bezier(.4,0,.2,1),
+    background .2s ease,
+    transform .15s ease;
+}
+#sbToggleBtn:hover {
+    background: rgba(100, 116, 139, 0.10); /* slate-500 @10% — hoà nhẹ vào header, không nổi cục */
+}
+#sbToggleBtn:active { transform: scale(0.92); }
+
+#sbToggleBtn .sb-bars {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4.5px;
+    width: 18px;
+    height: 14px;
+    position: relative;
+}
+#sbToggleBtn .sb-bar {
+    display: block;
+    width: 100%;
+    height: 2px;
+    border-radius: 2px;
+    background: #475569; /* slate-600 - nhẹ và trung tính hơn đen kịt */
+    transition: transform .28s cubic-bezier(.4,0,.2,1), opacity .2s ease,
+    width .2s ease, background .25s ease;
+}
+/* gạch giữa ngắn hơn một chút cho cảm giác tinh tế */
+#sbToggleBtn .sb-bar:nth-child(2) { width: 70%; align-self: flex-end; }
+#sbToggleBtn:hover .sb-bar { background: #2563eb; }
+#sbToggleBtn:hover .sb-bar:nth-child(2) { width: 100%; }
+
+/* ---- Khi sidebar ĐANG MỞ: nút nằm NGAY TRONG header sidebar,
+
+        thẳng hàng với logo "GrandHotel", màu hoà cùng nền tối ---- */
+body.sb-open #sbToggleBtn {
+    top: 28px;            /* thẳng hàng theo chiều cao với khối logo */
+    left: 212px;           /* nằm bên trong sidebar (w-72 = 288px), sát mép phải */
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+body.sb-open #sbToggleBtn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+}
+body.sb-open #sbToggleBtn .sb-bar { background: #cbd5e1; } /* slate-300 - đồng bộ với chữ sidebar */
+body.sb-open #sbToggleBtn:hover .sb-bar { background: #ffffff; }
+
+/* Icon biến hình thành dấu X khi sidebar mở */
+body.sb-open #sbToggleBtn .sb-bar:nth-child(1) { width: 100%; transform: translateY(6px) rotate(45deg); }
+body.sb-open #sbToggleBtn .sb-bar:nth-child(2) { opacity: 0; }
+body.sb-open #sbToggleBtn .sb-bar:nth-child(3) { width: 100%; transform: translateY(-6px) rotate(-45deg); }
+body.sb-open #sbToggleBtn:hover .sb-bar:nth-child(1),
+body.sb-open #sbToggleBtn:hover .sb-bar:nth-child(3) { background: #ffffff; }
+
+/* ---- Khi sidebar ĐANG TẮT: nút nằm sát trước tiêu đề trang
+        (VD "Booking Room") và đẩy lùi tiêu đề + breadcrumb vào ---- */
+header[class*="bg-white/80 backdrop-blur-md"] > div:first-child {
+    padding-left: 0;
+    transition: padding-left .32s cubic-bezier(.4,0,.2,1);
+}
+body:not(.sb-open) header[class*="bg-white/80 backdrop-blur-md"] > div:first-child {
+    padding-left: 44px; /* đẩy chữ "Booking Room" / breadcrumb lùi vào để không bị nút đè lên */
+}
+
+@media (max-width: 768px) {
+    body.sb-open #sbToggleBtn { left: 18px; top: 18px; background: transparent; box-shadow: none; }
+    body.sb-open #sbToggleBtn .sb-bar { background:#e2e8f0; }
+    #appSidebar { position: fixed; top: 0; bottom: 0; left: 0; z-index: 1050; }
+    #appSidebar:not(.sb-collapsed) {
+        box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.45);
+    }
+}
+.preview-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ===== SIDEBAR SCROLLBAR ===== */
+.scrollbar-sidebar { scrollbar-width: thin; scrollbar-color: #334155 transparent; }
+.scrollbar-sidebar::-webkit-scrollbar { width: 4px; }
+.scrollbar-sidebar::-webkit-scrollbar-track { background: transparent; }
+.scrollbar-sidebar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+.scrollbar-sidebar::-webkit-scrollbar-thumb:hover { background: #475569; }

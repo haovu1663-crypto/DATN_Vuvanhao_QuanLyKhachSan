@@ -1,0 +1,22 @@
+/* ===== REVENUE STATISTICS ===== */
+#view-revenue { display: none; }
+#view-revenue.active { display: flex; flex-direction: column; }
+
+.rv-tab {
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all .18s;
+    white-space: nowrap;
+}
+.rv-tab:hover { background: rgba(255,255,255,0.7); color: #1e293b; }
+.rv-tab.active {
+    background: #fff;
+    color: #2563eb;
+    box-shadow: 0 1px 6px rgba(37,99,235,0.12);
+}

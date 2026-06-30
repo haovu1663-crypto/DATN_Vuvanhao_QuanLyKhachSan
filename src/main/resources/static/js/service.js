@@ -705,3 +705,481 @@
     }());
 
 })();
+
+
+
+
+
+
+
+
+
+
+    /* ══════════ PANEL GIẶT ỦI ══════════
+    Hook vào svPickType của service.js để show/hide panel
+    và cập nhật live preview
+    ═══════════════════════════════════════ */
+    (function () {
+    'use strict';
+
+    const LAUNDRY_TYPE = 'Dịch vụ giặt ủi';
+
+    /* ── Hiện/ẩn panel theo loại dịch vụ ── */
+    function svLaundryTogglePanel(type) {
+    const panel = document.getElementById('sv-panel-laundry');
+    if (!panel) return;
+    const show = (type === LAUNDRY_TYPE);
+    panel.style.display = show ? 'block' : 'none';
+    if (show) svLaundryUpdatePreview();
+}
+
+    /* ── Ghi đè / wrap svPickType sau khi service.js load ── */
+    function hookSvPickType() {
+    const _orig = window.svPickType;
+    window.svPickType = function (btn) {
+    if (typeof _orig === 'function') _orig(btn);
+    const type = btn ? btn.getAttribute('data-type') : '';
+    svLaundryTogglePanel(type);
+};
+}
+
+    /* ── Live preview ── */
+    function svLaundryUpdatePreview() {
+    const type     = document.getElementById('sv-laundry-type')?.value      || '';
+    const unit     = document.getElementById('sv-laundry-unit')?.value      || 'kg';
+    const weight   = document.getElementById('sv-laundry-weight')?.value    || '';
+    const duration = document.getElementById('sv-laundry-duration')?.value  || '';
+    const express  = document.getElementById('sv-laundry-express')?.checked;
+    const delivery = document.getElementById('sv-laundry-delivery')?.checked;
+
+    const preview  = document.getElementById('sv-laundry-preview');
+    const preText  = document.getElementById('sv-laundry-preview-text');
+    if (!preview || !preText) return;
+
+    if (!type) { preview.style.display = 'none'; return; }
+
+    let parts = [type];
+    if (weight) parts.push(`${weight} ${unit}`);
+    if (duration) parts.push(`hoàn thành trong ${duration}h`);
+    if (express) parts.push('dịch vụ khẩn');
+    if (delivery) parts.push('giao tận phòng');
+
+    preText.textContent = parts.join(' · ');
+    preview.style.display = 'block';
+}
+
+    /* ── Đồng bộ suffix đơn vị vào ô định lượng ── */
+    function syncUnitSuffix() {
+    const unitEl  = document.getElementById('sv-laundry-unit');
+    const suffix  = document.getElementById('sv-laundry-unit-suffix');
+    if (unitEl && suffix) suffix.textContent = unitEl.value || 'kg';
+}
+
+    /* ── Reset panel khi đóng modal ── */
+    function svLaundryReset() {
+    ['sv-laundry-type','sv-laundry-unit','sv-laundry-duration'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = el.tagName === 'SELECT' && el.options.length ? el.options[0].value : '';
+});
+    ['sv-laundry-weight','sv-laundry-note'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+});
+    ['sv-laundry-express','sv-laundry-delivery','sv-laundry-fold','sv-laundry-eco'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.checked = false;
+});
+    const preview = document.getElementById('sv-laundry-preview');
+    if (preview) preview.style.display = 'none';
+    syncUnitSuffix();
+}
+
+    /* ── Gắn sự kiện live preview ── */
+    function bindEvents() {
+    ['sv-laundry-type','sv-laundry-unit','sv-laundry-duration',
+    'sv-laundry-weight','sv-laundry-express','sv-laundry-delivery'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', svLaundryUpdatePreview);
+    if (el && el.type === 'number') el.addEventListener('input', svLaundryUpdatePreview);
+});
+
+    /* Sync suffix khi đổi đơn vị */
+    const unitEl = document.getElementById('sv-laundry-unit');
+    if (unitEl) unitEl.addEventListener('change', syncUnitSuffix);
+}
+
+    /* ── Hook svCloseModal để reset ── */
+    function hookSvCloseModal() {
+    const _origClose = window.svCloseModal;
+    window.svCloseModal = function () {
+    if (typeof _origClose === 'function') _origClose();
+    svLaundryReset();
+    const panel = document.getElementById('sv-panel-laundry');
+    if (panel) panel.style.display = 'none';
+};
+}
+
+    /* ── Init sau khi DOM + service.js sẵn sàng ── */
+    function init() {
+    bindEvents();
+    hookSvPickType();
+    hookSvCloseModal();
+    syncUnitSuffix();
+
+    /* Nếu tab Giặt ủi đang active ngay lúc mở → hiện panel */
+    const activeBtn = document.querySelector('#sv-type-bar .sv-type-pill.active');
+    if (activeBtn && activeBtn.getAttribute('data-type') === LAUNDRY_TYPE) {
+    document.getElementById('sv-panel-laundry').style.display = 'block';
+}
+}
+
+    if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    /* service.js có thể chưa load xong → chờ 1 tick */
+    setTimeout(init, 0);
+}
+})();
+
+
+
+
+
+(function () {
+    'use strict';
+
+    let _svOrderBookingId = null;
+    let _svOrderRoomName  = '';
+    let _svOrderAll       = [];   // toàn bộ danh sách từ API
+    let _svOrderFiltered  = [];   // sau khi lọc
+    let _svOrderQty       = {};   // { serviceId: quantity }
+    let _svOrderActiveType = 'ALL'; // tab đang chọn
+
+    /* ---------- MỞ MODAL ---------- */
+    window.svOpenOrderModal = async function (bookingId, roomName) {
+        _svOrderBookingId = bookingId;
+        _svOrderRoomName  = roomName;
+        _svOrderQty       = {};
+
+        const sub = document.getElementById('sv-order-banner-sub');
+        if (sub) sub.textContent = `Booking #${bookingId}  ·  Phòng: ${roomName}`;
+
+        _svOrderActiveType = 'ALL';
+
+        svOrderSummaryUpdate();
+
+        const overlay = document.getElementById('sv-order-overlay');
+        overlay.style.display = 'flex';
+
+        await svOrderLoad();
+    };
+
+    /* ---------- ĐÓNG ---------- */
+    window.svOrderClose = function () {
+        document.getElementById('sv-order-overlay').style.display = 'none';
+    };
+
+    /* ---------- LOAD DANH SÁCH TỪ API ---------- */
+    async function svOrderLoad() {
+        svOrderListHtml('<div style="text-align:center;padding:40px 0;color:#94a3b8;"><i class="fas fa-spinner fa-spin" style="font-size:22px;margin-bottom:10px;display:block;"></i>Đang tải...</div>');
+        try {
+            const token = localStorage.getItem('accessToken');
+            const res = await fetch('/api/v1/services', {
+                headers: token ? { Authorization: 'Bearer ' + token } : {}
+            });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const json = await res.json();
+            _svOrderAll = Array.isArray(json) ? json : (Array.isArray(json.data) ? json.data : []);
+            _svOrderFiltered = [..._svOrderAll];
+            svOrderRenderTabs();
+            svOrderRender();
+        } catch (e) {
+            svOrderListHtml('<div style="text-align:center;padding:40px 0;color:#ef4444;"><i class="fas fa-exclamation-circle" style="font-size:22px;margin-bottom:10px;display:block;"></i>Không thể tải dịch vụ. Thử lại sau.</div>');
+        }
+    }
+
+    /* ---------- ICON THEO TYPE ---------- */
+    function svTypeIcon(t) {
+        if (!t || t === 'ALL')  return 'fas fa-th-large';
+        const l = t.toLowerCase();
+        if (l.includes('ăn') || l.includes('uống') || l.includes('food')) return 'fas fa-utensils';
+        if (l.includes('giặt') || l.includes('ủi') || l.includes('laundry')) return 'fas fa-tshirt';
+        if (l.includes('spa') || l.includes('massage'))  return 'fas fa-spa';
+        if (l.includes('đưa đón') || l.includes('transfer')) return 'fas fa-car';
+        if (l.includes('thuê xe') || l.includes('xe'))   return 'fas fa-motorcycle';
+        return 'fas fa-concierge-bell';
+    }
+
+    /* ---------- RENDER TABS ---------- */
+    function svOrderRenderTabs() {
+        const types  = ['ALL', ...new Set(_svOrderAll.map(s => s.type || 'Khác').filter(Boolean))];
+        const tabsEl = document.getElementById('sv-order-tabs');
+        if (!tabsEl) return;
+        tabsEl.innerHTML = types.map(t => {
+            const active = t === _svOrderActiveType;
+            const label  = t === 'ALL' ? 'Tất cả' : t;
+            return `<button type="button"
+                class="sv-type-pill${active ? ' active' : ''}"
+                data-sv-tab="${t}"
+                onclick="svOrderFilterByType('${t}')"
+            ><i class="${svTypeIcon(t)}"></i> ${label}</button>`;
+        }).join('');
+    }
+
+    /* ---------- LỌC THEO TYPE ---------- */
+    window.svOrderFilterByType = function (type) {
+        _svOrderActiveType = type;
+        svOrderApplyFilter();
+        svOrderRenderTabs();
+        svOrderRender();
+    };
+
+    /* ---------- TÌM KIẾM ---------- */
+    window.svOrderSearch = function (kw) {
+        svOrderApplyFilter(kw);
+        svOrderRender();
+    };
+
+    /* ---------- ÁP DỤNG CẢ 2 BỘ LỌC ---------- */
+    function svOrderApplyFilter(kw) {
+        const search = (kw !== undefined ? kw : (document.getElementById('sv-order-search') || {}).value || '').toLowerCase().trim();
+        _svOrderFiltered = _svOrderAll.filter(s => {
+            const matchType = _svOrderActiveType === 'ALL' || (s.type || 'Khác') === _svOrderActiveType;
+            const matchKw   = !search || (s.name || '').toLowerCase().includes(search);
+            return matchType && matchKw;
+        });
+    }
+
+    /* ---------- RENDER DANH SÁCH ---------- */
+    function svOrderRender() {
+        if (!_svOrderFiltered.length) {
+            svOrderListHtml('<div style="text-align:center;padding:32px 0;color:#94a3b8;font-size:13px;"><i class="fas fa-search" style="font-size:20px;display:block;margin-bottom:8px;"></i>Không tìm thấy dịch vụ nào.</div>');
+            return;
+        }
+
+        const html = _svOrderFiltered.map(s => {
+            const img    = (Array.isArray(s.images) && s.images[0]) ? s.images[0] : '';
+            const price  = new Intl.NumberFormat('vi-VN').format(s.price || 0);
+            const qty    = _svOrderQty[s.id] || 0;
+
+            // Kiểm tra xem có phải dịch vụ giặt ủi không
+            const isLaundry = (s.type || '').toLowerCase().includes('giặt') ||
+                (s.type || '').toLowerCase().includes('ủi') ||
+                (s.type || '').toLowerCase().includes('laundry');
+
+            const isSelected = _svOrderQty[s.id] ? true : false;
+
+            // ===== DỊCH VỤ GIẶT ỦI: CLICK TOGGLE (BỎ SỐ LƯỢNG) =====
+            if (isLaundry) {
+                return `
+            <div onclick="svOrderToggleService(${s.id})"
+                 style="display:flex;align-items:center;gap:14px;padding:12px 14px;
+                        border:1.5px solid ${isSelected ? '#2563eb' : '#e2e8f0'};
+                        border-radius:16px;
+                        background:${isSelected ? '#eff6ff' : '#fafbff'};
+                        transition:border-color .15s,box-shadow .15s,background .15s;
+                        cursor:pointer;position:relative;"
+                 onmouseover="this.style.borderColor='#bfdbfe';this.style.boxShadow='0 2px 12px rgba(37,99,235,0.08)'"
+                 onmouseout="this.style.borderColor='${isSelected ? '#2563eb' : '#e2e8f0'}';this.style.boxShadow='none'">
+
+                <!-- Ảnh -->
+                <div style="width:60px;height:60px;border-radius:12px;overflow:hidden;flex-shrink:0;
+                            background:#f1f5f9;display:flex;align-items:center;justify-content:center;position:relative;">
+                    ${img
+                    ? `<img src="${img}" alt="${s.name}" style="width:100%;height:100%;object-fit:cover;">`
+                    : `<i class="fas fa-concierge-bell" style="color:#94a3b8;font-size:22px;"></i>`
+                }
+                    ${isSelected ? `<div style="position:absolute;inset:0;background:rgba(37,99,235,0.15);display:flex;align-items:center;justify-content:center;">
+                                    <i class="fas fa-check" style="color:#2563eb;font-size:24px;font-weight:900;"></i>
+                                </div>` : ''}
+                </div>
+
+                <!-- Thông tin -->
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:2px;
+                                white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name || '—'}</div>
+                    <div style="font-size:11px;color:#64748b;margin-bottom:4px;">${s.type || ''}</div>
+                    <div style="font-size:13px;font-weight:800;color:#2563eb;">${price} ₫</div>
+                </div>
+
+                <!-- Dấu hiệu chọn -->
+                ${isSelected ? `<div style="width:32px;height:32px;border-radius:50%;background:#2563eb;
+                                            display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <i class="fas fa-check" style="color:#fff;font-size:16px;font-weight:900;"></i>
+                                </div>` : ''}
+            </div>`;
+            }
+
+            // ===== DỊCH VỤ KHÁC: GIỮ NÚT +/- NHƯ CŨ =====
+            return `
+            <div style="display:flex;align-items:center;gap:14px;padding:12px 14px;
+                        border:1.5px solid #e2e8f0;border-radius:16px;background:#fafbff;
+                        transition:border-color .15s,box-shadow .15s;"
+                 onmouseover="this.style.borderColor='#bfdbfe';this.style.boxShadow='0 2px 12px rgba(37,99,235,0.08)'"
+                 onmouseout="this.style.borderColor='#e2e8f0';this.style.boxShadow='none'">
+
+                <!-- Ảnh -->
+                <div style="width:60px;height:60px;border-radius:12px;overflow:hidden;flex-shrink:0;
+                            background:#f1f5f9;display:flex;align-items:center;justify-content:center;">
+                ${img
+                ? `<img src="${img}" alt="${s.name}" style="width:100%;height:100%;object-fit:cover;">`
+                : `<i class="fas fa-concierge-bell" style="color:#94a3b8;font-size:22px;"></i>`
+            }
+                </div>
+
+                    <!-- Thông tin -->
+                <div style="flex:1;min-width:0;">
+                <div style="font-size:14px;font-weight:700;color:#1e293b;margin-bottom:2px;
+                                white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.name || '—'}</div>
+                <div style="font-size:11px;color:#64748b;margin-bottom:4px;">${s.type || ''}</div>
+                <div style="font-size:13px;font-weight:800;color:#2563eb;">${price} ₫</div>
+                </div>
+
+                <!-- Bộ chọn số lượng (nút +/-) -->
+                <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+                <button onclick="svOrderChangeQty(${s.id}, -1)"
+                style="width:30px;height:30px;border-radius:8px;border:1.5px solid #e2e8f0;
+                                   background:#fff;font-size:16px;font-weight:700;color:#64748b;
+                                   cursor:pointer;display:flex;align-items:center;justify-content:center;
+                                   transition:background .1s;" ${qty === 0 ? 'disabled style="width:30px;height:30px;border-radius:8px;border:1.5px solid #e2e8f0;background:#f8fafc;font-size:16px;font-weight:700;color:#cbd5e1;cursor:not-allowed;display:flex;align-items:center;justify-content:center;"' : ''}>−</button>
+
+                <span id="sv-order-qty-${s.id}"
+                style="min-width:28px;text-align:center;font-size:14px;font-weight:800;
+                                 color:${qty > 0 ? '#2563eb' : '#94a3b8'};">${qty}</span>
+
+                <button onclick="svOrderChangeQty(${s.id}, 1)"
+                style="width:30px;height:30px;border-radius:8px;border:1.5px solid #2563eb;
+                                   background:linear-gradient(135deg,#2563eb,#1d4ed8);font-size:16px;font-weight:700;
+                                   color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;
+                                   transition:opacity .1s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">+</button>
+                </div>
+                </div>`;
+        }).join('');
+
+        svOrderListHtml(html);
+    }
+
+    /* ---------- TOGGLE DỊCH VỤ GIẶT ỦI (CHỌN/BỎ CHỌN) ---------- */
+    window.svOrderToggleService = function (serviceId) {
+        const isSelected = _svOrderQty[serviceId] ? true : false;
+        if (isSelected) {
+            delete _svOrderQty[serviceId];
+        } else {
+            _svOrderQty[serviceId] = 1; // Mặc định là 1 cho giặt ủi
+        }
+
+        // Re-render danh sách để cập nhật visual
+        svOrderRender();
+        svOrderSummaryUpdate();
+    };
+
+    /* ---------- THAY ĐỔI SỐ LƯỢNG ---------- */
+    window.svOrderChangeQty = function (serviceId, delta) {
+        const current = _svOrderQty[serviceId] || 0;
+        const next    = Math.max(0, current + delta);
+        if (next === 0) delete _svOrderQty[serviceId];
+        else _svOrderQty[serviceId] = next;
+
+        // Cập nhật inline không cần re-render toàn bộ
+        const qtyEl = document.getElementById('sv-order-qty-' + serviceId);
+        if (qtyEl) {
+            qtyEl.textContent = next;
+            qtyEl.style.color = next > 0 ? '#2563eb' : '#94a3b8';
+        }
+
+        svOrderSummaryUpdate();
+    };
+
+    /* ---------- CẬP NHẬT TÓM TẮT ---------- */
+    function svOrderSummaryUpdate() {
+        const ids  = Object.keys(_svOrderQty);
+        const box  = document.getElementById('sv-order-summary');
+        const lines= document.getElementById('sv-order-summary-lines');
+        const tot  = document.getElementById('sv-order-total');
+
+        if (!ids.length) {
+            if (box) box.style.display = 'none';
+            return;
+        }
+
+        let total = 0;
+        const lineHtml = ids.map(id => {
+            const svc = _svOrderAll.find(s => String(s.id) === String(id));
+            if (!svc) return '';
+            const qty     = _svOrderQty[id];
+            const subtotal= (svc.price || 0) * qty;
+            total += subtotal;
+            return `<div style="display:flex;justify-content:space-between;font-size:12px;color:#475569;">
+                <span>${svc.name} × ${qty}</span>
+                <span style="font-weight:600;">${new Intl.NumberFormat('vi-VN').format(subtotal)} ₫</span>
+                </div>`;
+        }).join('');
+
+        if (lines) lines.innerHTML = lineHtml;
+        if (tot)   tot.textContent = new Intl.NumberFormat('vi-VN').format(total) + ' ₫';
+        if (box)   box.style.display = 'block';
+    }
+
+    /* ---------- ĐẶT HÀNG ---------- */
+    // API: POST /api/v1/orders  — @ModelAttribute OrderRequest { bookingId, serviceId, quantity }
+    // Mỗi sản phẩm được chọn → gửi 1 request riêng (song song)
+    window.svOrderSubmit = async function () {
+        const ids = Object.keys(_svOrderQty);
+        if (!ids.length) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon: 'warning', title: 'Chưa chọn dịch vụ',
+                    text: 'Vui lòng chọn ít nhất 1 dịch vụ.', confirmButtonColor: '#2563eb' });
+            } else alert('Vui lòng chọn ít nhất 1 dịch vụ.');
+            return;
+        }
+
+        const btn = document.getElementById('sv-order-submit-btn');
+        if (btn) { btn.disabled = true; btn.style.opacity = '.6'; }
+
+        try {
+            const token = localStorage.getItem('accessToken');
+            const headers = token ? { Authorization: 'Bearer ' + token } : {};
+
+            // Gửi song song — mỗi dịch vụ 1 request POST /api/v1/orders
+            const requests = ids.map(id => {
+                const fd = new FormData();
+                fd.append('bookingId', _svOrderBookingId);
+                fd.append('serviceId', id);
+                fd.append('quantity',  _svOrderQty[id]);
+                return fetch('/api/v1/orders', {
+                    method:  'POST',
+                    headers: headers,
+                    body:    fd
+                });
+            });
+
+            const results = await Promise.all(requests);
+            const failed  = results.filter(r => !r.ok);
+
+            if (failed.length > 0) {
+                throw new Error(`${failed.length} đơn gửi thất bại`);
+            }
+
+            svOrderClose();
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ toast:true, position:'top-end', icon:'success',
+                    title: `Đặt ${ids.length} dịch vụ thành công!`,
+                    showConfirmButton:false, timer:2500, timerProgressBar:true });
+            }
+        } catch (e) {
+            console.error('[svOrderSubmit]', e);
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ icon:'error', title:'Lỗi', text: e.message || 'Đặt dịch vụ thất bại. Vui lòng thử lại.',
+                    confirmButtonColor:'#2563eb' });
+            } else alert('Đặt dịch vụ thất bại: ' + e.message);
+        } finally {
+            if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+        }
+    };
+
+    /* ---------- HELPER ---------- */
+    function svOrderListHtml(html) {
+        const el = document.getElementById('sv-order-list');
+        if (el) el.innerHTML = html;
+    }
+})();

@@ -221,3 +221,73 @@ async function handleDelete() {
         deleteBtn.innerHTML = originalBtnText;
     }
 }
+
+
+
+
+
+// ===== ROOM FORM MODE BANNER (Add vs Update) =====
+(function rfModeBanner() {
+    function setMode(isUpdate) {
+        const banner      = document.getElementById('rf-mode-banner');
+        const bannerIcon  = document.getElementById('rf-banner-icon');
+        const bannerTitle = document.getElementById('rf-banner-title');
+        const bannerSub   = document.getElementById('rf-banner-sub');
+        const idBadge     = document.getElementById('rf-id-badge');
+        const headerTitle = document.getElementById('rf-header-title');
+        const headerBread = document.getElementById('rf-header-breadcrumb');
+        const asideAdd    = document.getElementById('rf-aside-add');
+        const asideUpd    = document.getElementById('rf-aside-update');
+        const submitBtn   = document.getElementById('btnSubmit');
+
+        if (!banner) return;
+
+        if (isUpdate) {
+            banner.className     = 'rf-mode-banner rf-mode-update';
+            bannerIcon.innerHTML = '<i class="fas fa-pen-to-square"></i>';
+            bannerTitle.textContent = 'Cập nhật phòng';
+            bannerSub.textContent   = 'Nhập ID phòng và tải dữ liệu cũ, sau đó chỉnh sửa và lưu lại.';
+            if (idBadge)     idBadge.classList.remove('hidden');
+            if (headerTitle) headerTitle.textContent = 'Update Room';
+            if (headerBread) headerBread.textContent = 'Dashboard / Rooms / Edit';
+            if (asideAdd)    asideAdd.classList.add('hidden');
+            if (asideUpd)    asideUpd.classList.remove('hidden');
+            if (submitBtn)   submitBtn.style.background = 'linear-gradient(135deg,#d97706,#f59e0b)';
+            if (submitBtn)   submitBtn.style.boxShadow  = '0 4px 14px rgba(217,119,6,.30)';
+        } else {
+            banner.className     = 'rf-mode-banner rf-mode-add';
+            bannerIcon.innerHTML = '<i class="fas fa-plus-circle"></i>';
+            bannerTitle.textContent = 'Thêm phòng mới';
+            bannerSub.textContent   = 'Điền đầy đủ thông tin bên dưới để tạo phòng mới trong hệ thống.';
+            if (idBadge)     idBadge.classList.add('hidden');
+            if (headerTitle) headerTitle.textContent = 'Add New Room';
+            if (headerBread) headerBread.textContent = 'Dashboard / Rooms / Create';
+            if (asideAdd)    asideAdd.classList.remove('hidden');
+            if (asideUpd)    asideUpd.classList.add('hidden');
+            if (submitBtn)   submitBtn.style.background = 'linear-gradient(135deg,#4f46e5,#6366f1)';
+            if (submitBtn)   submitBtn.style.boxShadow  = '0 4px 14px rgba(99,102,241,.30)';
+        }
+    }
+
+    // Hook into the Room ID field to keep ID badge in sync
+    function syncIdBadge() {
+        const valEl  = document.getElementById('rf-id-badge-val');
+        const roomId = document.getElementById('roomId');
+        if (valEl && roomId) valEl.textContent = roomId.value || '—';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuAdd    = document.getElementById('menuAdd');
+        const menuUpdate = document.getElementById('menuUpdate');
+        if (menuAdd)    menuAdd.addEventListener('click',    function() { setTimeout(function() { setMode(false); }, 50); });
+        if (menuUpdate) menuUpdate.addEventListener('click', function() { setTimeout(function() { setMode(true);  }, 50); });
+
+        // Observe roomId changes (set by room-form.js after fetch)
+        const roomIdEl = document.getElementById('roomId');
+        if (roomIdEl) {
+            const obs = new MutationObserver(syncIdBadge);
+            obs.observe(roomIdEl, { attributes: true, attributeFilter: ['value'] });
+            roomIdEl.addEventListener('input', syncIdBadge);
+        }
+    });
+})();

@@ -1,0 +1,106 @@
+<!-- ===== MAIN: SERVICE ROOM ===== -->
+<main id="view-service" class="flex-1 flex-col overflow-y-auto relative" style="display:none;">
+
+    <!-- Sticky header đồng bộ với các tab khác -->
+    <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-24 border-b border-slate-200 flex items-center justify-between px-10">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Service Room</h1>
+            <p class="text-xs text-slate-500 font-medium">Dashboard / Rooms / Service</p>
+            <p class="text-xs font-semibold mt-0.5 flex items-center gap-1.5" style="color:#2563eb;">
+                <i class="fas fa-map-marker-alt" style="font-size:10px;"></i>
+                <span id="sv-branch-text">—</span>
+            </p>
+        </div>
+        <div class="flex items-center gap-4">
+            <button onclick="svReload()" class="flex items-center gap-2 px-5 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl font-semibold text-sm transition-all">
+                <i class="fas fa-sync-alt"></i> Tải lại
+            </button>
+            <div class="h-8 w-[1px] bg-slate-200"></div>
+            <div class="relative cursor-pointer text-slate-400 hover:text-blue-600 transition-colors" title="Thông báo">
+                <i class="far fa-bell text-xl"></i>
+                <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full border-2 border-white"></span>
+            </div>
+            <div class="h-8 w-[1px] bg-slate-200"></div>
+            <div class="flex items-center gap-3 bg-slate-50 p-1.5 pr-4 rounded-full border border-slate-100 hover:bg-slate-100 transition-all cursor-pointer" id="sv-user-chip" onclick="sharedToggleUserMenu('sv')">
+                <div id="sv-avatar" class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm flex-shrink-0"
+                     style="background: linear-gradient(135deg, #3b6fd4, #5b8fe8);">??</div>
+                <span class="text-sm font-bold text-slate-700" id="sv-greeting">Hi, ...</span>
+            </div>
+            <div id="sv-user-menu" class="hidden absolute top-[72px] right-8 z-50 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden py-1">
+                <div class="px-4 py-3 border-b border-slate-100">
+                    <p class="text-xs text-slate-400 font-medium">Đăng nhập với tư cách</p>
+                    <p class="text-sm font-bold text-slate-800 mt-0.5 truncate" id="sv-fullname-menu">—</p>
+                    <p class="text-xs text-blue-500 font-semibold mt-0.5" id="sv-role-menu">—</p>
+                </div>
+                <a href="/demo" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                    <i class="fas fa-home w-4 text-slate-400"></i> Về trang chủ
+                </a>
+                <button onclick="rfLogout()" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
+                    <i class="fas fa-sign-out-alt w-4"></i> Đăng xuất
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div style="display:flex; flex-direction:column; gap:1.5rem; padding: 2rem;">
+
+        <!-- Header card (search + action buttons) -->
+        <div class="sv-header-card">
+            <div class="sv-header-left">
+                <span class="sv-header-icon"><i class="fas fa-concierge-bell"></i></span>
+                <div>
+                    <h2 class="sv-title">Phòng đang sử dụng dịch vụ</h2>
+                    <p class="sv-subtitle">Danh sách khách đang check-in tại chi nhánh</p>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div class="sv-search-wrap">
+                    <span class="sv-search-icon"><i class="fas fa-search"></i></span>
+                    <input
+                            type="text"
+                            id="svSearchInput"
+                            class="sv-search-input"
+                            placeholder="Tìm theo tên phòng..."
+                            oninput="svFilterRooms(this.value)"
+                    />
+                </div>
+                <button class="sv-add-service-header-btn" onclick="svOpenAddService(null, null)">
+                    <i class="fas fa-plus"></i>
+                    Add Service
+                </button>
+                <button class="sv-update-service-header-btn" onclick="svOpenUpdateService()">
+                    <i class="fas fa-pen"></i>
+                    Cập nhật dịch vụ
+                </button>
+            </div>
+        </div>
+
+        <!-- Bảng danh sách -->
+        <div class="sv-table-card">
+            <table class="sv-table">
+                <thead>
+                <tr>
+                    <th>ID Booking</th>
+                    <th>Tên phòng</th>
+                    <th>Tên khách</th>
+                    <th>Dịch vụ</th>
+                </tr>
+                </thead>
+                <tbody id="svTableBody">
+                <tr>
+                    <td colspan="4" class="sv-empty">
+                        <i class="fas fa-spinner fa-spin"></i> Đang tải dữ liệu...
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Trạng thái không có dữ liệu (ẩn/hiện bằng JS) -->
+        <div id="svEmptyState" class="sv-empty-state" style="display:none;">
+            <i class="fas fa-door-closed"></i>
+            <p>Không có phòng nào đang sử dụng dịch vụ.</p>
+        </div>
+
+    </div>
+</main>

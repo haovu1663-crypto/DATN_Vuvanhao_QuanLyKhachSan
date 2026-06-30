@@ -374,3 +374,79 @@ async function rtuDeleteRoomType() {
         btn.innerHTML = '<i class="fas fa-trash-alt"></i> Xóa loại phòng';
     }
 }
+
+
+
+
+
+
+
+// ===== CAPACITY DOTS VISUAL (add & update room type) =====
+(function() {
+    function renderDots(dotContainerId, value) {
+        const el = document.getElementById(dotContainerId);
+        if (!el) return;
+        el.innerHTML = '';
+        for (let i = 1; i <= 15; i++) {
+            const d = document.createElement('div');
+            d.className = 'rtnew-cap-dot' + (i <= value ? ' active' : '');
+            el.appendChild(d);
+        }
+    }
+
+    // Patch rtCapChange để cập nhật dots
+    const _origRtCap = window.rtCapChange;
+    window.rtCapChange = function(delta) {
+        if (_origRtCap) _origRtCap(delta);
+        const val = parseInt(document.getElementById('rt-capacity')?.value || 2);
+        renderDots('rt-cap-dots', val);
+    };
+
+    // Patch rtuCapChange
+    const _origRtuCap = window.rtuCapChange;
+    window.rtuCapChange = function(delta) {
+        if (_origRtuCap) _origRtuCap(delta);
+        const val = parseInt(document.getElementById('rtu-capacity')?.value || 2);
+        renderDots('rtu-cap-dots', val);
+        // Update ID badge
+        const idEl = document.getElementById('rtu-id');
+        const badge = document.getElementById('rtu-id-val-display');
+        if (badge && idEl) badge.textContent = idEl.value || '—';
+    };
+
+    // Patch rtuFetchById để sau khi load xong cập nhật dots + ID badge
+    document.addEventListener('DOMContentLoaded', function() {
+        renderDots('rt-cap-dots', 2);
+        renderDots('rtu-cap-dots', 2);
+
+        // Observe rtu-id changes để cập nhật badge
+        const rtuIdEl = document.getElementById('rtu-id');
+        if (rtuIdEl) {
+            const observer = new MutationObserver(function() {
+                const badge = document.getElementById('rtu-id-val-display');
+                if (badge) badge.textContent = rtuIdEl.value || '—';
+            });
+            observer.observe(rtuIdEl, { attributes: true, attributeFilter: ['value'] });
+            // Cũng hook vào input event
+            rtuIdEl.addEventListener('change', function() {
+                const badge = document.getElementById('rtu-id-val-display');
+                if (badge) badge.textContent = rtuIdEl.value || '—';
+            });
+        }
+
+        // Hook rtuFetchById success: sau 300ms cập nhật dots & badge
+        const _origFetch = window.rtuFetchById;
+        if (typeof _origFetch === 'function') {
+            window.rtuFetchById = async function() {
+                await _origFetch();
+                setTimeout(function() {
+                    const cap = parseInt(document.getElementById('rtu-capacity')?.value || 2);
+                    renderDots('rtu-cap-dots', cap);
+                    const idEl = document.getElementById('rtu-id');
+                    const badge = document.getElementById('rtu-id-val-display');
+                    if (badge && idEl) badge.textContent = idEl.value || '—';
+                }, 400);
+            };
+        }
+    });
+})();

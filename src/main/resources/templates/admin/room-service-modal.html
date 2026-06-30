@@ -1,0 +1,91 @@
+<!-- ===== MODAL ĐẶT DỊCH VỤ CHO PHÒNG ===== -->
+<div id="sv-order-overlay"
+     onclick="if(event.target===this)svOrderClose()"
+     style="display:none;position:fixed;inset:0;z-index:10000;
+            background:rgba(15,23,42,0.55);backdrop-filter:blur(5px);
+            align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:24px;width:96%;max-width:620px;
+                max-height:90vh;overflow:hidden;display:flex;flex-direction:column;
+                box-shadow:0 28px 70px rgba(0,0,0,0.22);animation:svOrderIn .18s ease;">
+
+        <!-- Banner -->
+        <div style="background:linear-gradient(135deg,#1e3a8a,#2563eb);
+                    padding:22px 24px 18px;position:relative;flex-shrink:0;">
+            <button onclick="svOrderClose()"
+                    style="position:absolute;top:14px;right:16px;background:rgba(255,255,255,0.15);
+                           border:none;color:#fff;width:32px;height:32px;border-radius:50%;
+                           cursor:pointer;font-size:17px;display:flex;align-items:center;justify-content:center;">✕</button>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
+                <div style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,0.18);
+                            display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-concierge-bell" style="color:#fff;font-size:18px;"></i>
+                </div>
+                <div>
+                    <h2 style="color:#fff;font-size:17px;font-weight:800;margin:0;">Đặt dịch vụ</h2>
+                    <p id="sv-order-banner-sub" style="color:rgba(255,255,255,0.72);font-size:12px;margin:0;"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thanh tìm kiếm + Tab loại dịch vụ -->
+        <div style="padding:14px 20px 0;flex-shrink:0;">
+            <!-- Search -->
+            <div style="position:relative;margin-bottom:12px;">
+                <i class="fas fa-search" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:13px;"></i>
+                <input id="sv-order-search" type="text" placeholder="Tìm dịch vụ..."
+                       oninput="svOrderSearch(this.value)"
+                       style="width:100%;padding:10px 14px 10px 38px;border:1.5px solid #e2e8f0;
+                              border-radius:12px;font-size:13px;font-family:inherit;color:#1e293b;
+                              background:#f8fafc;outline:none;box-sizing:border-box;transition:border-color .15s;"
+                       onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e2e8f0'">
+            </div>
+            <!-- Tabs loại -->
+            <div id="sv-order-tabs" class="sv-type-bar" style="margin-bottom:4px;">
+                <div style="color:#94a3b8;font-size:12px;padding:6px 8px;">Đang tải...</div>
+            </div>
+        </div>
+
+        <!-- Danh sách sản phẩm -->
+        <div style="padding:14px 20px;overflow-y:auto;flex:1;">
+            <div id="sv-order-list" style="display:flex;flex-direction:column;gap:10px;min-height:80px;">
+                <div style="text-align:center;padding:40px 0;color:#94a3b8;">
+                    <i class="fas fa-spinner fa-spin" style="font-size:22px;margin-bottom:10px;display:block;"></i>
+                    Đang tải danh sách dịch vụ...
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer: tóm tắt + nút đặt hàng -->
+        <div style="flex-shrink:0;border-top:1.5px solid #f1f5f9;padding:16px 20px;background:#fff;">
+            <div id="sv-order-summary" style="display:none;background:#f8fafc;border:1.5px solid #e2e8f0;
+                 border-radius:14px;padding:12px 16px;margin-bottom:14px;">
+                <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;
+                             letter-spacing:.06em;margin-bottom:8px;">
+                    <i class="fas fa-receipt"></i> Tóm tắt đơn
+                </div>
+                <div id="sv-order-summary-lines" style="display:flex;flex-direction:column;gap:5px;"></div>
+                <div style="height:1px;background:#e2e8f0;margin:10px 0;"></div>
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-size:12px;font-weight:700;color:#1e293b;">Tổng tiền</span>
+                    <span id="sv-order-total" style="font-size:15px;font-weight:800;color:#2563eb;"></span>
+                </div>
+            </div>
+            <div style="display:flex;gap:10px;">
+                <button onclick="svOrderClose()"
+                        style="flex:0 0 auto;padding:11px 20px;border-radius:12px;border:1.5px solid #e2e8f0;
+                               background:#fff;font-size:13px;font-weight:700;color:#64748b;cursor:pointer;
+                               transition:background .15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#fff'">
+                    Huỷ
+                </button>
+                <button id="sv-order-submit-btn" onclick="svOrderSubmit()"
+                        style="flex:1;padding:11px 20px;border-radius:12px;border:none;
+                               background:linear-gradient(135deg,#2563eb,#1d4ed8);
+                               font-size:13px;font-weight:700;color:#fff;cursor:pointer;
+                               box-shadow:0 4px 14px rgba(37,99,235,0.35);
+                               transition:opacity .15s;" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+                    <i class="fas fa-check-circle"></i> Xác nhận đặt dịch vụ
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

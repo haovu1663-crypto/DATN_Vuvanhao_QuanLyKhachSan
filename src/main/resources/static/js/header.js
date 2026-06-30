@@ -79,3 +79,63 @@
         }
     });
 });
+
+
+
+
+
+
+
+
+
+    // ===== WORK BRANCH FROM LOCALSTORAGE =====
+    (function rfLoadBranch() {
+    let name = '';
+    try {
+    const raw = localStorage.getItem('workBranch');
+    if (!raw) return;
+    const branchData = JSON.parse(raw);
+    name = typeof branchData === 'string'
+    ? branchData
+    : (branchData.name || branchData.branchName || branchData.branch || JSON.stringify(branchData));
+} catch (e) {
+    name = localStorage.getItem('workBranch') || '';
+}
+    if (!name) return;
+    ['work-branch-text', 'rs-branch-text', 'ci-branch-text', 'co-branch-text', 'sv-branch-text'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = name;
+});
+})();
+
+
+
+
+    // ===== POPULATE HEADER CHO CÁC TAB MỚI (sv, art, urt) =====
+    // Đảm bảo greeting/avatar/fullname được fill đúng ngay cả khi header.js
+    // chưa liệt kê các prefix này
+    (function populateNewHeaders() {
+    const prefixes = ['sv', 'art', 'urt'];
+    function fill() {
+    const fullName = localStorage.getItem('fullName') || '';
+    const role     = localStorage.getItem('userRole') || '';
+    const initials = fullName.split(' ').filter(Boolean).slice(-2).map(w => w[0]).join('').toUpperCase() || '??';
+    const hiText   = fullName ? 'Hi, ' + fullName.split(' ').pop() + '!' : 'Hi, ...';
+    prefixes.forEach(function(p) {
+    const avatar   = document.getElementById(p + '-avatar');
+    const greeting = document.getElementById(p + '-greeting');
+    const fullEl   = document.getElementById(p + '-fullname-menu');
+    const roleEl   = document.getElementById(p + '-role-menu');
+    if (avatar)   { avatar.textContent = initials; }
+    if (greeting) { greeting.textContent = hiText; }
+    if (fullEl)   { fullEl.textContent = fullName || '—'; }
+    if (roleEl)   { roleEl.textContent = role || '—'; }
+});
+}
+    if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fill);
+} else {
+    fill();
+}
+})();
+

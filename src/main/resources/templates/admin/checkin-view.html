@@ -1,16 +1,16 @@
-<!-- ===== CHECK OUT VIEW ===== -->
-<main th:fragment="view-checkout" id="view-checkout" class="flex-1 flex flex-col overflow-y-auto relative">
+<!-- ===== CHECK IN VIEW ===== -->
+<main id="view-checkin" class="flex-1 flex flex-col overflow-y-auto relative">
     <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md h-24 border-b border-slate-200 flex items-center justify-between px-10">
         <div>
-            <h1 class="text-2xl font-bold text-slate-800">Check Out Room</h1>
-            <p class="text-xs text-slate-500 font-medium">Dashboard / Rooms / Check Out</p>
+            <h1 class="text-2xl font-bold text-slate-800">Check In Room</h1>
+            <p class="text-xs text-slate-500 font-medium">Dashboard / Rooms / Check In</p>
             <p class="text-xs font-semibold mt-0.5 flex items-center gap-1.5" style="color:#2563eb;">
                 <i class="fas fa-map-marker-alt" style="font-size:10px;"></i>
-                <span id="co-branch-text">—</span>
+                <span id="ci-branch-text">—</span>
             </p>
         </div>
         <div class="flex items-center gap-4">
-            <button onclick="coReload()" class="flex items-center gap-2 px-5 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-600 rounded-xl font-semibold text-sm transition-all">
+            <button onclick="ciReload()" class="flex items-center gap-2 px-5 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl font-semibold text-sm transition-all">
                 <i class="fas fa-sync-alt"></i> Tải lại
             </button>
             <div class="h-8 w-[1px] bg-slate-200"></div>
@@ -19,16 +19,16 @@
                 <span class="absolute -top-1 -right-1 bg-red-500 w-2 h-2 rounded-full border-2 border-white"></span>
             </div>
             <div class="h-8 w-[1px] bg-slate-200"></div>
-            <div class="flex items-center gap-3 bg-slate-50 p-1.5 pr-4 rounded-full border border-slate-100 hover:bg-slate-100 transition-all cursor-pointer" id="co-user-chip" onclick="sharedToggleUserMenu('co')">
-                <div id="co-avatar" class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm flex-shrink-0"
+            <div class="flex items-center gap-3 bg-slate-50 p-1.5 pr-4 rounded-full border border-slate-100 hover:bg-slate-100 transition-all cursor-pointer" id="ci-user-chip" onclick="sharedToggleUserMenu('ci')">
+                <div id="ci-avatar" class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm flex-shrink-0"
                      style="background: linear-gradient(135deg, #3b6fd4, #5b8fe8);">??</div>
-                <span class="text-sm font-bold text-slate-700" id="co-greeting">Hi, ...</span>
+                <span class="text-sm font-bold text-slate-700" id="ci-greeting">Hi, ...</span>
             </div>
-            <div id="co-user-menu" class="hidden absolute top-[72px] right-8 z-50 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden py-1">
+            <div id="ci-user-menu" class="hidden absolute top-[72px] right-8 z-50 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden py-1">
                 <div class="px-4 py-3 border-b border-slate-100">
                     <p class="text-xs text-slate-400 font-medium">Đăng nhập với tư cách</p>
-                    <p class="text-sm font-bold text-slate-800 mt-0.5 truncate" id="co-fullname-menu">—</p>
-                    <p class="text-xs text-blue-500 font-semibold mt-0.5" id="co-role-menu">—</p>
+                    <p class="text-sm font-bold text-slate-800 mt-0.5 truncate" id="ci-fullname-menu">—</p>
+                    <p class="text-xs text-blue-500 font-semibold mt-0.5" id="ci-role-menu">—</p>
                 </div>
                 <a href="/demo" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
                     <i class="fas fa-home w-4 text-slate-400"></i> Về trang chủ
@@ -42,45 +42,45 @@
 
     <div class="p-8 w-full flex flex-col gap-6">
 
-        <!-- Stats summary bar — giống Check In -->
+        <!-- Stats summary bar -->
         <div class="grid grid-cols-3 gap-4">
             <div class="glass-card rounded-2xl shadow-md shadow-slate-200/50 px-6 py-4 flex items-center gap-4">
-                <div class="w-11 h-11 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-door-closed text-amber-500 text-lg"></i>
+                <div class="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-calendar-check text-blue-500 text-lg"></i>
                 </div>
                 <div>
-                    <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Tổng chờ trả</p>
-                    <p class="text-2xl font-bold text-slate-800" id="co-stat-total">—</p>
+                    <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Tổng booking</p>
+                    <p class="text-2xl font-bold text-slate-800" id="ci-stat-total">—</p>
                 </div>
             </div>
             <div class="glass-card rounded-2xl shadow-md shadow-slate-200/50 px-6 py-4 flex items-center gap-4">
-                <div class="w-11 h-11 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-calendar-day text-green-500 text-lg"></i>
+                <div class="w-11 h-11 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-clock text-amber-500 text-lg"></i>
                 </div>
                 <div>
-                    <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Check In hôm nay</p>
-                    <p class="text-2xl font-bold text-slate-800" id="co-stat-today">—</p>
+                    <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Hôm nay</p>
+                    <p class="text-2xl font-bold text-slate-800" id="ci-stat-today">—</p>
                 </div>
             </div>
             <div class="glass-card rounded-2xl shadow-md shadow-slate-200/50 px-6 py-4 flex items-center gap-4">
                 <div class="w-11 h-11 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-hourglass-half text-red-400 text-lg"></i>
+                    <i class="fas fa-exclamation-triangle text-red-400 text-lg"></i>
                 </div>
                 <div>
-                    <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Lưu lâu ngày</p>
-                    <p class="text-2xl font-bold text-red-500" id="co-stat-overdue">—</p>
+                    <p class="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Quá hạn</p>
+                    <p class="text-2xl font-bold text-red-500" id="ci-stat-overdue">—</p>
                 </div>
             </div>
         </div>
 
-        <!-- Search + Table — cấu trúc y hệt Check In -->
+        <!-- Search + Table -->
         <div class="glass-card rounded-[2rem] shadow-2xl shadow-slate-200/50 p-8">
             <div class="flex items-center justify-between mb-6">
                 <div>
-                    <h2 class="text-lg font-bold text-slate-700">Danh sách booking chờ Check Out</h2>
-                    <p class="text-xs text-slate-400 mt-0.5">Các booking đã check in — chưa trả phòng</p>
+                    <h2 class="text-lg font-bold text-slate-700">Danh sách booking chờ Check In</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Các booking có ngày nhận phòng dự kiến đã đến — chưa check in</p>
                 </div>
-                <span class="text-xs bg-amber-50 text-amber-600 font-semibold px-3 py-1.5 rounded-full" id="co-count"></span>
+                <span class="text-xs bg-blue-50 text-blue-600 font-semibold px-3 py-1.5 rounded-full" id="ci-count"></span>
             </div>
 
             <!-- Search bar -->
@@ -89,14 +89,14 @@
                     <i class="fas fa-search text-slate-400 text-sm"></i>
                 </div>
                 <input
-                        id="co-filter-input"
+                        id="ci-filter-input"
                         type="text"
-                        placeholder="Tìm theo tên khách, tên phòng, loại phòng..."
+                        placeholder="Tìm theo tên phòng, loại phòng..."
                         autocomplete="off"
-                        oninput="coFilterTable()"
-                        class="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 placeholder:text-slate-400 outline-none transition-all focus:border-amber-400 focus:bg-white focus:shadow-[0_0_0_4px_rgba(217,119,6,0.08)]"
+                        oninput="ciFilterTable()"
+                        class="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 placeholder:text-slate-400 outline-none transition-all focus:border-blue-400 focus:bg-white focus:shadow-[0_0_0_4px_rgba(59,130,246,0.08)]"
                 >
-                <button id="co-filter-clear" onclick="coFilterClear()"
+                <button id="ci-filter-clear" onclick="ciFilterClear()"
                         class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-500 text-xs flex items-center justify-center transition-all">
                     <i class="fas fa-times"></i>
                 </button>
@@ -104,23 +104,22 @@
 
             <!-- Table -->
             <div class="overflow-x-auto rounded-2xl border border-slate-100">
-                <table class="w-full text-sm" id="co-table">
+                <table class="w-full text-sm" id="ci-table">
                     <thead>
                     <tr class="bg-slate-50 text-left">
                         <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider rounded-tl-2xl">#</th>
                         <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Booking ID</th>
                         <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Phòng</th>
                         <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Loại phòng</th>
-                        <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Khách hàng</th>
-                        <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Ngày Check In</th>
-                        <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Check Out dự kiến</th>
+                        <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Ngày nhận dự kiến</th>
+                        <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Ngày trả dự kiến</th>
                         <th class="px-5 py-3.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center rounded-tr-2xl">Thao tác</th>
                     </tr>
                     </thead>
-                    <tbody id="co-table-body">
+                    <tbody id="ci-table-body">
                     <tr>
-                        <td colspan="8" class="px-5 py-12 text-center text-slate-400">
-                            <i class="fas fa-spinner fa-spin text-2xl mb-3 block text-amber-400"></i>
+                        <td colspan="5" class="px-5 py-12 text-center text-slate-400">
+                            <i class="fas fa-spinner fa-spin text-2xl mb-3 block text-blue-400"></i>
                             <span class="text-sm font-medium">Đang tải danh sách...</span>
                         </td>
                     </tr>

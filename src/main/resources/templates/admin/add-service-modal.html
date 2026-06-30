@@ -1,0 +1,249 @@
+<!-- ===== ADD SERVICE MODAL ===== -->
+<div id="sv-modal-overlay" onclick="if(event.target===this)svCloseModal()">
+    <div id="sv-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="sv-modal-title">
+
+        <!-- ── Banner ── -->
+        <div class="sv-modal-banner">
+            <button class="sv-modal-close-btn" onclick="svCloseModal()" title="Đóng">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="sv-modal-banner-row">
+                <div class="sv-modal-banner-icon">
+                    <i class="fas fa-concierge-bell"></i>
+                </div>
+                <div>
+                    <h2 class="sv-modal-banner-title" id="sv-modal-title">Đăng ký dịch vụ</h2>
+                    <p class="sv-modal-banner-sub" id="sv-modal-banner-sub">Booking #— &nbsp;·&nbsp; Phòng: —</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Body ── -->
+        <div class="sv-modal-body">
+
+            <!-- Chọn loại dịch vụ (type) -->
+            <div class="sv-field" style="margin-bottom:4px;">
+                <label><i class="fas fa-tags"></i>&nbsp; Loại dịch vụ <span class="sv-required">*</span></label>
+                <div class="sv-type-bar" id="sv-type-bar">
+                    <button type="button" class="sv-type-pill active" data-type="Dịch vụ ăn uống"       onclick="svPickType(this)"><i class="fas fa-utensils"></i> Ăn uống</button>
+                    <button type="button" class="sv-type-pill"        data-type="Dịch vụ giặt ủi"       onclick="svPickType(this)"><i class="fas fa-tshirt"></i> Giặt ủi</button>
+                    <button type="button" class="sv-type-pill"        data-type="Dịch vụ spa & massage" onclick="svPickType(this)"><i class="fas fa-spa"></i> Spa &amp; Massage</button>
+                    <button type="button" class="sv-type-pill"        data-type="Dịch vụ đưa đón"       onclick="svPickType(this)"><i class="fas fa-car"></i> Đưa đón</button>
+                    <button type="button" class="sv-type-pill"        data-type="Dịch vụ thuê xe"       onclick="svPickType(this)"><i class="fas fa-motorcycle"></i> Thuê xe</button>
+                    <button type="button" class="sv-type-pill"        data-type="Dịch vụ khác"          onclick="svPickType(this)"><i class="fas fa-ellipsis-h"></i> Khác</button>
+                </div>
+            </div>
+
+            <!-- ── Tìm kiếm dịch vụ theo ID (chỉ hiện ở mode UPDATE) ── -->
+            <div id="sv-search-id-block" style="display:none; margin-top:10px;">
+                <div class="sv-search-id-wrap">
+                    <input id="sv-search-id-input"
+                           type="number" min="1"
+                           class="sv-input sv-search-id-input"
+                           placeholder="Nhập ID dịch vụ cần cập nhật..."
+                           onkeydown="if(event.key==='Enter') svSearchServiceById()">
+                    <button class="sv-search-id-btn" onclick="svSearchServiceById()">
+                        <span id="sv-search-id-spinner" class="sv-spinner" style="display:none;"></span>
+                        <i id="sv-search-id-icon" class="fas fa-search"></i>
+                        Tìm kiếm
+                    </button>
+                </div>
+                <p id="sv-search-id-msg" class="sv-search-id-msg" style="display:none;"></p>
+            </div>
+
+            <hr class="sv-divider">
+
+            <!-- Thông tin dịch vụ chung (ẩn khi chọn Giặt ủi) -->
+            <div id="sv-common-info">
+                <p class="sv-section-title"><i class="fas fa-info-circle"></i> Thông tin dịch vụ</p>
+
+                <div class="sv-field-group">
+                    <!-- Tên dịch vụ + Trạng thái -->
+                    <div class="sv-field-row">
+                        <div class="sv-field">
+                            <label for="sv-input-name">
+                                <i class="fas fa-tag"></i> Tên dịch vụ
+                                <span class="sv-required">*</span>
+                            </label>
+                            <input id="sv-input-name" class="sv-input"
+                                   type="text" placeholder="VD: Buffet sáng, Giặt hấp 5kg…"
+                                   autocomplete="off" required>
+                        </div>
+                        <div class="sv-field">
+                            <label for="sv-input-status">
+                                <i class="fas fa-circle-dot"></i> Trạng thái
+                            </label>
+                            <select id="sv-input-status" class="sv-select">
+                                <option value="true">✅ Đang hoạt động</option>
+                                <option value="false">⏸ Tạm ngừng</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Mô tả -->
+                    <div class="sv-field">
+                        <label for="sv-input-description">
+                            <i class="fas fa-align-left"></i> Mô tả
+                        </label>
+                        <textarea id="sv-input-description" class="sv-textarea"
+                                  placeholder="Mô tả ngắn về dịch vụ…"></textarea>
+                    </div>
+
+                    <!-- Giá -->
+                    <div class="sv-field">
+                        <label for="sv-input-price">
+                            <i class="fas fa-money-bill-wave"></i> Giá (VND)
+                            <span class="sv-required">*</span>
+                        </label>
+                        <div class="sv-price-wrap">
+                            <span class="sv-price-prefix">₫</span>
+                            <input id="sv-input-price" class="sv-input"
+                                   type="number" min="0" step="1000"
+                                   placeholder="0" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hình ảnh -->
+                <p class="sv-section-title"><i class="fas fa-images"></i> Hình ảnh</p>
+                <div class="sv-field" style="margin-bottom: 20px;">
+                    <div class="sv-upload-zone" id="sv-upload-zone">
+                        <input type="file" id="sv-input-images"
+                               accept="image/*" multiple
+                               onchange="svHandleImages(this.files)">
+                        <div class="sv-upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <p class="sv-upload-text">Kéo ảnh vào đây hoặc nhấn để chọn</p>
+                        <p class="sv-upload-hint">PNG, JPG, WEBP · Tối đa 5 ảnh · 5MB/ảnh</p>
+                    </div>
+                    <div class="sv-img-previews" id="sv-img-previews"></div>
+                </div>
+            </div><!-- /#sv-common-info -->
+
+            <!-- ══ PANEL GIẶT ỦI (chỉ hiện khi chọn tab Giặt ủi) ══ -->
+            <div id="sv-panel-laundry" style="display:none;">
+                <hr class="sv-divider">
+                <p class="sv-section-title"><i class="fas fa-tshirt"></i> Thông tin giặt ủi</p>
+
+                <div class="sv-field-group">
+                    <!-- Loại giặt + Đơn vị -->
+                    <div class="sv-field-row">
+                        <div class="sv-field">
+                            <label for="sv-laundry-type">
+                                <i class="fas fa-list-ul"></i> Loại dịch vụ giặt
+                                <span class="sv-required">*</span>
+                            </label>
+                            <input type="text" id="sv-laundry-type" class="sv-input"
+                                   placeholder="VD: Giặt thường, Giặt hấp, Ủi phẳng…"
+                                   oninput="svLaundryUpdatePreview && svLaundryUpdatePreview()"
+                                   autocomplete="off">
+                        </div>
+                        <div class="sv-field">
+                            <label for="sv-laundry-unit">
+                                <i class="fas fa-balance-scale"></i> Đơn vị tính
+                                <span class="sv-required">*</span>
+                            </label>
+                            <select id="sv-laundry-unit" class="sv-select" onchange="svLaundrySyncUnit && svLaundrySyncUnit()">
+                                <option value="kg">⚖️ Theo kg</option>
+                                <option value="món">👕 Theo món</option>
+                                <option value="túi">🛍️ Theo túi</option>
+                                <option value="bộ">👗 Theo bộ</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Định lượng + Thời gian hoàn thành -->
+                    <div class="sv-field-row">
+                        <div class="sv-field">
+                            <label for="sv-laundry-weight">
+                                <i class="fas fa-money-bill-wave"></i> Giá (VND)
+                                <span class="sv-required">*</span>
+                            </label>
+                            <div class="sv-price-wrap">
+                                <span class="sv-price-prefix">₫</span>
+                                <input id="sv-laundry-weight" class="sv-input"
+                                       type="number" min="0" step="1000"
+                                       placeholder="0"
+                                       style="padding-left: 30px;"
+                                       oninput="svLaundryUpdatePreview && svLaundryUpdatePreview()">
+                            </div>
+                        </div>
+                        <div class="sv-field">
+                            <label for="sv-laundry-duration">
+                                <i class="fas fa-clock"></i> Thời gian hoàn thành
+                            </label>
+                            <select id="sv-laundry-duration" class="sv-select" onchange="svLaundryUpdatePreview && svLaundryUpdatePreview()">
+                                <option value="">-- Chọn --</option>
+                                <option value="2">⚡ 2 giờ (nhanh)</option>
+                                <option value="4">🕓 4 giờ</option>
+                                <option value="8">🕗 8 giờ (tiêu chuẩn)</option>
+                                <option value="24">📅 24 giờ</option>
+                                <option value="48">📅 48 giờ</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Ghi chú đặc biệt -->
+                    <div class="sv-field">
+                        <label for="sv-laundry-note">
+                            <i class="fas fa-sticky-note"></i> Ghi chú đặc biệt
+                        </label>
+                        <textarea id="sv-laundry-note" class="sv-textarea"
+                                  placeholder="VD: Không sấy nóng, chỉ giặt tay, phân loại màu sáng/tối…"
+                                  style="height:70px;"></textarea>
+                    </div>
+
+                    <!-- Tags nhanh -->
+                    <div class="sv-field">
+                        <label><i class="fas fa-tag"></i> Tuỳ chọn nhanh</label>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;" id="sv-laundry-tags">
+                            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:#475569;cursor:pointer;">
+                                <input type="checkbox" id="sv-laundry-express" style="accent-color:#2563eb;width:14px;height:14px;" onchange="svLaundryUpdatePreview && svLaundryUpdatePreview()">
+                                ⚡ Dịch vụ khẩn
+                            </label>
+                            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:#475569;cursor:pointer;">
+                                <input type="checkbox" id="sv-laundry-delivery" style="accent-color:#2563eb;width:14px;height:14px;" onchange="svLaundryUpdatePreview && svLaundryUpdatePreview()">
+                                🚚 Giao tận phòng
+                            </label>
+                            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:#475569;cursor:pointer;">
+                                <input type="checkbox" id="sv-laundry-fold" style="accent-color:#2563eb;width:14px;height:14px;">
+                                👔 Gấp/treo gọn gàng
+                            </label>
+                            <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;color:#475569;cursor:pointer;">
+                                <input type="checkbox" id="sv-laundry-eco" style="accent-color:#2563eb;width:14px;height:14px;">
+                                🌿 Dùng nước giặt xanh
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview tóm tắt nhỏ -->
+                <div id="sv-laundry-preview"
+                     style="display:none;margin-top:8px;padding:12px 16px;background:#eff6ff;
+                            border:1.5px solid #bfdbfe;border-radius:12px;font-size:12.5px;color:#1e40af;
+                            line-height:1.65;">
+                    <i class="fas fa-info-circle" style="margin-right:6px;"></i>
+                    <span id="sv-laundry-preview-text"></span>
+                </div>
+            </div>
+            <!-- ══ END PANEL GIẶT ỦI ══ -->
+
+        </div><!-- /.sv-modal-body -->
+
+        <!-- ── Footer ── -->
+        <div class="sv-modal-footer">
+            <button class="sv-btn-cancel" onclick="svCloseModal()">
+                <i class="fas fa-times"></i> Hủy
+            </button>
+            <button class="sv-btn-submit" id="sv-submit-btn" onclick="svSubmitService()">
+                <span class="sv-spinner"></span>
+                <i id="sv-submit-icon" class="fas fa-plus-circle sv-btn-icon"></i>
+                <span id="sv-submit-label">Đăng ký dịch vụ</span>
+            </button>
+        </div>
+
+    </div>
+</div>
+
+
